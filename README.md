@@ -13,3 +13,29 @@ pip install pynirs
 ## USAGE
 
 TODO
+
+## TODO AND EXTENSIONS
+
+### globally
+- finish package structure / declarations
+- enhance tests
+
+### preprocessing
+- thread preprocessing - DONE. 
+    - multiprocessing with spawns to test
+- compute distance beetween preprocessings. Keep only significative ones (mean / variance) - Done
+- use previous result to design for the tree of preprocessing - Done
+- validate scaling / normalization pattern (before / within / after preprocessing) - Done
+
+- scaleY
+- save (xy_scalers and y_inverse_scalers)
+
+### sets
+- save / load
+- compressed representation to minimize memory print
+
+### augmentation
+- noises and data structures
+
+### learning
+- all
