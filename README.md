@@ -5,6 +5,10 @@ pynirs is a python package developed at CIRAD (www.cirad.fr) by Grégory Beurier
 It provides set of tools to load, filter, noise and manage sets of NIRS spectrum files. 
 
 ## INSTALLATION
+tensorflow 2.6.2
+cuda 11.2
+python 3.7.9
+
 
 pynirs is available with pip:
 
@@ -21,14 +25,13 @@ TODO
 - enhance tests
 
 ### preprocessing
-- thread preprocessing - DONE. 
+- thread preprocessing - Done 
     - multiprocessing with spawns to test
 - compute distance beetween preprocessings. Keep only significative ones (mean / variance) - Done
 - use previous result to design for the tree of preprocessing - Done
 - validate scaling / normalization pattern (before / within / after preprocessing) - Done
-
-- scaleY
-- save (xy_scalers and y_inverse_scalers)
+- scaleY - Done
+- save (xy_scalers and y_inverse_scalers) - Done
 
 ### sets
 - save / load
