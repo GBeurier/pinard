@@ -10,9 +10,8 @@ import random
 sys.path.append(os.path.abspath("") + "/../src/pynirs")
 from nirs_set import NIRS_Set as NSet
 import preprocessor as pp
-import matplotlib.pyplot as plt
-
 import tensorflow as tf
+import matplotlib.pyplot as plt
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Conv1D, Flatten, BatchNormalization, SpatialDropout1D
 from tensorflow.keras.optimizers import SGD
@@ -68,7 +67,7 @@ def learn(X_train, X_test, y_train, y_test, input_shape, name, folder):
     earlyStopping = EarlyStopping(monitor='val_loss', patience=150, verbose=0, mode='min') 
     mcp_save = ModelCheckpoint("tmp.model", save_best_only=True, monitor='val_loss', mode='min') 
 
-    model.compile(loss='mean_squared_error', metrics=['mae'], optimizer='rmsprop')
+    model.compile(loss='mean_squared_error', metrics=['mae','mse'], optimizer='rmsprop')
 
     history = model.fit(X_train, y_train, 
                 epochs=250, 
