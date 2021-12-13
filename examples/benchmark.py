@@ -91,6 +91,7 @@ def benchmark_folder(x,y,folder):
     scores = {}
     
     kf = KFold(n_splits=5, random_state=SEED, shuffle=True)
+    fold_index = 0
     for train_index, test_index in kf.split(x):
         X_train, X_test = x[train_index], x[test_index]
         y_train, y_test = y[train_index], y[test_index]
@@ -102,7 +103,7 @@ def benchmark_folder(x,y,folder):
             X_train_sub = X_train[:,:,0:i]
             X_test_sub = X_test[:,:,0:i]
             score = learn(X_train_sub, X_test_sub, y_train, y_test, (s[1], i), str(i), folder)
-            name = '0-' + str(i)
+            name = str(fold_index) + '>0-' + str(i)
             scores[name] = score
             
         for i in range(15, s[2], 15):
@@ -111,9 +112,11 @@ def benchmark_folder(x,y,folder):
             X_test_sub = X_test[:,:,i-15:i]
             X_test_sub = np.concatenate((X_test_src, X_test_sub), axis = 2)
             score = learn(X_train_sub, X_test_sub, y_train, y_test, (s[1], 17), str(i), folder)
-            name = str(i-15) + "-" + str(i)
+            name = str(fold_index) + '>' + str(i-15) + "-" + str(i)
             scores[name] = score
             
+        fold_index += 1
+        
     return scores
     
     
