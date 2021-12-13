@@ -3,6 +3,8 @@ import scipy.signal as signal
 import scipy.ndimage as nd
 from sklearn.preprocessing import scale
 import pywt
+import threading, queue
+from sklearn.preprocessing import RobustScaler
 
 def baseline(spectra):
     """ Removes baseline (mean) from each spectrum.
@@ -251,122 +253,76 @@ def spl_norml(spectra):
     """
     return (spectra - np.min(spectra)) / (np.max(spectra) - np.min(spectra))
 
-NORM_DICT = {
-    "detrend": detrend,
-    # "norml": norml, 
-    # "spl_norml": spl_norml,
-    # "smooth": smooth, 
-}
-
 METHOD_DICT = {
-    # "baseline": baseline,
+    "baseline": baseline,
     "snv": snv, 
     "rnv": rnv, 
+    "lsnv": lsnv,
+    "savgol": _savgol, 
+    "savgol0": savgol_0,  
     "savgol1": savgol_1, 
+    "norml": norml, 
+    "detrend": detrend,
     "msc": msc, 
+    "emsc": emsc, 
+    "smooth": smooth, 
     "derivate": derivate, 
+    "gaussian": _gaussian, 
+    "gaussian_0": gaussian_0, 
     "gaussian1": gaussian_1, 
     "gaussian2": gaussian_2, 
-    # "savgol_0": savgol_0, 
-    # "gaussian_0": gaussian_0, 
-    # "lsnv": lsnv, #useless
-    # "savgol": _savgol, 
-    # "emsc": emsc, 
-    # "gaussian": _gaussian, 
-    # "haar": haar, 
-    # "wv_haar": wv_haar,
+    "wv_haar": wv_haar,
+    "spl_norml": spl_norml,
 }
 
-WV_LIST = [ 
-            'bior2.2',
-            'bior3.1',
-            'bior4.4',
-            'bior5.5',
-            'bior6.8',
-            'coif1',
-            'coif2',
-            'coif3',
-            'coif4',
-            'coif5',
-            'coif6',
-            'coif7',
-            'coif8',
-            'coif9',
-            'coif10',
-            'coif11',
-            'coif12',
-            'coif13',
-            'coif14',
-            'coif15',
-            'coif16',
-            'coif17',
-            'db2',
-            'db3',
-            'db4',
-            'db5',
-            'db6',
-            'db7',
-            'db8',
-            'db9',
-            'db10',
-            'db11',
-            'db12',
-            'db13',
-            'db14',
-            'db15',
-            'db16',
-            'db17',
-            'db18',
-            'db19',
-            'db20',
-            'db21',
-            'db22',
-            'db23',
-            'db24',
-            'db25',
-            'db26',
-            'db27',
-            'db28',
-            'db29',
-            'db30',
-            'db31',
-            'db32',
-            'db33',
-            'db34',
-            'db35',
-            'db36',
-            'db37',
-            'db38',
-            'dmey',
-            'haar',
-            'rbio2.2',
-            'rbio3.1',
-            'rbio4.4',
-            'rbio5.5',
-            'rbio6.8',
-            'sym4',
-            'sym5',
-            'sym6',
-            'sym7',
-            'sym8',
-            'sym9',
-            'sym10',
-            'sym11',
-            'sym12',
-            'sym13',
-            'sym14',
-            'sym15',
-            'sym16',
-            'sym17',
-            'sym18',
-            'sym19',
-            'sym20'
-            ]
 
-def get_method(name):
-    return METHOD_DICT[name]
+def process(spectra, processing):
+    pp_spectra = {}
+    pp_spectra['x'] = spectra
+    q = queue.Queue()
 
-
+    def processor():
+        while True:
+            item = q.get()
+            if item == 'x':
+                q.task_done()
+                continue
+            pipeline = item.split('*')
+            x = pp_spectra['x']
+            state = 0
+            
+            # get best existing spectra
+            for i in range(len(pipeline)):
+                k = '*'.join(pipeline[:-i]) 
+                if k in pp_spectra:
+                    x = pp_spectra[k]
+                    state = len(pipeline) - i
+                    break
+            
+            # apply remaining methods
+            for i in range(state, len(pipeline)):
+                proc = pipeline[i]
+                if 'wv_' in proc:
+                    proc = proc.split('_')[1]
+                    x = wavelet_transform(x, proc)
+                    x = RobustScaler().fit_transform(x)
+                    x = spl_norml(x)
+                    pp_spectra[item] = x
+                else:
+                    x = METHOD_DICT[proc](x)
+                    x = spl_norml(x)
+                    pp_spectra[item] = x
+            q.task_done()
+            
+    threading.Thread(target=processor, daemon=True).start()
+    
+    for p in processing:
+        q.put(p)
+    q.join()
+    
+    return pp_spectra
+    
+    
 def trim(wavelength, spectra, bins):
     """ Trim spectra to a specified wavelength bin (or bins).
     Args:
@@ -388,4 +344,7 @@ def trim(wavelength, spectra, bins):
     return wavelength_trim, spectra_trim
 
 
+
+
+# WV_LIST = ['bior1.1', 'bior1.3', 'bior1.5', 'bior2.2', 'bior2.4', 'bior2.6', 'bior2.8', 'bior3.1', 'bior3.3', 'bior3.5', 'bior3.7', 'bior3.9', 'bior4.4', 'bior5.5', 'bior6.8', 'coif1', 'coif2', 'coif3', 'coif4', 'coif5', 'coif6', 'coif7', 'coif8', 'coif9', 'coif10', 'coif11', 'coif12', 'coif13', 'coif14', 'coif15', 'coif16', 'coif17', 'db1', 'db2', 'db3', 'db4', 'db5', 'db6', 'db7', 'db8', 'db9', 'db10', 'db11', 'db12', 'db13', 'db14', 'db15', 'db16', 'db17', 'db18', 'db19', 'db20', 'db21', 'db22', 'db23', 'db24', 'db25', 'db26', 'db27', 'db28', 'db29', 'db30', 'db31', 'db32', 'db33', 'db34', 'db35', 'db36', 'db37', 'db38', 'dmey', 'haar', 'rbio1.1', 'rbio1.3', 'rbio1.5', 'rbio2.2', 'rbio2.4', 'rbio2.6', 'rbio2.8', 'rbio3.1', 'rbio3.3', 'rbio3.5', 'rbio3.7', 'rbio3.9', 'rbio4.4', 'rbio5.5', 'rbio6.8', 'sym2', 'sym3', 'sym4', 'sym5', 'sym6', 'sym7', 'sym8', 'sym9', 'sym10', 'sym11', 'sym12', 'sym13', 'sym14', 'sym15', 'sym16', 'sym17', 'sym18', 'sym19', 'sym20']            ]
 
