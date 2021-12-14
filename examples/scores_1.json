@@ -1,0 +1,69 @@
+{   "PROCESSING": [ "x"
+                    ,"x*detrend"
+                    ,"x*savgol1"
+                    ,"x*derivate"
+                    ,"x*gaussian1"
+                    ,"x*gaussian2"
+                    ,"x*wv_haar"
+                    ,"x*detrend*savgol1"
+                    ,"x*detrend*derivate"
+                    ,"x*detrend*wv_haar"
+                    ,"x*wv_bior2.2"
+                    ,"x*wv_db2"
+                    ,"x*wv_dmey"
+                    ,"x*wv_rbio6.8"
+                    ,"x*wv_sym4"
+                    ,"x*savgol1*savgol1"
+                    ,"x*derivate*savgol1"
+                    ,"x*gaussian1*savgol1"
+                    ,"x*gaussian2*savgol1"
+                    ,"x*wv_haar*savgol1"
+                    ,"x*savgol1*derivate"
+                    ,"x*derivate*derivate"
+                    ,"x*gaussian1*derivate"
+                    ,"x*gaussian2*derivate"
+                    ,"x*wv_haar*derivate"
+    ],
+    "sample_data\\ALPINE_C_424_Murguzur": {
+        "0": 0.0013829381205141544,
+        "1": 0.0019693044014275074,
+        "2": 0.001877490314655006,
+        "3": 0.0022409395314753056
+    },
+    "sample_data\\Cassava_TBC_6026_Shen": {
+        "0": 0.0016481094062328339,
+        "1": 0.001452883007004857,
+        "2": 0.0017637559212744236,
+        "3": 0.0012635961174964905
+    },
+    "sample_data\\Fuel_Octane_60_Wang": {
+        "0": 0.0006165733793750405,
+        "1": 0.001976810861378908,
+        "2": 0.0035431610886007547,
+        "3": 0.0003825876337941736
+    },
+    "sample_data\\LEAF_Proline_GlasField500_Burnett": {
+        "0": 0.0018288748105987906,
+        "1": 0.0025917203165590763,
+        "2": 0.009827046655118465,
+        "3": 0.0034930668771266937
+    },
+    "sample_data\\LEAF_Protein_GlasField500_Burnett": {
+        "0": 0.005503784865140915,
+        "1": 0.002812052611261606,
+        "2": 0.003337058937177062,
+        "3": 0.002339178929105401
+    },
+    "sample_data\\LEAF_Starch_GlasField500_Burnett": {
+        "0": 0.007365772500634193,
+        "1": 0.006236495450139046,
+        "2": 0.005933546926826239,
+        "3": 0.007286326494067907
+    },
+    "sample_data\\TABLET_Escitalopramt_310_Zhao": {
+        "0": 0.0025152526795864105,
+        "1": 0.003282566089183092,
+        "2": 0.001963996794074774,
+        "3": 0.004086865112185478
+    }
+}
