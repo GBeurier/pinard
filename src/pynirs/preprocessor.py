@@ -9,7 +9,7 @@ import numpy as np
 
 from sklearn.preprocessing import StandardScaler as StandardNormalVariate
 from sklearn.preprocessing import RobustScaler as RobustNormalVariate
-from sklearn.preprocessing import scale
+from sklearn.preprocessing import scale, StandardScaler
 from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.utils import check_array
 from sklearn.utils.validation import (
@@ -18,7 +18,7 @@ from sklearn.utils.validation import (
     # _check_sample_weight, 
     FLOAT_DTYPES, 
 )
-# import pywt
+import pywt
 # import threading, queue
 
 # #np.mean, np.std, np.median, np.percentile([lower, upper]), np.max(), np.min(), np.linalg.norm(), np.polyfit()
@@ -116,11 +116,11 @@ def baseline(spectra):
 
 class SavitzkyGolay(TransformerMixin, BaseEstimator):
     
-    def __init__(self, filter_win = 11, poly_order = 3, deriv_order = 0, delta = 1.0, *, copy = True):
+    def __init__(self, window_length = 11, polyorder = 3, deriv = 0, delta = 1.0, *, copy = True):
         self.copy = copy
-        self.filter_win = filter_win
-        self.poly_order = poly_order
-        self.deriv_order = deriv_order
+        self.window_length = window_length
+        self.polyorder = polyorder
+        self.deriv = deriv
         self.delta = delta
 
     def _reset(self):
@@ -143,7 +143,7 @@ class SavitzkyGolay(TransformerMixin, BaseEstimator):
             estimator = self
         )
                 
-        X = signal.savgol_filter(X.T, filter_win = self.filter_win, poly_order = self.poly_order, deriv_order = self.deriv_order, delta = self.delta)
+        X = signal.savgol_filter(X.T, window_length = self.window_length, polyorder = self.polyorder, deriv = self.deriv, delta = self.delta)
         return X
 
     def _more_tags(self):
@@ -151,18 +151,18 @@ class SavitzkyGolay(TransformerMixin, BaseEstimator):
     
     
 
-def savgol(spectra, filter_win = 11, poly_order = 3, deriv_order = 0, delta = 1.0):
+def savgol(spectra, window_length = 11, polyorder = 3, deriv = 0, delta = 1.0):
     """ Perform Savitzky–Golay filtering on the data (also calculates derivatives). This function is a wrapper for
     scipy.signal.savgol_filter.
     Args:
         spectra < numpy.ndarray > : NIRS data matrix.
         filter_win < int > : Size of the filter window in samples (default 11).
-        poly_order < int > : Order of the polynomial estimation (default 3).
-        deriv_order < int > : Order of the derivation (default 0).
+        polyorder < int > : Order of the polynomial estimation (default 3).
+        deriv < int > : Order of the derivation (default 0).
     Returns:
         spectra < numpy.ndarray > : NIRS data smoothed with Savitzky-Golay filtering
     """
-    return signal.savgol_filter(spectra, filter_win, poly_order, deriv_order, delta = delta)
+    return signal.savgol_filter(spectra, window_length, polyorder, deriv, delta = delta)
 
 
 
@@ -401,10 +401,10 @@ class MultiplicativeScatterCorrection(TransformerMixin, BaseEstimator):
         
         tmp_x = X
         if self.scale:
-            scaler = StandardScaler()
+            scaler = StandardScaler(with_std = False)
             scaler.fit(X)
             self.scaler_ = scaler
-            tmp_x = scaler.transform(X, with_std = False, axis = 0)
+            tmp_x = scaler.transform(X)
         
         
         reference = np.mean(tmp_x, axis = 1)
@@ -470,7 +470,6 @@ class MultiplicativeScatterCorrection(TransformerMixin, BaseEstimator):
 
 
 
-
 def msc(spectra, scaled = True):
     """ Performs multiplicative scatter correction to the mean.
     Args:
@@ -492,6 +491,43 @@ def msc(spectra, scaled = True):
 
 
 
+
+class Derivate(TransformerMixin, BaseEstimator):
+    
+    def __init__(self, order = 1, delta = 1, *, copy = True):
+        self.copy = copy
+        self.order = order
+        self.delta = delta
+
+    def _reset(self):
+        pass
+
+    def fit(self, X, y = None):
+        if sparse.issparse(X):
+            raise ValueError("SavitzkyGolay does not support sparse input")
+        return self
+
+    def transform(self, X, copy = None):
+        if sparse.issparse(X):
+            raise ValueError('Sparse matrices not supported!"')
+
+        X = self._validate_data(
+            X, 
+            reset = False, 
+            copy = self.copy, 
+            dtype = FLOAT_DTYPES, 
+            estimator = self
+        )
+                
+        for n in range(self.order):
+            X = np.gradient(X, self.delta, axis = 0)
+        
+        return X
+
+    def _more_tags(self):
+        return {'allow_nan': False}
+
+
 def derivate(spectra, order = 1, delta = 1):
     """ Computes Nth order derivates with the desired spacing using numpy.gradient.
     Args:
@@ -506,7 +542,43 @@ def derivate(spectra, order = 1, delta = 1):
     return spectra
 
 
-def _gaussian(spectra, order = 1, sigma = 2):
+
+
+class Gaussian(TransformerMixin, BaseEstimator):
+    
+    def __init__(self, order = 1, sigma = 1, *, copy = True):
+        self.copy = copy
+        self.order = order
+        self.sigma = sigma
+
+    def _reset(self):
+        pass
+
+    def fit(self, X, y = None):
+        if sparse.issparse(X):
+            raise ValueError("SavitzkyGolay does not support sparse input")
+        return self
+
+    def transform(self, X, copy = None):
+        if sparse.issparse(X):
+            raise ValueError('Sparse matrices not supported!"')
+
+        X = self._validate_data(
+            X, 
+            reset = False, 
+            copy = self.copy, 
+            dtype = FLOAT_DTYPES, 
+            estimator = self
+        )
+                
+        X = ndimage.gaussian_filter1d(X, order = self.order, sigma = self.sigma)
+        
+        return X
+
+    def _more_tags(self):
+        return {'allow_nan': False}
+
+def gaussian(spectra, order = 1, sigma = 2):
     """ Computes 1D gaussian filter using scipy.ndimage gaussian 1d filter.
     Args:
         spectra < numpy.ndarray > : NIRS data matrix.
@@ -515,17 +587,54 @@ def _gaussian(spectra, order = 1, sigma = 2):
     Returns:
         spectra < numpy.ndarray > : Gaussian NIR spectra.
     """
-    return nd.gaussian_filter1d(spectra, order = order, sigma = sigma)
+    return ndimage.gaussian_filter1d(spectra, order = order, sigma = sigma)
 
-def gaussian_0(spectra):
-    return _gaussian(spectra, order = 0, sigma = 3)
+# def gaussian_0(spectra):
+#     return _gaussian(spectra, order = 0, sigma = 3)
 
-def gaussian_1(spectra):
-    return _gaussian(spectra, order = 1, sigma = 2)
+# def gaussian_1(spectra):
+#     return _gaussian(spectra, order = 1, sigma = 2)
     
-def gaussian_2(spectra):
-    return _gaussian(spectra, order = 2, sigma = 1)
+# def gaussian_2(spectra):
+#     return _gaussian(spectra, order = 2, sigma = 1)
 
+
+class Wavelet(TransformerMixin, BaseEstimator):
+    
+    def __init__(self, wavelet = "haar", mode = "per", *, copy = True):
+        self.copy = copy
+        self.wavelet = wavelet
+        self.mode = mode
+
+    def _reset(self):
+        pass
+
+    def fit(self, X, y = None):
+        if sparse.issparse(X):
+            raise ValueError("SavitzkyGolay does not support sparse input")
+        return self
+
+    def transform(self, X, copy = None):
+        if sparse.issparse(X):
+            raise ValueError('Sparse matrices not supported!"')
+
+        X = self._validate_data(
+            X, 
+            reset = False, 
+            copy = self.copy, 
+            dtype = FLOAT_DTYPES, 
+            estimator = self
+        )
+        
+        _, wt_coeffs = pywt.dwt(X, wavelet = self.wavelet, mode = self.mode)
+
+        if len(wt_coeffs[0]) != len(X[0]):
+            return signal.resample(wt_coeffs, len(X[0]), axis = 1)
+        else:
+            return wt_coeffs
+        
+    def _more_tags(self):
+        return {'allow_nan': False}
 
 # mode: ['zero', 'constant', 'symmetric', 'periodic', 'smooth', 'periodization', 'reflect', 'antisymmetric', 'antireflect']
 # wavelet: ['haar', 'db', 'sym', 'coif', 'bior', 'rbio', 'dmey', 'gaus', 'mexh', 'morl', 'cgau', 'shan', 'fbsp', 'cmor']
@@ -544,15 +653,68 @@ def wavelet_transform(spectra, wavelet, mode = "per"):
     else:
         return wt_coeffs
     
+
+
+class SimpleScale(TransformerMixin, BaseEstimator):
+    def __init__(self, *, copy = True):
+        self.copy = copy
+        
+    def _reset(self):
+        if hasattr(self, "min_"):
+            del self.min_
+            del self.max_
+            
+    def fit(self, X, y = None):
+        self._reset()        
+        return self.partial_fit(X, y)
     
-def wv_haar(spectra):
-    """ Computes haar transform using pywavelet transform. Spectra is resampled to fit size.
-    Args:
-        spectra < numpy.ndarray > : NIRS data matrix.
-    Returns:
-        spectra < numpy.ndarray > : haar transformed spectra.
-    """
-    return wavelet_transform(spectra, 'haar', 'per')
+    def partial_fit(self, X, y = None):
+        if sparse.issparse(X):
+            raise TypeError("Normalization does not support sparse input")
+        
+        first_pass = not hasattr(self, "min_")
+        X = self._validate_data(
+            X, 
+            reset = first_pass, 
+            dtype = FLOAT_DTYPES, 
+            estimator = self
+        )
+        
+        self.min_ = np.min(X, axis = 0)
+        self.max_ = np.max(X, axis = 0)
+        return self
+
+    def transform(self, X):
+        check_is_fitted(self)
+        
+        X = self._validate_data(
+            X, 
+            reset = False, 
+            copy = self.copy, 
+            dtype = FLOAT_DTYPES, 
+            estimator = self
+        )
+        
+        X = (X - self.min_) / (self.max_ - self.min_)
+        
+        return X
+    
+    def inverse_transform(self, X):
+        check_is_fitted(self)
+
+        X = check_array(
+            X, 
+            copy = self.copy, 
+            dtype = FLOAT_DTYPES
+        )
+
+        f = self.max_ - self.min_
+        X = ( X * f ) + self.min_
+
+        return X
+        
+    def _more_tags(self):
+        return {'allow_nan': False}
 
 def spl_norml(spectra):
     """ Perform simple spectral normalisation. (manual algo)
