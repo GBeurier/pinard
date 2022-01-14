@@ -9,6 +9,8 @@ import numpy as np
 
 from sklearn.preprocessing import StandardScaler as StandardNormalVariate
 from sklearn.preprocessing import RobustScaler as RobustNormalVariate
+from sklearn.preprocessing import FunctionTransformer as IdentityTransformer
+
 from sklearn.preprocessing import scale, StandardScaler
 from sklearn.base import TransformerMixin, BaseEstimator
 from sklearn.utils import check_array
@@ -31,10 +33,11 @@ __all__ = [
     "Normalize",
     "Detrend",
     "MultiplicativeScatterCorrection",
-    "ExtendedMultiplicativeScatterCorrection",
+    "Derivate",
+    "Gaussian",
+    "Wavelet",
+    "SimpleScale",
     "baseline", 
-    # "snv", 
-    # "rnv",
     "savgol",
     "norml",
     "detrend",
@@ -71,7 +74,7 @@ class Baseline(TransformerMixin, BaseEstimator):
         self.mean_ = np.mean(X, axis = 0)
         return self
 
-    def transform(self, X):
+    def transform(self, X, y = None):
         check_is_fitted(self)
         
         X = self._validate_data(
@@ -85,7 +88,7 @@ class Baseline(TransformerMixin, BaseEstimator):
         X = X - self.mean_
         return X
     
-    def inverse_transform(self, X):
+    def inverse_transform(self, X, y = None):
         check_is_fitted(self)
 
         X = check_array(

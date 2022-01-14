@@ -17,21 +17,13 @@ pip install pynirs
 ## USAGE
 
 TODO
-
 ## TODO AND EXTENSIONS
+### critical
+- Kennard Stone parallel implementation
+- Reup tests
+### low
+- reimplement extended multiplicative scatter correction with its inverse transform
 
-### globally
-- finish package structure / declarations
-- enhance tests
-
-### preprocessing
-- thread preprocessing - Done 
-    - multiprocessing with spawns to test
-- compute distance beetween preprocessings. Keep only significative ones (mean / variance) - Done
-- use previous result to design for the tree of preprocessing - Done
-- validate scaling / normalization pattern (before / within / after preprocessing) - Done
-- scaleY - Done
-- save (xy_scalers and y_inverse_scalers) - Done
 
 ### sets
 - save / load

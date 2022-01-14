@@ -36,7 +36,7 @@ class NIRS_Set:
     
         
        
-    def load(self, x_path, y_path = None, y_cols = None, x_hdr = None, y_hdr = None):
+    def load(self, x_path, y_path = None, y_cols = None, *, x_hdr = None, y_hdr = None):
         assert(y_path != None or y_cols != None)
         
         x_data = pd.read_csv(x_path, sep = ";", header = x_hdr, dtype=np.float32).values
@@ -62,7 +62,7 @@ class NIRS_Set:
         ## TODO ensure that x_data width is even number otherwise duplicates last col
         self.set.x = x_data
         self.set.y = y_data
-    
+        return x_data, y_data
     
     def preprocess(self):
         self.set.proc_x = preprocessor.process(self.set.x, PREPROCESSING)
