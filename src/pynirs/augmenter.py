@@ -1,6 +1,6 @@
 import warnings
 import numpy as np
-from sklearn.base import TransformerMixin
+from sklearn.base import TransformerMixin, BaseEstimator
 import random ## TODO replace by np.random
 import scipy.interpolate as interpolate
 
@@ -58,12 +58,27 @@ def nearest_x(x_test,vx):
 #####################
 ##    GENERATORS   ##
 #####################
+    # def fit_transform(self, X, y=None, **fit_params):
+    #     return super().fit_transform(X, y)
+    
+    # def fit(self, X, y = None):
+    #     return super().fit(X, y)
+
+    # def transform(self, X, y):
+    #     return super().transform(X,y)
+        
 
 
-class Augmenter(TransformerMixin):
+class Augmenter(TransformerMixin, BaseEstimator):
     
     def __init__(self, count = 1):
         self.count = count
+
+    def fit_transform(self, X, y=None, **fit_params):
+        return self.transform(X, y)
+    
+    def fit(self, X, y = None):
+        return self
 
     def augment(self, X, y):
         new_X = X.copy()
@@ -105,6 +120,8 @@ class Rotate_Translate(Augmenter):
         y_distor = spectrum + distor
         # y_distor[y_distor < 0] = 0
         return np.array(y_distor), y
+    
+    
 
 class Monotonous_Spline_Simplification(Augmenter):
     def augment(self, spectrum, y):
