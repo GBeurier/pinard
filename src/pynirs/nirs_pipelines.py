@@ -60,7 +60,7 @@ class SampleAugmentation(FeatureUnion):
             The `hstack` of results of transformers. `sum_n_components` is the
             sum of `n_components` (output dimension) over transformers.
         """
-        print(self,np.array(X).shape, np.array(y).shape)
+        # print(self,np.array(X).shape, np.array(y).shape)
         
         Xs, ys = zip(*Parallel(n_jobs=self.n_jobs)(
             delayed(_transform_one_xy)(trans, X, y, weight)

@@ -39,7 +39,8 @@ class NIRS_Set:
     def load(self, x_path, y_path = None, y_cols = None, *, x_hdr = None, y_hdr = None):
         assert(y_path != None or y_cols != None)
         
-        x_data = pd.read_csv(x_path, sep = ";", header = x_hdr, dtype=np.float32).values
+        x_df = pd.read_csv(x_path, sep = ";", header = x_hdr, dtype=np.float32)
+        x_data = x_df.values
         assert not(np.isnan(x_data).any())
         
         y_data = None
