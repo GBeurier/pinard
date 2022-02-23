@@ -53,11 +53,11 @@ class NIRS_Set:
             if y_cols != -1:
                 y_data = y_data[:, y_cols]
         
-        if y_cols != 1:    
-            if isinstance(y_cols, list):
-                y_data = y_data.reshape((len(y_data), len(y_cols)))
-            else:
-                y_data = y_data.reshape((len(y_data), 1))
+        # if y_cols != 1:    
+        #     if isinstance(y_cols, list):
+        #         y_data = y_data.reshape((len(y_data), len(y_cols)))
+        #     else:
+        #         y_data = y_data.reshape((len(y_data), 1))
         
         
         ## TODO ensure that x_data width is even number otherwise duplicates last col
