@@ -146,9 +146,8 @@ class SavitzkyGolay(TransformerMixin, BaseEstimator):
             estimator = self
         )
                 
-        X = signal.savgol_filter(X.T, window_length = self.window_length, polyorder = self.polyorder, deriv = self.deriv, delta = self.delta)
-        return X
-
+        return signal.savgol_filter(X, window_length = self.window_length, polyorder = self.polyorder, deriv = self.deriv, delta = self.delta)
+        
     def _more_tags(self):
         return {'allow_nan': False}
     
