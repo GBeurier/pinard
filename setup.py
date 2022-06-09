@@ -41,7 +41,9 @@ setup(
         'scikit-learn',
         'scipy',
         'tensorflow',
-        'PyWavelets'
+        'PyWavelets',
+        'typing',
+        'dataclasses'
     ],
 
     extras_require={
