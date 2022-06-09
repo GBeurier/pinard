@@ -40,7 +40,8 @@ setup(
         'numpy',
         'scikit-learn',
         'scipy',
-        'tensorflow'
+        'tensorflow',
+        'PyWavelets'
     ],
 
     extras_require={
