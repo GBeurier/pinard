@@ -31,7 +31,6 @@ class FeatureAugmentation(FeatureUnion):
     
     
     def transform(self, X):
-        print("TRANSFORM")
         Xs = Parallel(n_jobs=self.n_jobs)(
             delayed(_transform_one)(trans, X, None, weight)
             for name, trans, weight in self._iter())
@@ -41,7 +40,6 @@ class FeatureAugmentation(FeatureUnion):
             return np.zeros((X.shape[0], 0))
         Xs = np.swapaxes(Xs, 0, 1)
         Xs = np.swapaxes(Xs, 1, 2)
-        print("ahahah", Xs.shape)
         return Xs
 
 class SampleAugmentation(FeatureUnion):
