@@ -75,7 +75,7 @@ class SampleAugmentation(FeatureUnion):
 
         x_stk = np.vstack(Xs)
         y_stk = np.vstack(ys)
-        print(self, x_stk.shape, y_stk.shape)
+        # print(self, x_stk.shape, y_stk.shape)
         
         return x_stk, y_stk
 
