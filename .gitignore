@@ -18,3 +18,4 @@ dist/
 # Testing
 .pytest_cache/
 .coverage
+.vscode/settings.json

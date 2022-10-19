@@ -1,2 +1,3 @@
 [run]
 source = pinard
+omit = pinard/sklearn/_utils.py
