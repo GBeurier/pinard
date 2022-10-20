@@ -10,7 +10,7 @@ from ._nirs import (Haar, MultiplicativeScatterCorrection, SavitzkyGolay,
                     Wavelet, msc, savgol, wavelet_transform)
 from ._scaler import (Derivate, Normalize, SimpleScale, derivate, norml,
                       spl_norml)
-from ._standard import Baseline, Detrend, Gaussian, baseline, detrend
+from ._standard import Baseline, Detrend, Gaussian, baseline, detrend, gaussian
 
 __all__ = [
     "IdentityTransformer",  # sklearn.preprocessing.FunctionTransformer alias
@@ -34,4 +34,5 @@ __all__ = [
     "wavelet_transform",
     "derivate",
     "spl_norml",
+    "gaussian",
 ]

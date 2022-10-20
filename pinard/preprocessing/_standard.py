@@ -119,7 +119,7 @@ class Detrend(TransformerMixin, BaseEstimator):
         return {"allow_nan": False}
 
 
-def gaussian(spectra, order=1, sigma=2):
+def gaussian(spectra, order=2, sigma=1):
     """Computes 1D gaussian filter using scipy.ndimage gaussian 1d filter.
     Args:
         spectra < numpy.ndarray > : NIRS data matrix.
@@ -159,13 +159,3 @@ class Gaussian(TransformerMixin, BaseEstimator):
 
     def _more_tags(self):
         return {"allow_nan": False}
-
-
-# def gaussian_0(spectra):
-#     return _gaussian(spectra, order = 0, sigma = 3)
-
-# def gaussian_1(spectra):
-#     return _gaussian(spectra, order = 1, sigma = 2)
-
-# def gaussian_2(spectra):
-#     return _gaussian(spectra, order = 2, sigma = 1)

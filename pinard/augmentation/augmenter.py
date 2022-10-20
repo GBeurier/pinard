@@ -2,11 +2,12 @@ import abc
 
 import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.utils.validation import FLOAT_DTYPES, check_is_fitted
 
 
 class Augmenter(TransformerMixin, BaseEstimator, metaclass=abc.ABCMeta):
-    def __init__(self, count=1):
-        self.count = count
+    def __init__(self, *, copy=True):
+        self.copy = copy
 
     def fit_transform(self, X, y=None, **fit_params):
         return self.transform(X, y)
@@ -15,23 +16,20 @@ class Augmenter(TransformerMixin, BaseEstimator, metaclass=abc.ABCMeta):
         return self
 
     @abc.abstractmethod
-    def augment(self, X, y):
-        new_X = X.copy()
-        new_y = y.copy()
-        return new_X, new_y
+    def augment(self, X):
+        pass
 
-    def transform(self, X, y):
-        self.init_size = len(X)
-        for i in range(len(X)):
-            for k in range(self.count):
-                newX, newy = self.augment(X[i], y[i])
-                if isinstance(newX, np.ndarray):
-                    X = np.vstack([X, newX])
-                    y = np.vstack([y, newy])
-        return X, y
+    def transform(self, X):
+        X = self._validate_data(
+            X, reset=False, copy=self.copy, dtype=FLOAT_DTYPES, estimator=self
+        )
 
-    def inverse_transform(self, X, y):
-        return X[0:self.init_size], y[0:self.init_size]
+        return self.augment(X)
 
     def _more_tags(self):
         return {"allow_nan": False}
+
+
+class IdentityAugmenter(Augmenter):
+    def augment(self, X):
+        return X

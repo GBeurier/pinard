@@ -2,14 +2,18 @@ import random
 
 import numpy as np
 import scipy.interpolate as interpolate
-from augmenter import Augmenter
+
+from .augmenter import Augmenter
 
 
-def spectrum_length(x, y):
+def X_length(x, y):
     x1 = x[range((len(x) - 1))]
     y1 = y[range((len(y) - 1))]
     x2 = x[range(1, len(x))]
     y2 = y[range(1, len(y))]
+    y1 = np.reshape(np.array(y1), (-1, 1))
+    y2 = np.reshape(np.array(y2), (-1, 1))
+
     SpecLen_seg = v_segment_length(x1, y1, x2, y2)
     SpecLen = np.sum(SpecLen_seg)
     SpecLen_seg_cumsum = np.cumsum(SpecLen_seg)
@@ -37,10 +41,10 @@ def interval_selection(n_l, CumVect):
 
 
 class Random_X_Spline_Deformation(Augmenter):
-    def augment(self, spectrum, y):
+    def augment(self, X):
         """Random modification of x based on subsampled spline"""
-        x = np.arange(0, len(spectrum), 1)
-        t, c, k = interpolate.splrep(x, spectrum, s=0, k=3)
+        x = np.arange(0, len(X), 1)
+        t, c, k = interpolate.splrep(x, X, s=0, k=3)
 
         delta_x_size = int(np.around(len(t) / 20))
         delta_x = np.linspace(np.min(x), np.max(x), delta_x_size)
@@ -48,24 +52,24 @@ class Random_X_Spline_Deformation(Augmenter):
         delta = np.interp(t, delta_x, delta_y)
         t = t + delta
         spline = interpolate.BSpline(t, c, k, extrapolate=True)
-        return spline(x), y
+        return spline(x)
 
 
 class Random_X_Spline_Shift(Augmenter):
-    def augment(self, spectrum, y):
+    def augment(self, X):
         """Add spline based x shift"""
-        x = np.arange(0, len(spectrum), 1)
+        x = np.arange(0, len(X), 1)
         delta = random.uniform(-10, 10)
         x = x + delta
-        t, c, k = interpolate.splrep(x, spectrum, s=0, k=3)
+        t, c, k = interpolate.splrep(x, X, s=0, k=3)
         spline = interpolate.BSpline(t, c, k, extrapolate=False)
-        return spline(x), y
+        return spline(x)
 
 
 class Monotonous_Spline_Simplification(Augmenter):
-    def augment(self, spectrum, y):
+    def augment(self, X):
         """Select regularly spaced points along x_axis and adjust a spline"""
-        nfreq = len(spectrum)
+        nfreq = len(X)
         x_range_real = np.arange(0, nfreq, 1)
         nb_points = 60
 
@@ -74,34 +78,36 @@ class Monotonous_Spline_Simplification(Augmenter):
         )
         ctrl_points.sort()
         x = x_range_real[ctrl_points]
-        y = spectrum[ctrl_points]
+        y = X[ctrl_points]
         t, c, k = interpolate.splrep(x, y, s=0, k=3)
         spline = interpolate.BSpline(t, c, k, extrapolate=False)
 
-        return spline(x_range_real), y
+        return spline(x_range_real)
 
 
 class Dependent_Spline_Simplification(Augmenter):
-    def augment(self, spectrum, y):
-        """Select regularly spaced points ON the spectrum and adjust a spline"""
-        nfreq = len(spectrum)
-        x0 = np.linspace(0, np.max(spectrum), nfreq)
-        res = spectrum_length(x0, spectrum)
+    def augment(self, X):
+        """Select regularly spaced points ON the X and adjust a spline"""
+        nfreq = len(X)
+        x0 = np.linspace(0, np.max(X), nfreq)
+        res = X_length(x0, X)
         nb_segments = 10
         x_samples = []
         y_samples = []
 
         for s in range(1, nb_segments):
-            length = spectrum_length(x0, spectrum)[0] / nb_segments
+            length = X_length(x0, X)[0] / nb_segments
+            print(length)
             # cumulative_length = np.cumsum(np.repeat(l,nb_segments))
             n_l = s * length
             test = res[2]
             toto = interval_selection(n_l, test)
+
             P = segment_pt_coord(
                 x1=x0[toto[1]],
-                y1=spectrum[toto[1]],
+                y1=X[toto[1]],
                 x2=x0[toto[0]],
-                y2=spectrum[toto[0]],
+                y2=X[toto[0]],
                 fracL=res[1][toto[1]] % length,
                 L=res[1][toto[1]],
             )
@@ -112,22 +118,22 @@ class Dependent_Spline_Simplification(Augmenter):
         x = np.array(x_samples)
         x = np.concatenate(([0], x, [np.max(x0)]))
         y = np.array(y_samples)
-        y = np.concatenate(([spectrum[0]], y, [spectrum[nfreq - 1]]))
+        y = np.concatenate(([X[0]], y, [X[nfreq - 1]]))
         # print(x)
         t, c, k = interpolate.splrep(x, y, s=0, k=3)
         xmin, xmax = x.min(), x.max()
         xx = np.linspace(xmin, xmax, nfreq)
         spline = interpolate.BSpline(t, c, k, extrapolate=False)
 
-        return spline(xx), y
+        return spline(xx)
 
 
 class Random_Spline_Addition(Augmenter):
-    def augment(self, spectrum, y):
+    def augment(self, X):
         """Add spline noise on y"""
-        nfreq = len(spectrum)
+        nfreq = len(X)
         x_range_real = np.arange(0, nfreq, 1)
-        interval_width = np.max(spectrum) / 80
+        interval_width = np.max(X) / 80
         half_interval_width = interval_width / 2
         baseline = random.uniform(-half_interval_width, half_interval_width)
         interval_min = -half_interval_width + baseline
@@ -146,6 +152,6 @@ class Random_Spline_Addition(Augmenter):
 
         spline = interpolate.BSpline(t, c, k, extrapolate=False)
         distor = spline(x_range_real)
-        y_distor = spectrum + distor
+        y_distor = X + np.reshape(distor, (-1, 1))
         # y_distor[y_distor < 0] = 0
-        return np.array(y_distor), y
+        return np.array(y_distor)

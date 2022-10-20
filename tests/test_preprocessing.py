@@ -41,12 +41,14 @@ def test_preprocessings(
 
 
 preprocessing_func = [
+    ("baseline", pp.baseline, 1),
+    ("savgol", pp.savgol, 4),
+    ("norml", pp.norml, 5),
+    ("baseline", pp.detrend, 6),
     ("msc", pp.msc, 7),
     ("derivate", pp.derivate, 8),
-    ("norml", pp.norml, 5),
+    ("baseline", pp.gaussian, 9),
     ("spl_norml", pp.spl_norml, 12),
-    ("savgol", pp.savgol, 4),
-    ("baseline", pp.baseline, 1),
 ]
 
 

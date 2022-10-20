@@ -13,7 +13,7 @@ Moreover, because Pinard extends scikit-learn, all scikit-learn features are nat
 
 ## Authors
 
-Pinard is a python package developed at CIRAD (www.cirad.fr) by Grégory Beurier (beurier@cirad.fr), Denis Cornet (denis.cornet@cirad.fr) and Lauriane Rouan (lauriane.rouan@cirad.fr)
+Pinard is a python package developed at CIRAD (www.cirad.fr) by Grégory Beurier (beurier@cirad.fr) in collaboration with Denis Cornet (denis.cornet@cirad.fr) and Lauriane Rouan (lauriane.rouan@cirad.fr)
 
 ## Dependencies
 
@@ -35,6 +35,13 @@ see examples folder
 
 ## ROADMAP
 
-- Refactor splitting modules to be compliant with sklearn class hierarchy
-- Extend sklearn pipeline to fully integrate data augmentation (x,y management)
-- Add Kfold to splitting modules
+- sklearn compatibility:
+    - Extend sklearn pipeline to fully integrate data augmentation (x,y along the pipeline management)
+    - Extend sklearn pipeline to integrate  validation data (required for Deep Learning tuning)
+    - Add folds and iterable results to all splitting methods (cross validation / KFold compatibility)
+- ease of use:
+    - Extend model_selection helpers (metrics, methods, etc.)
+    - Provide dedicated serialization methods to avoid compatibility problems between different frameworks (i.e. Keras + sklearn)
+- data augmentation:
+    - Auto-balance sample augmentation based on groups/classes/metric - augmentation count replaced by ratio/weight
+    - Allow augmentation methods parameters

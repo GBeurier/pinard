@@ -1,7 +1,7 @@
 import numpy as np
 from joblib import Parallel, delayed
-from sklearn.pipeline import _fit_transform_one  # Pipeline,
-from sklearn.pipeline import FeatureUnion, _transform_one
+from sklearn.pipeline import FeatureUnion, _fit_transform_one, _transform_one
+from sklearn.preprocessing import FunctionTransformer
 
 # from sklearn.utils.metaestimators import available_if
 
@@ -19,7 +19,7 @@ class FeatureAugmentation(FeatureUnion):
         self._validate_transformers()
         result = Parallel(n_jobs=self.n_jobs)(
             delayed(_fit_transform_one)(trans, X, y, weight, **fit_params)
-            for name, trans, weight in self._iter()
+            for _, trans, weight in self._iter()
         )
 
         if not result:
@@ -35,7 +35,7 @@ class FeatureAugmentation(FeatureUnion):
     def transform(self, X):
         Xs = Parallel(n_jobs=self.n_jobs)(
             delayed(_transform_one)(trans, X, None, weight)
-            for name, trans, weight in self._iter()
+            for _, trans, weight in self._iter()
         )
 
         if not Xs:
@@ -46,6 +46,14 @@ class FeatureAugmentation(FeatureUnion):
         return Xs
 
 
+# def _transform_one(transformer, X, y, weight, **fit_params):
+#     res = transformer.transform(X)
+#     # if we have a weight for this transformer, multiply output
+#     if weight is None:
+#         return res
+#     return res * weight
+
+
 # def _transform_one_xy(transformer, X, y, weight, **fit_params):
 #     resX, resY = transformer.transform(X, y)
 #     # if we have a weight for this transformer, multiply output
@@ -54,42 +62,75 @@ class FeatureAugmentation(FeatureUnion):
 #     return resX * weight, resY
 
 
-# class SampleAugmentation(FeatureUnion):
-#     def transform(self, X, y):
-#         """Transform X separately by each transformer, concatenate results.
+class SampleAugmentation(FeatureUnion):
+    def __init__(
+        self, transformer_list, *, n_jobs=None, transformer_weights=None, verbose=False
+    ):
+        transformer_origin_list = []
+        self.augmentation_count = []
+        self.total_count = 0
+        for tpl in transformer_list:
+            if len(tpl) == 2:
+                transformer_origin_list.append(tpl)
+                self.augmentation_count.append(1)
+                self.total_count += 1
+            elif len(tpl) == 3:
+                transformer_origin_list.append((tpl[1], tpl[2]))
+                self.augmentation_count.append(tpl[0])
+                self.total_count += tpl[0]
+        super().__init__(
+            transformer_origin_list,
+            n_jobs=n_jobs,
+            transformer_weights=transformer_weights,
+            verbose=verbose,
+        )
 
-#         Parameters
-#         ----------
-#         X : iterable or array-like, depending on transformers
-#             Input data to be transformed.
+    def _iter(self):
+        """
+        Generate (name, trans, weight) x count tuples excluding None and
+        'drop' transformers.
+        """
+        get_weight = (self.transformer_weights or {}).get
 
-#         Returns
-#         -------
-#         X_t : array-like or sparse matrix of \
-#                 shape (n_samples, sum_n_components)
-#             The `hstack` of results of transformers. `sum_n_components` is the
-#             sum of `n_components` (output dimension) over transformers.
-#         """
-#         # print(self,np.array(X).shape, np.array(y).shape)
+        for i, (name, trans) in enumerate(self.transformer_list):
+            for _ in range(self.augmentation_count[i]):
+                if trans == "drop":
+                    continue
+                if trans == "passthrough":
+                    trans = FunctionTransformer(feature_names_out="one-to-one")
+                yield (name, trans, get_weight(name))
 
-#         Xs, ys = zip(*Parallel(n_jobs=self.n_jobs)(
-#             delayed(_transform_one_xy)(trans, X, y, weight)
-#             for name, trans, weight in self._iter()
-#         ))
+    def transform(self, X, y=None):
+        """Transform X separately by each transformer, concatenate results.
 
-#         # for u in Xs:
-#         #     print(np.array(u).shape)
-#         # print(self,np.array(Xs).shape, np.array(ys).shape)
+        Parameters
+        ----------
+        X : iterable or array-like, depending on transformers
+            Input data to be transformed.
 
-#         if not Xs:
-#             # All transformers are None
-#             return np.zeros((X.shape[0], 0)), np.zeros((y.shape[0], 0))
+        Returns
+        -------
+        X_t : array-like or sparse matrix of \
+                shape (n_samples, sum_n_components)
+            The `hstack` of results of transformers. `sum_n_components` is the
+            sum of `n_components` (output dimension) over transformers.
+        """
+        Xs = zip(
+            *Parallel(n_jobs=self.n_jobs)(
+                delayed(_transform_one)(trans, X, y, weight)
+                for name, trans, weight in self._iter()
+            )
+        )
 
-#         x_stk = np.vstack(Xs)
-#         y_stk = np.vstack(ys)
-#         # print(self, x_stk.shape, y_stk.shape)
+        if not Xs:
+            return np.zeros((self.total_count, 0)), np.zeros((self.total_count, 0))
+        else:
+            Xs = np.array(list(Xs))
 
-#         return x_stk, y_stk
+        Xs = np.concatenate(Xs, axis=0)
+        Ys = np.repeat(y, self.total_count, axis=0)
+
+        return Xs, Ys
 
 
 # class Pipeline_XY(Pipeline):

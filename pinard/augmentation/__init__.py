@@ -5,6 +5,7 @@ from ._spline_augmentation import (Dependent_Spline_Simplification,
                                    Random_Spline_Addition,
                                    Random_X_Spline_Deformation,
                                    Random_X_Spline_Shift)
+from .augmenter import Augmenter, IdentityAugmenter
 
 __all__ = [
     "Random_X_Spline_Deformation",
@@ -15,4 +16,6 @@ __all__ = [
     "Rotate_Translate",
     "Random_Y_Shift",
     "Random_Multiplicative_Shift",
+    "Augmenter",
+    "IdentityAugmenter"
 ]
