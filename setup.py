@@ -42,18 +42,13 @@ setup(
         'scipy',
         'tensorflow',
         'PyWavelets',
-        'typing',
-        'dataclasses'
     ],
 
     extras_require={
         'math': extra_api,
-
         'bin': extra_bin,
-
         'test': extra_test,
         'dev': extra_dev,
-
         'ci': extra_ci,
     },
 
