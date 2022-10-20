@@ -21,24 +21,15 @@ split_list = [
     ),
     (
         {
-            "method": "k_mean",
-            "test_size": 0.25,
-            "random_state": 42,
-            "metric": "jensenshannon",
-        },
-        2,
-    ),
-    (
-        {
             "pca_components": 4,
             "method": "k_mean",
             "test_size": 0.25,
             "random_state": 42,
             "metric": "correlation",
         },
-        3,
+        2,
     ),
-    ({"method": "kennard_stone", "test_size": 0.25, "random_state": 42}, 4),
+    ({"method": "kennard_stone", "test_size": 0.25, "random_state": 42}, 3),
     (
         {
             "method": "kennard_stone",
@@ -47,7 +38,7 @@ split_list = [
             "metric": "correlation",
             "pca_components": 8,
         },
-        5,
+        4,
     ),
     (
         {
@@ -56,17 +47,17 @@ split_list = [
             "random_state": 42,
             "metric": "correlation",
         },
-        6,
+        5,
     ),
-    ({"method": "spxy", "test_size": 0.25, "random_state": 42}, 7),
-    ({"method": "spxy", "test_size": 0.25, "random_state": 42, "pca_components": 2}, 8),
+    ({"method": "spxy", "test_size": 0.25, "random_state": 42}, 6),
+    ({"method": "spxy", "test_size": 0.25, "random_state": 42, "pca_components": 2}, 7),
     (
         {"method": "spxy", "test_size": 0.25, "random_state": 42, "metric": "canberra"},
-        9,
+        8,
     ),
-    ({"method": "stratified", "test_size": 0.25, "random_state": 42}, 10),
-    ({"method": "stratified", "test_size": 0.25, "random_state": 42, "n_bins": 4}, 11),
-    ({"method": "circular", "test_size": 0.25, "random_state": 42}, 12),
+    ({"method": "stratified", "test_size": 0.25, "random_state": 42}, 9),
+    ({"method": "stratified", "test_size": 0.25, "random_state": 42, "n_bins": 4}, 10),
+    ({"method": "circular", "test_size": 0.25, "random_state": 42}, 11),
 ]
 
 
