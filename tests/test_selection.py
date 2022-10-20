@@ -25,7 +25,7 @@ split_list = [
             "method": "k_mean",
             "test_size": 0.25,
             "random_state": 42,
-            "metric": "correlation",
+            "metric": "canberra",
         },
         2,
     ),
