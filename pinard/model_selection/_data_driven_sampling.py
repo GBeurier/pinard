@@ -9,7 +9,7 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.preprocessing import KBinsDiscretizer
 from sklearn.utils.validation import _num_features, _num_samples
 
-from ._utils import _validate_shuffle_split
+from ..sklearn._utils import _validate_shuffle_split
 
 tweening = importlib.util.find_spec("tweening")
 if tweening is not None:
