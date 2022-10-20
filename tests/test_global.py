@@ -1,19 +1,17 @@
-
-
-#Load data
-#split_data
-#Pipeline_XY:
+# Load data
+# split_data
+# Pipeline_XY:
 # [
-	#augment
-	#FeatureUnion#preprocess
-	#scaler
+# 	augment
+# 	FeatureUnion#preprocess
+# 	scaler
 # ]
 
 # fit
 
-#Keras PipelineXY_validation:
+# Keras PipelineXY_validation:
 # [
-	#SampleAugmentation
-	#FeatureAugmentation#preprocess
+# 	SampleAugmentation
+# 	FeatureAugmentation#preprocess
 # ]
 # fit

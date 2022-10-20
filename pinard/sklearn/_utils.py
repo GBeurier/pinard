@@ -1,7 +1,23 @@
-def _validate_shuffle_split(n_samples, test_size, train_size, default_test_size=None):
-    """
-    Validation helper to check if the test/test sizes are meaningful wrt to the
-    size of the data (n_samples)
+import math
+
+import numpy as np
+
+
+def _validate_shuffle_split(n_samples, test_size, train_size, default_test_size=0.25):
+    """from 'sklearn.model_selection._split'
+    Validation helper to check if the train/test sizes are meaningful to the size of 
+    the data (n_samples)
+
+    Parameters
+    ----------
+    n_samples : _type_
+    _description_
+    test_size : _type_
+    _description_
+    train_size : _type_
+    _description_
+    default_test_size : float, optional
+    _description_, by default 0.25
     """
     if test_size is None and train_size is None:
         test_size = default_test_size
@@ -45,12 +61,12 @@ def _validate_shuffle_split(n_samples, test_size, train_size, default_test_size=
         )
 
     if test_size_type == "f":
-        n_test = ceil(test_size * n_samples)
+        n_test = math.ceil(test_size * n_samples)
     elif test_size_type == "i":
         n_test = float(test_size)
 
     if train_size_type == "f":
-        n_train = floor(train_size * n_samples)
+        n_train = math.floor(train_size * n_samples)
     elif train_size_type == "i":
         n_train = float(train_size)
 
@@ -76,4 +92,4 @@ def _validate_shuffle_split(n_samples, test_size, train_size, default_test_size=
             "aforementioned parameters.".format(n_samples, test_size, train_size)
         )
 
-    return (n_train,)
+    return (n_train, n_test)

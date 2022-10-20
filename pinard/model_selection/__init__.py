@@ -1,5 +1,5 @@
+from ._data_driven_sampling import kbins_stratified_sampling, kmean_sampling
 from ._helpers import train_test_split_idx
-from ._data_driven_sampling import kmean_sampling, kbins_stratified_sampling
 from ._nirs_sampling import ks_sampling, spxy_sampling
 from ._random_sampling import shuffle_sampling, systematic_circular_sampling
 

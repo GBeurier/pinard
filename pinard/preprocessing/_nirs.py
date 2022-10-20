@@ -1,26 +1,16 @@
-from scipy import sparse, signal, ndimage
-
-import warnings
 import numpy as np
-
-from sklearn.preprocessing import StandardScaler as StandardNormalVariate
-from sklearn.preprocessing import RobustScaler as RobustNormalVariate
-from sklearn.preprocessing import FunctionTransformer as IdentityTransformer
-
-from sklearn.preprocessing import scale, StandardScaler
-from sklearn.base import TransformerMixin, BaseEstimator
-from sklearn.utils import check_array
-from sklearn.utils.validation import (
-    check_is_fitted,
-    # check_random_state,
-    # _check_sample_weight,
-    FLOAT_DTYPES,
-)
 import pywt
+from scipy import signal, sparse
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import StandardScaler, scale
+from sklearn.utils import check_array
+from sklearn.utils.validation import FLOAT_DTYPES, check_is_fitted
 
 
-# mode: ['zero', 'constant', 'symmetric', 'periodic', 'smooth', 'periodization', 'reflect', 'antisymmetric', 'antireflect']
-# wavelet: ['haar', 'db', 'sym', 'coif', 'bior', 'rbio', 'dmey', 'gaus', 'mexh', 'morl', 'cgau', 'shan', 'fbsp', 'cmor']
+# mode: ['zero', 'constant', 'symmetric', 'periodic', 'smooth', 'periodization',
+# 'reflect', 'antisymmetric', 'antireflect']
+# wavelet: ['haar', 'db', 'sym', 'coif', 'bior', 'rbio', 'dmey', 'gaus', 'mexh', 'morl',
+# 'cgau', 'shan', 'fbsp', 'cmor']
 def wavelet_transform(spectra, wavelet, mode="periodization"):
     """Computes transform using pywavelet transform.
     Args:
@@ -44,15 +34,16 @@ class Wavelet(TransformerMixin, BaseEstimator):
     see: https://pywavelets.readthedocs.io
 
     Parameters
-    ----------
-    wavelet : Wavelet object or name, default='haar'
+    --  --  --  --  --
+    wavelet : Wavelet object or name, default = 'haar'
         Wavelet to use: ['Haar', 'Daubechies', 'Symlets', 'Coiflets', 'Biorthogonal',
         'Reverse biorthogonal', 'Discrete Meyer (FIR Approximation)'...]
         see: https://www.pybytes.com/pywavelets/ref/wavelets.html#wavelet-families
 
-    mode : str, optional, default='periodization'
+    mode : str, optional, default = 'periodization'
         Signal extension mode.add
-        ['zero', 'constant', 'symmetric', 'periodic', 'smooth', 'periodization', 'reflect', 'antisymmetric', 'antireflect']
+        ['zero', 'constant', 'symmetric', 'periodic', 'smooth', 'periodization',
+         'reflect', 'antisymmetric', 'antireflect']
         see: https://pywavelets.readthedocs.io/en/latest/ref/signal-extension-modes.html#ref-modes
     """
 
@@ -68,7 +59,7 @@ class Wavelet(TransformerMixin, BaseEstimator):
         """Verify the X data compliance with wavelet transform
 
         Parameters
-        ----------
+        --  --  --  --  --
         X: array-like, spectra
             The data to transform.
         y: (None) - Ignored
@@ -105,8 +96,8 @@ class Haar(Wavelet):
 
 
 def savgol(spectra, window_length=11, polyorder=3, deriv=0, delta=1.0):
-    """Perform Savitzky–Golay filtering on the data (also calculates derivatives). This function is a wrapper for
-    scipy.signal.savgol_filter.
+    """Perform Savitzky–Golay filtering on the data (also calculates derivatives). 
+    This function is a wrapper for scipy.signal.savgol_filter.
     Args:
         spectra < numpy.ndarray > : NIRS data matrix.
         filter_win < int > : Size of the filter window in samples (default 11).
@@ -225,7 +216,8 @@ class MultiplicativeScatterCorrection(TransformerMixin, BaseEstimator):
 
         if X.shape[1] != len(self.a_) or X.shape[1] != len(self.b_):
             raise ValueError(
-                "Inverse transform cannot be applied with provided X. Bad number of columns."
+                "Inverse transform cannot be applied with provided X. "
+                "Bad number of columns."
             )
 
         for col in range(X.shape[1]):

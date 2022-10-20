@@ -1,10 +1,10 @@
 import random as rd
-import numpy as np
 
+import numpy as np
 from sklearn.model_selection import ShuffleSplit
 from sklearn.utils.validation import _num_samples
 
-from ._utils import _validate_shuffle_split
+from ..sklearn._utils import _validate_shuffle_split
 
 
 def shuffle_sampling(data, test_size, *, random_state=None):
@@ -20,7 +20,8 @@ def systematic_circular_sampling(data, y, test_size, random_state):
     """
     FONCTION d'échantillonnage : ``systematic_sampling``
     --------
-    Permet d'effectuer un échantillonnage non-aléatoire, basé sur la méthode d'échantillonnage systématique circulaire.
+    Permet d'effectuer un échantillonnage non-aléatoire, basé sur la méthode
+    d'échantillonnage systématique circulaire.
     Note
     ----
     Le point de départ, et le nombre de rotations sont tirés aléatoirement.

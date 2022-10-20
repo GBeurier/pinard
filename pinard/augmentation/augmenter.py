@@ -1,7 +1,7 @@
 import abc
-import numpy as np
 
-from sklearn.base import TransformerMixin, BaseEstimator
+import numpy as np
+from sklearn.base import BaseEstimator, TransformerMixin
 
 
 class Augmenter(TransformerMixin, BaseEstimator, metaclass=abc.ABCMeta):
@@ -31,7 +31,7 @@ class Augmenter(TransformerMixin, BaseEstimator, metaclass=abc.ABCMeta):
         return X, y
 
     def inverse_transform(self, X, y):
-        return X[0 : self.init_size], y[0 : self.init_size]
+        return X[0:self.init_size], y[0:self.init_size]
 
     def _more_tags(self):
         return {"allow_nan": False}

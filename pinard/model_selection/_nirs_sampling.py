@@ -1,19 +1,18 @@
 import numpy as np
-
 from scipy.spatial.distance import cdist
 from sklearn.decomposition import PCA
 from sklearn.utils.validation import _num_samples
 
-from ._utils import _validate_shuffle_split
+from ..sklearn._utils import _validate_shuffle_split
 
 
-## TODO refactor for perf
+# TODO refactor for perf
 def _max_min_distance_split(distance, train_size):
     """
     FUNCTION : ``max_min_distance_split``
     --------
-    Sample set split method based on maximun minimun distance, which is the core of Kennard Stone
-     method.
+    Sample set split method based on maximun minimun distance, which is the core 
+    of Kennard Stone method.
     Parameters
     ----------
     * ``distance`` : Ndarray
@@ -50,7 +49,8 @@ def _max_min_distance_split(distance, train_size):
         min_distance = np.min(min_distance, axis=0)
         max_min_distance = np.max(min_distance)
 
-        # Select the first point (in case that several distances are the same, choose the first one)
+        # Select the first point (in case that several distances are the same, choose 
+        # the first one)
         points = np.argwhere(select_distance == max_min_distance)[:, 1]
         for point in points:
             if point in index_train:
@@ -149,7 +149,8 @@ def spxy_sampling(
     ---------
     Galvao et al. (2005). A method for calibration and validation subset partitioning.
     Talanta, 67(4), 736-740. (https://www.sciencedirect.com/science/article/pii/S003991400500192X)
-    Li, Wenze, et al. "HSPXY: A hybrid‐correlation and diversity‐distances based data partition method." Journal of Chemometrics 33.4 (2019): e3109.
+    Li, Wenze, et al. "HSPXY: A hybrid‐correlation and diversity‐distances based data partition 
+    method." Journal of Chemometrics 33.4 (2019): e3109.
     """
 
     if y is None:

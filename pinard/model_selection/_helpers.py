@@ -1,19 +1,23 @@
-import numpy as np
+import importlib
+
 from sklearn.utils import indexable
 
-from ._data_driven_sampling import kmean_sampling, kbins_stratified_sampling
+from ._data_driven_sampling import kbins_stratified_sampling, kmean_sampling
 from ._nirs_sampling import ks_sampling, spxy_sampling
 from ._random_sampling import shuffle_sampling, systematic_circular_sampling
 
-import importlib
-
 tweening = importlib.util.find_spec("tweening")
 if tweening is not None:
-    from ._split_sampling import split_sampling
+    from _data_driven_sampling import split_sampling
 
 
-# Metric/scipy
-##'braycurtis', 'canberra', 'chebyshev', 'cityblock', 'correlation', 'cosine', 'dice', 'euclidean', 'hamming', 'jaccard', 'jensenshannon', 'kulczynski1', 'mahalanobis', 'matching', 'minkowski', 'rogerstanimoto', 'russellrao', 'seuclidean', 'sokalmichener', 'sokalsneath', 'sqeuclidean', 'yule'.
+# The distance metric to use. If a string, the distance function can be
+#         ‘braycurtis’, ‘canberra’, ‘chebyshev’, ‘cityblock’, ‘correlation’, ‘cosine’,
+#         ‘dice’, ‘euclidean’, ‘hamming’, ‘jaccard’, ‘jensenshannon’, ‘kulczynski1’,
+#         ‘mahalanobis’, ‘matching’, ‘minkowski’, ‘rogerstanimoto’, ‘russellrao’,
+#         ‘seuclidean’, ‘sokalmichener’, ‘sokalsneath’, ‘sqeuclidean’, ‘yule’.
+
+
 def train_test_split_idx(
     *x,
     y=None,
@@ -25,17 +29,15 @@ def train_test_split_idx(
     n_bins=10,
     train_size=None,
 ):
-    n_arrays = len(x)
+
     data = indexable(*x)[0]
 
-    ## TODO move in a dedicated modules with options
     if method == "random":
         return shuffle_sampling(
             data,
             test_size,
             random_state=random_state,
         )
-    ## TODO move in a dedicated modules with options
     elif method == "stratified":
         return kbins_stratified_sampling(
             data,
@@ -69,16 +71,6 @@ def train_test_split_idx(
             pca_components=pca_components,
             metric=metric,
         )
-    elif method == "SPlit":
-        if tweening is None:
-            raise ModuleNotFoundError(
-                "Cannot use SPlit sampling without tweening package. See https://github.com/GBeurier/pinard"
-            )
-        return split_sampling(
-            data,
-            test_size,
-            random_state,
-        )
     elif method == "circular":
         return systematic_circular_sampling(
             data,
@@ -86,8 +78,20 @@ def train_test_split_idx(
             test_size,
             random_state,
         )
+    elif method == "SPlit":
+        if tweening is None:
+            raise ModuleNotFoundError(
+                "Cannot use SPlit sampling without tweening package. "
+                "See https://github.com/GBeurier/pinard"
+            )
+        return split_sampling(
+            data,
+            test_size,
+            random_state,
+        )
 
     else:
         raise ValueError(
-            "Argument 'tech' must be : ['k_mean' ; 'kennard_stone' ; 'random' ; 'SPlit' ; 'spxy' ; 'stratified' ; 'circular']."
+            "Argument 'tech' must be : ['k_mean' ; 'kennard_stone' ; 'random' ; "
+            "'SPlit' ; 'spxy' ; 'stratified' ; 'circular']."
         )

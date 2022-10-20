@@ -1,4 +1,4 @@
-__version__ = '0.7.4'
+__version__ = '0.9.0'
 
 __all__ = [
     "augmentation",

@@ -26,7 +26,8 @@ def load_csv(
     y_index_col=0
 ):
     """Helper to load a NIRS dataset from csv file(s) using pandas and numpy:
-    The data can be either in one file (y_path set to None) or in two files for x and y data.
+    The data can be either in one file (y_path set to None) or in two files
+    for x and y data.
     Rows with NaN or str values are automatically removed.
 
     Parameters
@@ -48,11 +49,13 @@ def load_csv(
         Row number(s) to use as the column names for y data, and the start of the data.
         Default: None.
     x_index_col : int, str, sequence of int / str, or False, optional
-        Column(s) to use as the row labels of the x data, either given as string name or column index.
+        Column(s) to use as the row labels of the x data, either given as string name
+        or column index.
         Automatically removed from the dataset.
         Default: None.
     y_index_col : int, str, sequence of int / str, or False, optional
-        Column(s) to use as the row labels of the y data, either given as string name or column index.
+        Column(s) to use as the row labels of the y data, either given as string name
+        or column index.
         Automatically removed from the dataset.
         Default: None.
 
@@ -61,8 +64,8 @@ def load_csv(
     np.array, ,np.array
         Returns x and y data as np.array containing np.float32.
     """
-    assert y_fname != None or y_cols != None
-    ## TODO - add assert/exceptions on non-numerical columns
+    assert y_fname is not None or y_cols is not None
+    # TODO - add assert/exceptions on non-numerical columns
 
     x_df = pd.read_csv(x_fname, sep=sep, header=x_hdr, index_col=x_index_col)
     x_df = x_df.apply(pd.to_numeric, args=("coerce",)).dropna()
@@ -72,7 +75,7 @@ def load_csv(
         raise WrongFormatError(x_data, None)
 
     y_data = None
-    if y_fname == None:
+    if y_fname is None:
         y_data = x_data[:, y_cols]
         x_data = np.delete(x_data, y_cols, axis=1)
     else:

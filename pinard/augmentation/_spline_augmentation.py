@@ -1,6 +1,7 @@
+import random
+
 import numpy as np
 import scipy.interpolate as interpolate
-
 from augmenter import Augmenter
 
 
@@ -91,9 +92,9 @@ class Dependent_Spline_Simplification(Augmenter):
         y_samples = []
 
         for s in range(1, nb_segments):
-            l = spectrum_length(x0, spectrum)[0] / nb_segments
+            length = spectrum_length(x0, spectrum)[0] / nb_segments
             # cumulative_length = np.cumsum(np.repeat(l,nb_segments))
-            n_l = s * l
+            n_l = s * length
             test = res[2]
             toto = interval_selection(n_l, test)
             P = segment_pt_coord(
@@ -101,7 +102,7 @@ class Dependent_Spline_Simplification(Augmenter):
                 y1=spectrum[toto[1]],
                 x2=x0[toto[0]],
                 y2=spectrum[toto[0]],
-                fracL=res[1][toto[1]] % l,
+                fracL=res[1][toto[1]] % length,
                 L=res[1][toto[1]],
             )
 

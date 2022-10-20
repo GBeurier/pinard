@@ -1,7 +1,8 @@
-import pytest
-import numpy as np
-from os.path import dirname as d
 from os.path import abspath
+from os.path import dirname as d
+
+import numpy as np
+import pytest
 
 from pinard import preprocessing as pp
 

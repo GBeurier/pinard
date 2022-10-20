@@ -1,13 +1,19 @@
-import numpy as np
+import importlib
+import random as rd
 
+import numpy as np
 from scipy.spatial.distance import cdist
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
-from sklearn.utils.validation import _num_samples
-from sklearn.model_selection import ShuffleSplit, StratifiedShuffleSplit
+from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.preprocessing import KBinsDiscretizer
+from sklearn.utils.validation import _num_features, _num_samples
 
 from ._utils import _validate_shuffle_split
+
+tweening = importlib.util.find_spec("tweening")
+if tweening is not None:
+    from tweening import twin
 
 
 def kbins_stratified_sampling(
@@ -36,7 +42,7 @@ def kbins_stratified_sampling(
     return next(split_model.split(data, y_discrete))
 
 
-## TODO Refactor - uniformize varnames, clean code
+# TODO Refactor - uniformize varnames, clean code
 def kmean_sampling(
     data, test_size, *, random_state=None, pca_components=None, metric="euclidean"
 ):
@@ -53,7 +59,11 @@ def kmean_sampling(
     pca_components : _type_, optional
         _description_, by default None
     metric : str, optional
-        The distance metric to use. If a string, the distance function can be ‘braycurtis’, ‘canberra’, ‘chebyshev’, ‘cityblock’, ‘correlation’, ‘cosine’, ‘dice’, ‘euclidean’, ‘hamming’, ‘jaccard’, ‘jensenshannon’, ‘kulczynski1’, ‘mahalanobis’, ‘matching’, ‘minkowski’, ‘rogerstanimoto’, ‘russellrao’, ‘seuclidean’, ‘sokalmichener’, ‘sokalsneath’, ‘sqeuclidean’, ‘yule’.
+        The distance metric to use. If a string, the distance function can be 
+        ‘braycurtis’, ‘canberra’, ‘chebyshev’, ‘cityblock’, ‘correlation’, ‘cosine’,
+        ‘dice’, ‘euclidean’, ‘hamming’, ‘jaccard’, ‘jensenshannon’, ‘kulczynski1’, 
+        ‘mahalanobis’, ‘matching’, ‘minkowski’, ‘rogerstanimoto’, ‘russellrao’, 
+        ‘seuclidean’, ‘sokalmichener’, ‘sokalsneath’, ‘sqeuclidean’, ‘yule’.
 
     Returns
     -------
@@ -85,7 +95,8 @@ def split_sampling(data, test_size, *, random_state=None):
     # """
     # FONCTION d'échantillonnage : ``split_sampling``
     # --------
-    # Permet le tirage non-aléatoire d'échantillons dans un dataset, selon la méthode des supports points.
+    # Permet le tirage non-aléatoire d'échantillons dans un dataset, selon la 
+    # méthode des supports points.
     # Paramètres
     # ----------
     # * ``size`` : Int/Float
@@ -111,10 +122,10 @@ def split_sampling(data, test_size, *, random_state=None):
 
     if not isinstance(random_state, int) or random_state not in range(n_features):
         rd.seed(random_state)
-        random_state = rd.randint(0, len_df - 1)
+        random_state = rd.randint(0, n_features - 1)
 
-    n_sample /= n_features
-    r = round(1 / n_sample)
+    n_samples /= n_features
+    r = round(1 / n_samples)
     index_test = twin(data, r, u1=random_state)
     index_train = np.delete(np.arange(n_samples), index_test)
     return (index_train, index_test)

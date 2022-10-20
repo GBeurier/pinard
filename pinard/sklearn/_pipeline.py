@@ -1,12 +1,7 @@
 import numpy as np
-
 from joblib import Parallel, delayed
-from sklearn.pipeline import (
-    FeatureUnion,
-    _transform_one,
-    _fit_transform_one,
-    # Pipeline,
-)
+from sklearn.pipeline import _fit_transform_one  # Pipeline,
+from sklearn.pipeline import FeatureUnion, _transform_one
 
 # from sklearn.utils.metaestimators import available_if
 

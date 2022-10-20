@@ -3,7 +3,6 @@ import pytest
 
 from pinard import preprocessing as pp
 
-
 preprocessings = [
     (0, "IdentityTransformer", pp.IdentityTransformer()),
     (1, "Baseline", pp.Baseline()),

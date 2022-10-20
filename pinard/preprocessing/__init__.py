@@ -2,26 +2,21 @@
 The :mod:`pinard.preprocessing` module includes savitzky golay, baseline, haar, 
 gaussian, etc. TransformerMixins to preprocess NIR spectra.
 """
+from sklearn.preprocessing import FunctionTransformer as IdentityTransformer
+from sklearn.preprocessing import RobustScaler as RobustNormalVariate
+from sklearn.preprocessing import StandardScaler as StandardNormalVariate
 
-from ._standard import Baseline, Detrend, Gaussian
-from ._standard import baseline, detrend
-from ._scaler import (
-    StandardNormalVariate,
-    RobustNormalVariate,
-    Normalize,
-    SimpleScale,
-    IdentityTransformer,
-    Derivate,
-)
-from ._scaler import norml, derivate, spl_norml
-from ._nirs import MultiplicativeScatterCorrection, SavitzkyGolay, Haar, Wavelet
-from ._nirs import msc, savgol, wavelet_transform
+from ._nirs import (Haar, MultiplicativeScatterCorrection, SavitzkyGolay,
+                    Wavelet, msc, savgol, wavelet_transform)
+from ._scaler import (Derivate, Normalize, SimpleScale, derivate, norml,
+                      spl_norml)
+from ._standard import Baseline, Detrend, Gaussian, baseline, detrend
 
 __all__ = [
-    "IdentityTransformer",  ## sklearn.FunctionTransformer alias
+    "IdentityTransformer",  # sklearn.preprocessing.FunctionTransformer alias
     "Baseline",
-    "StandardNormalVariate",  ## sklearn.StandardScaler alias
-    "RobustNormalVariate",  ## sklearn.ROBUSTSCALER alias
+    "StandardNormalVariate",  # sklearn.preprocessing.StandardScaler alias
+    "RobustNormalVariate",  # sklearn.preprocessing.RobusScaler alias
     "SavitzkyGolay",
     "Haar",
     "Normalize",

@@ -1,12 +1,13 @@
-from scipy import sparse
 import warnings
+
 import numpy as np
-from sklearn.preprocessing import StandardScaler as StandardNormalVariate
-from sklearn.preprocessing import RobustScaler as RobustNormalVariate
+from scipy import sparse
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import FunctionTransformer as IdentityTransformer
-from sklearn.base import TransformerMixin, BaseEstimator
+from sklearn.preprocessing import RobustScaler as RobustNormalVariate
+from sklearn.preprocessing import StandardScaler as StandardNormalVariate
 from sklearn.utils import check_array
-from sklearn.utils.validation import check_is_fitted, FLOAT_DTYPES
+from sklearn.utils.validation import FLOAT_DTYPES, check_is_fitted
 
 
 class Normalize(TransformerMixin, BaseEstimator):
@@ -46,8 +47,8 @@ class Normalize(TransformerMixin, BaseEstimator):
         feature_range = self.feature_range
         if self.user_defined and feature_range[0] >= feature_range[1]:
             warnings.warn(
-                "Minimum of desired feature range should be smaller than maximum. Got %s."
-                % str(feature_range),
+                "Minimum of desired feature range should be smaller than "
+                "maximum. Got %s." % str(feature_range),
                 SyntaxWarning,
             )
 
@@ -132,8 +133,8 @@ def norml(spectra, feature_range=(-1, 1)):
         imax = feature_range[1]
         if imin >= imax:
             warnings.warn(
-                "Minimum of desired feature range should be smaller than maximum. Got %s."
-                % str(feature_range),
+                "Minimum of desired feature range should be smaller than maximum."
+                "Got %s." % str(feature_range),
                 SyntaxWarning,
             )
         if imin == imax:

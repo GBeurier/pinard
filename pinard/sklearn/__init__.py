@@ -1,5 +1,6 @@
 """
-The :mod:`pinard.sklearn` module includes various tools to extend or adapt sklearn features.
+The :mod:`pinard.sklearn` module includes various tools to extend 
+or adapt sklearn features.
 """
 
 from ._pipeline import FeatureAugmentation

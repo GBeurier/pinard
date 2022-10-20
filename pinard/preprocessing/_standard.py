@@ -1,8 +1,8 @@
 import numpy as np
-from scipy import sparse, signal, ndimage
-from sklearn.base import TransformerMixin, BaseEstimator
+from scipy import ndimage, signal, sparse
+from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils import check_array
-from sklearn.utils.validation import check_is_fitted, FLOAT_DTYPES
+from sklearn.utils.validation import FLOAT_DTYPES, check_is_fitted
 
 
 class Baseline(TransformerMixin, BaseEstimator):
@@ -83,7 +83,8 @@ def detrend(spectra, bp=0):
     """Perform spectral detrending to remove linear trend from data.
     Args:
         spectra < numpy.ndarray > : NIRS data matrix.
-        bp < list > : A sequence of break points. If given, an individual linear fit is performed for each part of data
+        bp < list > : A sequence of break points. If given, an individual linear fit is
+        performed for each part of data
         between two break points. Break points are specified as indices into data.
     Returns:
         spectra < numpy.ndarray > : Detrended NIR spectra
