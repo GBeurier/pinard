@@ -43,8 +43,11 @@ def interval_selection(n_l, CumVect):
 class Random_X_Spline_Deformation(Augmenter):
     def augment(self, X):
         """Random modification of x based on subsampled spline"""
-        x = np.arange(0, len(X), 1)
-        t, c, k = interpolate.splrep(x, X, s=0, k=3)
+        x = np.arange(0, len(X[0]), 1)
+        print("augment from>", x.shape, X.shape)
+
+        t, c, k = interpolate.splrep(x, X[0], s=0, k=3)
+        print(t,c,k)
 
         delta_x_size = int(np.around(len(t) / 20))
         delta_x = np.linspace(np.min(x), np.max(x), delta_x_size)
@@ -97,7 +100,6 @@ class Dependent_Spline_Simplification(Augmenter):
 
         for s in range(1, nb_segments):
             length = X_length(x0, X)[0] / nb_segments
-            print(length)
             # cumulative_length = np.cumsum(np.repeat(l,nb_segments))
             n_l = s * length
             test = res[2]
@@ -149,7 +151,6 @@ class Random_Spline_Addition(Augmenter):
         x.sort()
         y = np.asarray(y_points)
         t, c, k = interpolate.splrep(x, y, s=0, k=3)
-
         spline = interpolate.BSpline(t, c, k, extrapolate=False)
         distor = spline(x_range_real)
         y_distor = X + np.reshape(distor, (-1, 1))
