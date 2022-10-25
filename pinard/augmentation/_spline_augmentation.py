@@ -6,6 +6,13 @@ import scipy.interpolate as interpolate
 from .augmenter import Augmenter
 
 
+def segment_length(x1, y1, x2, y2):
+    return np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+
+
+v_segment_length = np.vectorize(segment_length)
+
+
 def X_length(x, y):
     x1 = x[range((len(x) - 1))]
     y1 = y[range((len(y) - 1))]
@@ -18,13 +25,6 @@ def X_length(x, y):
     SpecLen = np.sum(SpecLen_seg)
     SpecLen_seg_cumsum = np.cumsum(SpecLen_seg)
     return (SpecLen, SpecLen_seg, SpecLen_seg_cumsum)
-
-
-def segment_length(x1, y1, x2, y2):
-    return np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-
-
-v_segment_length = np.vectorize(segment_length)
 
 
 def segment_pt_coord(x1, y1, x2, y2, fracL, L):
@@ -41,14 +41,13 @@ def interval_selection(n_l, CumVect):
 
 
 class Random_X_Spline_Deformation(Augmenter):
-    def augment(self, X):
+    # def __init__(self, apply_on="samples", random_state=None, *, copy=True):
+    #     super().__init__(apply_on, random_state, copy=copy)
+
+    def augment(self, X, apply_on="samples"):
         """Random modification of x based on subsampled spline"""
         x = np.arange(0, len(X[0]), 1)
-        print("augment from>", x.shape, X.shape)
-
         t, c, k = interpolate.splrep(x, X[0], s=0, k=3)
-        print(t,c,k)
-
         delta_x_size = int(np.around(len(t) / 20))
         delta_x = np.linspace(np.min(x), np.max(x), delta_x_size)
         delta_y = np.random.uniform(-10, 10, delta_x_size)
@@ -58,80 +57,20 @@ class Random_X_Spline_Deformation(Augmenter):
         return spline(x)
 
 
-class Random_X_Spline_Shift(Augmenter):
-    def augment(self, X):
-        """Add spline based x shift"""
-        x = np.arange(0, len(X), 1)
-        delta = random.uniform(-10, 10)
-        x = x + delta
-        t, c, k = interpolate.splrep(x, X, s=0, k=3)
-        spline = interpolate.BSpline(t, c, k, extrapolate=False)
-        return spline(x)
-
-
-class Monotonous_Spline_Simplification(Augmenter):
-    def augment(self, X):
-        """Select regularly spaced points along x_axis and adjust a spline"""
-        nfreq = len(X)
-        x_range_real = np.arange(0, nfreq, 1)
-        nb_points = 60
-
-        ctrl_points = np.unique(
-            np.concatenate(([0], random.sample(range(nfreq), nb_points), [nfreq - 1]))
-        )
-        ctrl_points.sort()
-        x = x_range_real[ctrl_points]
-        y = X[ctrl_points]
-        t, c, k = interpolate.splrep(x, y, s=0, k=3)
-        spline = interpolate.BSpline(t, c, k, extrapolate=False)
-
-        return spline(x_range_real)
-
-
-class Dependent_Spline_Simplification(Augmenter):
-    def augment(self, X):
-        """Select regularly spaced points ON the X and adjust a spline"""
-        nfreq = len(X)
-        x0 = np.linspace(0, np.max(X), nfreq)
-        res = X_length(x0, X)
-        nb_segments = 10
-        x_samples = []
-        y_samples = []
-
-        for s in range(1, nb_segments):
-            length = X_length(x0, X)[0] / nb_segments
-            # cumulative_length = np.cumsum(np.repeat(l,nb_segments))
-            n_l = s * length
-            test = res[2]
-            toto = interval_selection(n_l, test)
-
-            P = segment_pt_coord(
-                x1=x0[toto[1]],
-                y1=X[toto[1]],
-                x2=x0[toto[0]],
-                y2=X[toto[0]],
-                fracL=res[1][toto[1]] % length,
-                L=res[1][toto[1]],
-            )
-
-            x_samples.append(P[0])
-            y_samples.append(P[1])
-
-        x = np.array(x_samples)
-        x = np.concatenate(([0], x, [np.max(x0)]))
-        y = np.array(y_samples)
-        y = np.concatenate(([X[0]], y, [X[nfreq - 1]]))
-        # print(x)
-        t, c, k = interpolate.splrep(x, y, s=0, k=3)
-        xmin, xmax = x.min(), x.max()
-        xx = np.linspace(xmin, xmax, nfreq)
-        spline = interpolate.BSpline(t, c, k, extrapolate=False)
-
-        return spline(xx)
+# class Random_X_Spline_Shift(Augmenter):
+#     def augment(self, X, apply_on="samples"):
+#         """Add spline based x shift"""
+#         x = np.arange(0, len(X[0]), 1)
+#         delta = np.random.uniform(-0.5, 0.5, len(X[0]))
+#         x = x + delta
+#         print(x)
+#         t, c, k = interpolate.splrep(x, X[0], s=0, k=3)
+#         spline = interpolate.BSpline(t, c, k, extrapolate=True)
+#         return spline(x)
 
 
 class Random_Spline_Addition(Augmenter):
-    def augment(self, X):
+    def augment(self, X, apply_on="samples"):
         """Add spline noise on y"""
         nfreq = len(X)
         x_range_real = np.arange(0, nfreq, 1)
@@ -156,3 +95,72 @@ class Random_Spline_Addition(Augmenter):
         y_distor = X + np.reshape(distor, (-1, 1))
         # y_distor[y_distor < 0] = 0
         return np.array(y_distor)
+
+
+# Kind of equivalent to gaussian preproprocessing
+class Monotonous_Spline_Simplification(Augmenter):
+    def augment(self, X, apply_on="samples"):
+        """Select regularly spaced points along x_axis and adjust a spline"""
+        nfreq = len(X[0])
+        x_range_real = np.arange(0, nfreq, 1)
+        nb_points = 60
+
+        ctrl_points = np.unique(
+            np.concatenate(([0], random.sample(range(nfreq), nb_points), [nfreq - 1]))
+        )
+        ctrl_points.sort()
+        print(len(ctrl_points))
+        x = x_range_real[ctrl_points]
+        y = X[0][ctrl_points]
+        t, c, k = interpolate.splrep(x, y, s=0, k=3)
+        spline = interpolate.BSpline(t, c, k, extrapolate=False)
+
+        return spline(x_range_real)
+
+
+class Dependent_Spline_Simplification(Augmenter):
+    def augment(self, X, apply_on="samples"):
+        """Select regularly spaced points ON the X and adjust a spline"""
+        nfreq = len(X[0])
+        x0 = np.linspace(0, np.max(X[0]), nfreq)
+        res = X_length(x0, X[0])
+        nb_segments = 10
+        x_samples = []
+        y_samples = []
+
+        print(res, nfreq, nb_segments)
+
+        for s in range(1, nb_segments):
+            length = X_length(x0, X[0])[0] / nb_segments
+            print(">>>", length)
+            # cumulative_length = np.cumsum(np.repeat(l,nb_segments))
+            n_l = s * length
+            print(">>>", n_l)
+            test = res[2]
+            print(">>>", test)
+            toto = interval_selection(n_l, test)
+            print("----", toto)
+
+            P = segment_pt_coord(
+                x1=x0[toto[1]],
+                y1=X[toto[1]],
+                x2=x0[toto[0]],
+                y2=X[toto[0]],
+                fracL=res[1][toto[1]] % length,
+                L=res[1][toto[1]],
+            )
+
+            x_samples.append(P[0])
+            y_samples.append(P[1])
+
+        x = np.array(x_samples)
+        x = np.concatenate(([0], x, [np.max(x0)]))
+        y = np.array(y_samples)
+        y = np.concatenate(([X[0][0]], y, [X[0][nfreq - 1]]))
+        # print(x)
+        t, c, k = interpolate.splrep(x, y, s=0, k=3)
+        xmin, xmax = x.min(), x.max()
+        xx = np.linspace(xmin, xmax, nfreq)
+        spline = interpolate.BSpline(t, c, k, extrapolate=False)
+
+        return spline(xx)
