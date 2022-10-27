@@ -18,8 +18,8 @@ def X_length(x, y):
     y1 = y[range((len(y) - 1))]
     x2 = x[range(1, len(x))]
     y2 = y[range(1, len(y))]
-    y1 = np.reshape(np.array(y1), (-1, 1))
-    y2 = np.reshape(np.array(y2), (-1, 1))
+    # y1 = np.reshape(np.array(y1), (-1, 1))
+    # y2 = np.reshape(np.array(y2), (-1, 1))
 
     SpecLen_seg = v_segment_length(x1, y1, x2, y2)
     SpecLen = np.sum(SpecLen_seg)
