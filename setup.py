@@ -28,7 +28,6 @@ setup(
     name='pinard',
     version=__version__,
     description='Pinard: a Pipeline for Nirs Analysis ReloadeD.',
-
     url='https://github.com/gbeurier/pinard',
     author='Gregory Beurier',
     author_email='beurier@cirad.fr',
@@ -66,6 +65,6 @@ setup(
         'Development Status :: 4 - Beta',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Topic :: Scientific/Engineering :: Chemistry',
-        'Topic :: Scientific/Engineering :: Information Analysis'
+        'Topic :: Scientific/Engineering :: Information Analysis',
     ],
 )
