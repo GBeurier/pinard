@@ -31,7 +31,11 @@ pip install pinard
 
 ## USAGE
 
-see examples folder
+Examples can be executed on google collab:
+- https://colab.research.google.com/github/GBeurier/pinard/blob/main/examples/simple_pipelines.ipynb
+- https://colab.research.google.com/github/GBeurier/pinard/blob/main/examples/stacking.ipynb
+
+more to come soon...
 
 ## ROADMAP
 
