@@ -1,4 +1,4 @@
-![alt text](https://github.com/gbeurier/pinard/blob/main/docs/logo_pinard.jpg?raw=true)
+![alt text](https://github.com/gbeurier/pinard/blob/main/doc/logo_pinard.jpg?raw=true)
 
 Pinard is a python package that provides functionalities dedicated to the preprocessing and processing of NIRS data and allows the fast development of prediction models thanks to the extension of scikit-learn pipelines.
 
