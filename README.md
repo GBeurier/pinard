@@ -1,3 +1,5 @@
+![alt text](https://github.com/gbeurier/pinard/blob/main/logo_pinard.jpg?raw=true)
+
 Pinard is a python package that provides functionalities dedicated to the preprocessing and processing of NIRS data and allows the fast development of prediction models thanks to the extension of scikit-learn pipelines.
 
 NIRS measures the light reflected from a sample after irradiating it with wavelengths ranging from visible to shortwave infrared. This provides a signature of the physical
@@ -22,11 +24,41 @@ pip install pinard
 
 ## USAGE
 
-Examples can be executed on google collab:
+### Basic usage
+```python
+x, y = utils.load_csv(xcal_csv, ycal_csv, x_hdr=0, y_hdr=0, remove_na=True) # Load data
+train_index, test_index = train_test_split_idx(x, y=y, method="kennard_stone", metric="correlation" test_size=0.25, random_state=rd_seed) # Get splitting indices
+X_train, y_train, X_test, y_test = x[train_index], y[train_index], x[test_index], y[test_index]
+
+# Declare preprocessing pipeline
+preprocessing = [   ('id', pp.IdentityTransformer()),
+                    ('savgol', pp.SavitzkyGolay()),
+                    ('derivate', pp.Derivate()), 
+                    Pipeline([('_sg1',pp.SavitzkyGolay()),('_sg2',pp.SavitzkyGolay())]))] # reification for 2nd order preprocessing
+
+# Declare complete pipeline
+pipeline = Pipeline([
+    ('scaler', MinMaxScaler()), # scaling
+    ('preprocessing', FeatureUnion(preprocessing)), # preprocessing
+    ('PLS',  sklearn.PLS()) # regressor
+])
+
+# Estimator including y values scaling
+estimator = TransformedTargetRegressor(regressor = pipeline, transformer = MinMaxScaler())
+
+# Training
+estimator.fit(X_train, y_train)
+
+# Predictions
+Y_preds = estimator.predict(X_test)
+
+```
+
+More complete examples can be found in examples folders and executed on google collab:
 - https://colab.research.google.com/github/GBeurier/pinard/blob/main/examples/simple_pipelines.ipynb
 - https://colab.research.google.com/github/GBeurier/pinard/blob/main/examples/stacking.ipynb
 
-more to come soon...
+more examples to come soon...
 
 ## ROADMAP
 
