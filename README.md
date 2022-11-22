@@ -15,17 +15,8 @@ Moreover, because Pinard extends scikit-learn, all scikit-learn features are nat
 
 Pinard is a python package developed at CIRAD (www.cirad.fr) by Grégory Beurier (beurier@cirad.fr) in collaboration with Denis Cornet (denis.cornet@cirad.fr) and Lauriane Rouan (lauriane.rouan@cirad.fr)
 
-## Dependencies
-
-https://github.com/avkl/twinning twinning
-sklearn
-numpy
-pandas
-scipy
 
 ## INSTALLATION
-
-pinard is available with pip:
 
 pip install pinard
 
@@ -39,13 +30,13 @@ more to come soon...
 
 ## ROADMAP
 
-- sklearn compatibility:
+- Sklearn compatibility:
     - Extend sklearn pipeline to fully integrate data augmentation (x,y along the pipeline management)
     - Extend sklearn pipeline to integrate  validation data (required for Deep Learning tuning)
     - Add folds and iterable results to all splitting methods (cross validation / KFold compatibility)
-- ease of use:
+- Ease of use:
     - Extend model_selection helpers (metrics, methods, etc.)
     - Provide dedicated serialization methods to avoid compatibility problems between different frameworks (i.e. Keras + sklearn)
-- data augmentation:
+- Data augmentation:
     - Auto-balance sample augmentation based on groups/classes/metric - augmentation count replaced by ratio/weight
     - Allow augmentation methods parameters
