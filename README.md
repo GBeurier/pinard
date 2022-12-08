@@ -15,12 +15,12 @@ Moreover, because Pinard extends scikit-learn, all scikit-learn features are nat
 
 ## Authors
 
-Pinard is a python package developed at CIRAD (www.cirad.fr) by Grégory Beurier (beurier@cirad.fr) in collaboration with Denis Cornet (denis.cornet@cirad.fr) and Lauriane Rouan (lauriane.rouan@cirad.fr)
+Pinard is a python package developed at [CIRAD](www.cirad.fr) by [Grégory Beurier](https://github.com/GBeurier/) in collaboration with [Denis Cornet](https://github.com/dcornet), and [Lauriane Rouan](https://github.com/l-rouan)
 
 
 ## INSTALLATION
 
-pip install pinard
+    pip install pinard
 
 ## USAGE
 
@@ -72,3 +72,6 @@ more examples to come soon...
 - Data augmentation:
     - Auto-balance sample augmentation based on groups/classes/metric - augmentation count replaced by ratio/weight
     - Allow augmentation methods parameters
+    
+## License
+Cecill-C
