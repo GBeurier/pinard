@@ -15,12 +15,28 @@ Moreover, because Pinard extends scikit-learn, all scikit-learn features are nat
 
 ## Authors
 
-Pinard is a python package developed at CIRAD (www.cirad.fr) by Grégory Beurier (beurier@cirad.fr) in collaboration with Denis Cornet (denis.cornet@cirad.fr) and Lauriane Rouan (lauriane.rouan@cirad.fr)
+Pinard is a python package developed at AGAP institute (https://umr-agap.cirad.fr/) by Grégory Beurier (beurier@cirad.fr) in collaboration with Denis Cornet (denis.cornet@cirad.fr) and Lauriane Rouan (lauriane.rouan@cirad.fr)
 
 
 ## INSTALLATION
 
+Installing the pinard package can be done using the Python package installer pip. To install pinard, you need to open a terminal or command prompt and enter the following command:
+
 pip install pinard
+
+It is recommended to use virtual environments to avoid any conflicts with other packages. Once the installation is complete, you should be able to import the package and use its functions in your Python code.
+It's also possible to use the package from Jupyter notebook or any other IDE, you just have to make sure the environment is the same as the one where you installed the package.
+
+If you want to install from the source code, you can use the following command, after having downloaded or cloned the source code from the official repository (https://github.com/GBeurier/pinard):
+
+pip install -r requirements.txt 
+
+This command will install all the dependencies of the package, such as joblib, kennard-stone, numpy, pandas, pytest, PyWavelets, setuptools, scikit-learn, and scipy.
+
+Then it's possible to install the package by running :
+
+python setup.py install
+
 
 ## USAGE
 
