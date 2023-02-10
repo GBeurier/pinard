@@ -21,12 +21,12 @@ def load_csv(
     y_fname=None,
     y_cols=0,
     *,
-    sep=";",
+    sep=None,
     x_hdr=None,
     y_hdr=None,
     x_index_col=None,
     y_index_col=None,
-    remove_na=False
+    autoremove_na=False
 ):
     """Helper to load a NIRS dataset from csv file(s) using pandas and numpy:
     The data can be either in one file (y_path set to None) or in two files
@@ -61,7 +61,7 @@ def load_csv(
         or column index.
         Automatically removed from the dataset.
         Default: None.
-    remove_na: bool
+    autoremove_na: bool
         The behavior with NA value. 
         If False, raises error if NA values are detected.
         If True, remove rows containing NA values.
@@ -74,15 +74,18 @@ def load_csv(
     """
     assert y_fname is not None or y_cols is not None
     # TODO - add assert/exceptions on non-numerical columns
+    # TODO - better management of NaN and Null (esp exception msg)
 
     x_df = pd.read_csv(x_fname, sep=sep, header=x_hdr, index_col=x_index_col)
     x_df = x_df.apply(pd.to_numeric, args=("coerce",))
-    if remove_na:
-        x_df = x_df.dropna()
-    elif x_df.isna().values.any():
-        raise WrongFormatError(x_df, None)
 
     x_data = x_df.astype(np.float32).values
+    x_rows_del = []
+    if autoremove_na:
+        if np.isnan(x_data).any():
+            x_rows_del, _ = np.where(np.isnan(x_data))
+            x_data = np.delete(x_data, x_rows_del, axis=0)
+
     if len(x_data.shape) != 2 or len(x_data) == 0:
         raise WrongFormatError(x_data, None)
 
@@ -93,12 +96,16 @@ def load_csv(
     else:
         y_df = pd.read_csv(y_fname, sep=sep, header=y_hdr, index_col=y_index_col)
         y_df = y_df.apply(pd.to_numeric, args=("coerce",))
-        if remove_na:
-            y_df = y_df.dropna()
-        elif y_df.isna().values.any():
-            raise WrongFormatError(None, x_df)
-            
+
         y_data = y_df.astype(np.float32).values
+        if autoremove_na:
+            if len(x_rows_del) > 0:
+                y_data = np.delete(y_data, x_rows_del, axis=0)
+
+            if np.isnan(y_data).any():
+                y_rows_del, _ = np.where(np.isnan(y_data))
+                y_data = np.delete(y_data, y_rows_del, axis=0)
+                x_data = np.delete(x_data, y_rows_del, axis=0)
 
         if len(y_data.shape) != 2:
             raise WrongFormatError(x_data, y_data)
