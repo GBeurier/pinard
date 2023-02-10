@@ -19,8 +19,4 @@ dist/
 .pytest_cache/
 .coverage
 .vscode/settings.json
-<<<<<<< HEAD
-docs/build/
-=======
-build/
->>>>>>> eb963b41e3dfcf0dceb98f9b814c12555ee05502
+/generator.ipynb
