@@ -1,8 +1,3 @@
-__version__ = '0.9.6'
+__version__ = "0.9.8"
 
-__all__ = [
-    "augmentation",
-    "model_selection",
-    "pipeline",
-    "preprocessing"
-]
+__all__ = ["augmentation", "model_selection", "pipeline", "preprocessing"]
