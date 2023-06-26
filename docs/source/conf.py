@@ -6,23 +6,25 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'PiNARD'
-copyright = '2022, Beurier, Cornet, Rouan'
-author = 'Beurier, Cornet, Rouan'
-release = '0.9.7'
+
+import os
+import sys
+sys.path.insert(0, os.path.abspath('../pinard/'))
+
+project = 'Pinard'
+copyright = '2023, Gregory Beurier'
+author = 'Gregory Beurier'
+release = '1.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.doctest',
-    'sphinx.ext.autosummary',
-]
+extensions = ['sphinx.ext.autodoc']
 
 templates_path = ['_templates']
-exclude_patterns = []
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+html_theme = 'sphinx_rtd_theme'
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

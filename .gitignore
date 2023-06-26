@@ -21,3 +21,4 @@ dist/
 .vscode/settings.json
 /generator.ipynb
 docs/build/html/_static/
+docs/build/
