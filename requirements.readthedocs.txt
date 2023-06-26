@@ -11,4 +11,4 @@ PyWavelets>=1.2.0
 setuptools>=65.0.0
 scikit-learn>=1.0.1
 scipy>=1.7.3
-pinard
+pinard @ git+https://github.com/GBeurier/pinard
