@@ -46,26 +46,48 @@ class FeatureAugmentation(FeatureUnion):
         return Xs
 
 
-# def _transform_one(transformer, X, y, weight, **fit_params):
-#     res = transformer.transform(X)
-#     # if we have a weight for this transformer, multiply output
-#     if weight is None:
-#         return res
-#     return res * weight
-
-
-# def _transform_one_xy(transformer, X, y, weight, **fit_params):
-#     resX, resY = transformer.transform(X, y)
-#     # if we have a weight for this transformer, multiply output
-#     if weight is None:
-#         return resX, resY
-#     return resX * weight, resY
-
-
 class SampleAugmentation(FeatureUnion):
-    def __init__(
-        self, transformer_list, *, n_jobs=None, transformer_weights=None, verbose=False
-    ):
+    """Applies multiple feature extraction mechanisms to the same input data and concatenates the results.
+
+    Inherits from the `FeatureUnion` class of the `sklearn.pipeline` module.
+
+    Parameters
+    ----------
+    transformer_list : list of (str, transformer) or (int, str, transformer) tuples
+        List of transformer tuples to be applied to the data. Each tuple contains either two or three elements.
+        If the tuple has two elements, it is a (str, transformer) tuple where the first element is the name of the transformer and the second element is the transformer object.
+        If the tuple has three elements, it is an (int, str, transformer) tuple where the first element is the count of augmentations for that transformer, the second element is the name of the transformer and the third element is the transformer object.
+    n_jobs : int or None, optional (default=None)
+        The number of jobs to run in parallel. `None` means 1 unless in a `joblib.parallel_backend` context. `-1` means using all processors.
+    transformer_weights : dict or None, optional (default=None)
+        Multiplicative weights for features per transformer. Keys are transformer names, values are weights.
+    verbose : bool, optional (default=False)
+        If True, the time elapsed while fitting each transformer will be printed as it is completed.
+
+    Attributes
+    ----------
+    transformer_list : list of (str, transformer) tuples
+        List of (name, trans) tuples specifying the transformer objects to be applied to the data.
+    """
+
+    def __init__(self, transformer_list, *, n_jobs=None, transformer_weights=None, verbose=False):
+        """
+        This is the constructor for a class that initializes a list of transformers with optional
+        parameters.
+
+        :param transformer_list: A list of tuples where each tuple represents a transformer to be
+        applied to the data. The tuple can have either two or three elements. If it has two elements,
+        the first element is the transformer object and the second element is the name of the
+        transformer. If it has three elements, the first element
+        :param n_jobs: The number of CPU cores to use for parallel processing. If set to None, all
+        available cores will be used
+        :param transformer_weights: A dictionary of weights assigned to each transformer. These weights
+        are used to compute the weighted average of the transformed features. If not provided, all
+        transformers are assumed to have equal weight
+        :param verbose: A boolean parameter that controls whether or not progress messages are printed
+        to the console during the fitting process. If set to True, progress messages will be printed. If
+        set to False, no progress messages will be printed, defaults to False (optional)
+        """
         transformer_origin_list = []
         self.augmentation_count = []
         self.total_count = 0
@@ -131,6 +153,22 @@ class SampleAugmentation(FeatureUnion):
         Ys = np.repeat(y, self.total_count, axis=0)
 
         return Xs, Ys
+
+
+# def _transform_one(transformer, X, y, weight, **fit_params):
+#     res = transformer.transform(X)
+#     # if we have a weight for this transformer, multiply output
+#     if weight is None:
+#         return res
+#     return res * weight
+
+
+# def _transform_one_xy(transformer, X, y, weight, **fit_params):
+#     resX, resY = transformer.transform(X, y)
+#     # if we have a weight for this transformer, multiply output
+#     if weight is None:
+#         return resX, resY
+#     return resX * weight, resY
 
 
 # class Pipeline_XY(Pipeline):

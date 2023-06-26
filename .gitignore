@@ -20,3 +20,4 @@ dist/
 .coverage
 .vscode/settings.json
 /generator.ipynb
+build/
