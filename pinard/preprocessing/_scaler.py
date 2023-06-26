@@ -1,7 +1,8 @@
+from sklearn.utils.validation import check_array, check_is_fitted
 import warnings
 
 import numpy as np
-from scipy import sparse
+import scipy
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import FunctionTransformer as IdentityTransformer
 from sklearn.preprocessing import RobustScaler as RobustNormalVariate
@@ -19,6 +20,7 @@ class Normalize(TransformerMixin, BaseEstimator):
         Desired range of transformed data. If range min and max equals -1, linalg
         normalization is applied, otherwise user defined normalization
         is applied
+
     copy : bool, default=True
         Set to False to perform inplace row normalization and avoid a
         copy (if the input is already a numpy array).
@@ -40,10 +42,40 @@ class Normalize(TransformerMixin, BaseEstimator):
             del self.linalg_norm_
 
     def fit(self, X, y=None):
+        """Fit the Normalize transformer on the training data.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            The training data.
+
+        y : None
+            Ignored variable.
+
+        Returns
+        -------
+        self : object
+            Returns the instance itself.
+        """
         self._reset()
         return self.partial_fit(X, y)
 
     def partial_fit(self, X, y=None):
+        """Perform incremental fit on the training data.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            The training data.
+
+        y : None
+            Ignored variable.
+
+        Returns
+        -------
+        self : object
+            Returns the instance itself.
+        """
         feature_range = self.feature_range
         if self.user_defined and feature_range[0] >= feature_range[1]:
             warnings.warn(
@@ -57,8 +89,8 @@ class Normalize(TransformerMixin, BaseEstimator):
                 "Feature range is not correctly defined. Got %s." % str(feature_range)
             )
 
-        if sparse.issparse(X):
-            raise TypeError("Normalization does not support sparse input")
+        if scipy.sparse.issparse(X):
+            raise TypeError("Normalization does not support scipy.sparse input")
 
         first_pass = not hasattr(self, "min_")
         X = self._validate_data(X, reset=first_pass, dtype=FLOAT_DTYPES, estimator=self)
@@ -74,6 +106,18 @@ class Normalize(TransformerMixin, BaseEstimator):
         return self
 
     def transform(self, X):
+        """Transform the input data.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            The input data to be transformed.
+
+        Returns
+        -------
+        X : ndarray of shape (n_samples, n_features)
+            The transformed data.
+        """
         check_is_fitted(self)
 
         X = self._validate_data(
@@ -95,6 +139,18 @@ class Normalize(TransformerMixin, BaseEstimator):
         return X
 
     def inverse_transform(self, X):
+        """Transform the normalized data back to the original representation.
+
+        Parameters
+        ----------
+        X : array-like of shape (n_samples, n_features)
+            The normalized data to be transformed back.
+
+        Returns
+        -------
+        X : ndarray of shape (n_samples, n_features)
+            The inverse transformed data.
+        """
         check_is_fitted(self)
 
         X = check_array(X, copy=self.copy, dtype=FLOAT_DTYPES)
@@ -118,28 +174,35 @@ class Normalize(TransformerMixin, BaseEstimator):
 
 
 def norml(spectra, feature_range=(-1, 1)):
-    """Perform spectral normalisation with user-defined limits. (numpy linalg)
-    Args:
-        spectra < numpy.ndarray > : NIRS data matrix.
-        feature_range : tuple (min, max), default=(-1, -1)
-            Desired range of transformed data. If range min and max equals -1, linalg
-            normalization is applied, otherwise user bounds defined normalization
-            is applied
-    Returns:
-        spectra < numpy.ndarray > : Normalized NIR spectra
     """
-    if feature_range[0] != -1 and feature_range[0] != -1:
+    Perform spectral normalization with user-defined limits.
+
+    Parameters
+    ----------
+    spectra : numpy.ndarray
+        NIRS data matrix.
+    feature_range : tuple (min, max), default=(-1, 1)
+        Desired range of transformed data. If range min and max equals -1, linalg
+        normalization is applied; otherwise, user bounds-defined normalization
+        is applied.
+
+    Returns
+    -------
+    spectra : numpy.ndarray
+        Normalized NIR spectra.
+    """
+    if feature_range[0] != -1 and feature_range[1] != -1:
         imin = feature_range[0]
         imax = feature_range[1]
         if imin >= imax:
             warnings.warn(
-                "Minimum of desired feature range should be smaller than maximum."
-                "Got %s." % str(feature_range),
+                "Minimum of desired feature range should be smaller than maximum. "
+                f"Got {feature_range}.",
                 SyntaxWarning,
             )
         if imin == imax:
             raise ValueError(
-                "Feature range is not correctly defined. Got %s." % str(feature_range)
+                f"Feature range is not correctly defined. Got {feature_range}."
             )
 
         f = (imax - imin) / (np.max(spectra) - np.min(spectra))
@@ -155,7 +218,7 @@ def norml(spectra, feature_range=(-1, 1)):
 
 
 class Derivate(TransformerMixin, BaseEstimator):
-    def __init__(self, order=1, delta=1, *, copy=True):
+    def __init__(self, order=1, delta=1, copy=True):
         self.copy = copy
         self.order = order
         self.delta = delta
@@ -164,12 +227,12 @@ class Derivate(TransformerMixin, BaseEstimator):
         pass
 
     def fit(self, X, y=None):
-        if sparse.issparse(X):
-            raise ValueError("SavitzkyGolay does not support sparse input")
+        if scipy.sparse.issparse(X):
+            raise ValueError("SavitzkyGolay does not support scipy.sparse input")
         return self
 
     def transform(self, X, copy=None):
-        if sparse.issparse(X):
+        if scipy.sparse.issparse(X):
             raise ValueError('Sparse matrices not supported!"')
 
         X = self._validate_data(
@@ -186,13 +249,22 @@ class Derivate(TransformerMixin, BaseEstimator):
 
 
 def derivate(spectra, order=1, delta=1):
-    """Computes Nth order derivates with the desired spacing using numpy.gradient.
-    Args:
-        spectra < numpy.ndarray > : NIRS data matrix.
-        order < float > : Order of the derivation.
-        delta < int > : Delta of the derivate (in samples).
-    Returns:
-        spectra < numpy.ndarray > : Derivated NIR spectra.
+    """
+    Computes Nth order derivatives with the desired spacing using numpy.gradient.
+
+    Parameters
+    ----------
+    spectra : numpy.ndarray
+        NIRS data matrix.
+    order : float, optional
+        Order of the derivation, by default 1.
+    delta : int, optional
+        Delta of the derivative (in samples), by default 1.
+
+    Returns
+    -------
+    spectra : numpy.ndarray
+        Derived NIR spectra.
     """
     for n in range(order):
         spectra = np.gradient(spectra, delta, axis=0)
@@ -200,7 +272,7 @@ def derivate(spectra, order=1, delta=1):
 
 
 class SimpleScale(TransformerMixin, BaseEstimator):
-    def __init__(self, *, copy=True):
+    def __init__(self, copy=True):
         self.copy = copy
 
     def _reset(self):
@@ -213,8 +285,8 @@ class SimpleScale(TransformerMixin, BaseEstimator):
         return self.partial_fit(X, y)
 
     def partial_fit(self, X, y=None):
-        if sparse.issparse(X):
-            raise TypeError("Normalization does not support sparse input")
+        if scipy.sparse.issparse(X):
+            raise TypeError("Normalization does not support scipy.sparse input")
 
         first_pass = not hasattr(self, "min_")
         X = self._validate_data(X, reset=first_pass, dtype=FLOAT_DTYPES, estimator=self)
@@ -249,11 +321,18 @@ class SimpleScale(TransformerMixin, BaseEstimator):
 
 
 def spl_norml(spectra):
-    """Perform simple spectral normalisation. (manual algo)
-    Args:
-        spectra < numpy.ndarray > : NIRS data matrix.
-    Returns:
-        spectra < numpy.ndarray > : Normalized NIR spectra
+    """
+    Perform simple spectral normalization.
+
+    Parameters
+    ----------
+    spectra : numpy.ndarray
+        NIRS data matrix.
+
+    Returns
+    -------
+    spectra : numpy.ndarray
+        Normalized NIR spectra.
     """
     min_ = np.min(spectra, axis=0)
     max_ = np.max(spectra, axis=0)

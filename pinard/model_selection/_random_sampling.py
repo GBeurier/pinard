@@ -8,6 +8,26 @@ from ..sklearn._utils import _validate_shuffle_split
 
 
 def shuffle_sampling(data, test_size, *, random_state=None):
+    """
+    Performs random shuffling of the data and splits it into train and test sets.
+
+    Parameters
+    ----------
+    data : array-like
+        The input data samples.
+    test_size : float
+        The proportion of the data to be used as the test set.
+    random_state : int, default=None
+        Seed value for random number generation.
+
+    Returns
+    -------
+    train_index : ndarray
+        The indices of the samples in the train set.
+    test_index : ndarray
+        The indices of the samples in the test set.
+    """
+
     split_model = ShuffleSplit(
         n_splits=1,
         test_size=test_size,
@@ -18,31 +38,32 @@ def shuffle_sampling(data, test_size, *, random_state=None):
 
 def systematic_circular_sampling(data, y, test_size, random_state):
     """
-    FONCTION d'échantillonnage : ``systematic_sampling``
-    --------
-    Permet d'effectuer un échantillonnage non-aléatoire, basé sur la méthode
-    d'échantillonnage systématique circulaire.
-    Note
-    ----
-    Le point de départ, et le nombre de rotations sont tirés aléatoirement.
-    Paramètres
+    Performs non-random sampling based on the systematic circular sampling method.
+    The starting point and the number of rotations are randomly determined.
+
+    Parameters
     ----------
-    * ``size`` : Int/Float
-            La quantité d'échantillons à prélever, peut être exprimé soit en nombre, soit en proportion.
-    * ``data`` : DataFrame
-            DataFrame contenant les échantillons.
-    * ``random_state`` : Int, default=None
-            Valeur de la seed, pour la reproductibilité des résultats.
-    Return
-    ------
-    * ``Tuple`` : (List[int], List[int])
-            Retourne un split entre le train_set et le test_set.
-    Exemple
+    size : int/float
+        The number of samples to be selected, can be expressed as either the count or the proportion.
+    data : DataFrame
+        The DataFrame containing the samples.
+    random_state : int, default=None
+        Seed value for result reproducibility.
+
+    Returns
     -------
-    >>> index_test = systematic_sampling(0.2, data, 1)
+    train_index : ndarray
+        The indices of the samples in the train set.
+    test_index : ndarray
+        The indices of the samples in the test set.
+
+    Example
+    -------
+    >>> index_test = systematic_circular_sampling(0.2, data, 1)
     >>> print(sorted(index_test))
     [3, 8, ..., 53, 58, ..., 101, 106]
     """
+
     if y is None:
         raise ValueError("Y data are required to use systematic circular sampling")
 

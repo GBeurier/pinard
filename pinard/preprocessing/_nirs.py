@@ -1,24 +1,24 @@
 import numpy as np
 import pywt
-from scipy import signal, sparse
+import scipy
+from scipy import signal
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import StandardScaler, scale
 from sklearn.utils import check_array
 from sklearn.utils.validation import FLOAT_DTYPES, check_is_fitted
 
 
-# mode: ['zero', 'constant', 'symmetric', 'periodic', 'smooth', 'periodization',
-# 'reflect', 'antisymmetric', 'antireflect']
-# wavelet: ['haar', 'db', 'sym', 'coif', 'bior', 'rbio', 'dmey', 'gaus', 'mexh', 'morl',
-# 'cgau', 'shan', 'fbsp', 'cmor']
-def wavelet_transform(spectra, wavelet, mode="periodization"):
-    """Computes transform using pywavelet transform.
+def wavelet_transform(spectra: np.ndarray, wavelet: str, mode: str = "periodization") -> np.ndarray:
+    """
+    Computes transform using pywavelet transform.
+
     Args:
-        spectra < numpy.ndarray > : NIRS data matrix.
-        wavelet < str > : wavelet family transformation
-        mode < str > : signal extension mode
+        spectra (numpy.ndarray): NIRS data matrix.
+        wavelet (str): wavelet family transformation.
+        mode (str): signal extension mode.
+
     Returns:
-        spectra < numpy.ndarray > : wavelet and resampled spectra.
+        numpy.ndarray: wavelet and resampled spectra.
     """
     _, wt_coeffs = pywt.dwt(spectra, wavelet=wavelet, mode=mode)
     if len(wt_coeffs[0]) != len(spectra[0]):
@@ -28,26 +28,22 @@ def wavelet_transform(spectra, wavelet, mode="periodization"):
 
 
 class Wavelet(TransformerMixin, BaseEstimator):
-    """Single level Discrete Wavelet Transform.
+    """
+    Single level Discrete Wavelet Transform.
 
     Performs a discrete wavelet transform on `data`, using a `wavelet` function.
-    see: https://pywavelets.readthedocs.io
 
     Parameters
-    --  --  --  --  --
-    wavelet : Wavelet object or name, default = 'haar'
+    ----------
+    wavelet : Wavelet object or name, default='haar'
         Wavelet to use: ['Haar', 'Daubechies', 'Symlets', 'Coiflets', 'Biorthogonal',
         'Reverse biorthogonal', 'Discrete Meyer (FIR Approximation)'...]
-        see: https://www.pybytes.com/pywavelets/ref/wavelets.html#wavelet-families
+    mode : str, optional, default='periodization'
+        Signal extension mode.
 
-    mode : str, optional, default = 'periodization'
-        Signal extension mode.add
-        ['zero', 'constant', 'symmetric', 'periodic', 'smooth', 'periodization',
-         'reflect', 'antisymmetric', 'antireflect']
-        see: https://pywavelets.readthedocs.io/en/latest/ref/signal-extension-modes.html#ref-modes
     """
 
-    def __init__(self, wavelet="haar", mode="periodization", *, copy=True):
+    def __init__(self, wavelet: str = "haar", mode: str = "periodization", *, copy: bool = True):
         self.copy = copy
         self.wavelet = wavelet
         self.mode = mode
@@ -56,26 +52,47 @@ class Wavelet(TransformerMixin, BaseEstimator):
         pass
 
     def fit(self, X, y=None):
-        """Verify the X data compliance with wavelet transform
+        """
+        Verify the X data compliance with wavelet transform.
 
         Parameters
-        --  --  --  --  --
-        X: array-like, spectra
+        ----------
+        X : array-like, spectra
             The data to transform.
-        y: (None) - Ignored
+        y : None
+            Ignored.
 
-        Raises:
-            ValueError: _description_
+        Raises
+        ------
+        ValueError
+            If the input X is a sparse matrix.
 
-        Returns:
-            _type_: _description_
+        Returns
+        -------
+        Wavelet
+            The fitted object.
         """
-        if sparse.issparse(X):
-            raise ValueError("Wavelets does not support sparse input")
+        if scipy.sparse.issparse(X):
+            raise ValueError("Wavelets does not support scipy.sparse input")
         return self
 
     def transform(self, X, copy=None):
-        if sparse.issparse(X):
+        """
+        Apply wavelet transform to the data X.
+
+        Parameters
+        ----------
+        X : array-like
+            The data to transform.
+        copy : bool or None, optional
+            Whether to copy the input data.
+
+        Returns
+        -------
+        numpy.ndarray
+            The transformed data.
+        """
+        if scipy.sparse.issparse(X):
             raise ValueError('Sparse matrices not supported!"')
 
         X = self._validate_data(
@@ -89,22 +106,34 @@ class Wavelet(TransformerMixin, BaseEstimator):
 
 
 class Haar(Wavelet):
-    """Shortcut to the Wavelet haar transform"""
+    """
+    Shortcut to the Wavelet haar transform.
+    """
 
-    def __init__(self, *, copy=True):
+    def __init__(self, *, copy: bool = True):
         super().__init__("haar", "periodization", copy=copy)
 
 
-def savgol(spectra, window_length=11, polyorder=3, deriv=0, delta=1.0):
-    """Perform Savitzky–Golay filtering on the data (also calculates derivatives). 
+def savgol(
+    spectra: np.ndarray,
+    window_length: int = 11,
+    polyorder: int = 3,
+    deriv: int = 0,
+    delta: float = 1.0,
+) -> np.ndarray:
+    """
+    Perform Savitzky–Golay filtering on the data (also calculates derivatives).
     This function is a wrapper for scipy.signal.savgol_filter.
+
     Args:
-        spectra < numpy.ndarray > : NIRS data matrix.
-        filter_win < int > : Size of the filter window in samples (default 11).
-        polyorder < int > : Order of the polynomial estimation (default 3).
-        deriv < int > : Order of the derivation (default 0).
+        spectra (numpy.ndarray): NIRS data matrix.
+        window_length (int): Size of the filter window in samples (default 11).
+        polyorder (int): Order of the polynomial estimation (default 3).
+        deriv (int): Order of the derivation (default 0).
+        delta (float): Sampling distance of the data.
+
     Returns:
-        spectra < numpy.ndarray > : NIRS data smoothed with Savitzky-Golay filtering
+        numpy.ndarray: NIRS data smoothed with Savitzky-Golay filtering.
     """
     return signal.savgol_filter(spectra, window_length, polyorder, deriv, delta=delta)
 
@@ -134,7 +163,15 @@ class SavitzkyGolay(TransformerMixin, BaseEstimator):
         Applies the Savitzky-Golay filter to the data X.
     """
 
-    def __init__(self, window_length=11, polyorder=3, deriv=0, delta=1.0, *, copy=True):
+    def __init__(
+        self,
+        window_length: int = 11,
+        polyorder: int = 3,
+        deriv: int = 0,
+        delta: float = 1.0,
+        *,
+        copy: bool = True
+    ):
         self.copy = copy
         self.window_length = window_length
         self.polyorder = polyorder
@@ -145,27 +182,47 @@ class SavitzkyGolay(TransformerMixin, BaseEstimator):
         pass
 
     def fit(self, X, y=None):
-        if sparse.issparse(X):
-            raise ValueError("SavitzkyGolay does not support sparse input")
+        """
+        Verify the X data compliance with Savitzky-Golay filter.
+
+        Parameters
+        ----------
+        X : array-like
+            The data to transform.
+        y : None
+            Ignored.
+
+        Raises
+        ------
+        ValueError
+            If the input X is a sparse matrix.
+
+        Returns
+        -------
+        SavitzkyGolay
+            The fitted object.
+        """
+        if scipy.sparse.issparse(X):
+            raise ValueError("SavitzkyGolay does not support scipy.sparse input")
         return self
 
     def transform(self, X, copy=None):
         """
-        Applies the Savitzky-Golay filter to the data X.
+        Apply the Savitzky-Golay filter to the data X.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         X : array-like
-            The input data.
-        copy : bool, optional (default=None)
+            The data to transform.
+        copy : bool or None, optional
             Whether to copy the input data.
 
-        Returns:
-        --------
-        X_smoothed : array-like
-            The smoothed data.
+        Returns
+        -------
+        numpy.ndarray
+            The transformed data.
         """
-        if sparse.issparse(X):
+        if scipy.sparse.issparse(X):
             raise ValueError('Sparse matrices not supported!"')
 
         X = self._validate_data(
@@ -200,8 +257,8 @@ class MultiplicativeScatterCorrection(TransformerMixin, BaseEstimator):
         return self.partial_fit(X, y)
 
     def partial_fit(self, X, y=None):
-        if sparse.issparse(X):
-            raise TypeError("Normalization does not support sparse input")
+        if scipy.sparse.issparse(X):
+            raise TypeError("Normalization does not support scipy.sparse input")
 
         first_pass = not hasattr(self, "mean_")
         X = self._validate_data(X, reset=first_pass, dtype=FLOAT_DTYPES, estimator=self)
@@ -274,10 +331,13 @@ class MultiplicativeScatterCorrection(TransformerMixin, BaseEstimator):
 
 def msc(spectra, scaled=True):
     """Performs multiplicative scatter correction to the mean.
+
     Args:
-        spectra < numpy.ndarray > : NIRS data matrix.
+        spectra (numpy.ndarray): NIRS data matrix.
+        scaled (bool): Whether to scale the data. Defaults to True.
+
     Returns:
-        spectra < numpy.ndarray > : Scatter corrected NIR spectra.
+        numpy.ndarray: Scatter-corrected NIR spectra.
     """
     if scaled:
         spectra = scale(spectra, with_std=False, axis=0)  # StandardScaler / demean

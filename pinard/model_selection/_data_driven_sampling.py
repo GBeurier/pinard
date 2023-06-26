@@ -25,10 +25,36 @@ def kbins_stratified_sampling(
     strategy="uniform",
     encode="ordinal",
 ):
+    """
+    Perform stratified sampling using KBins discretization.
+
+    Parameters
+    ----------
+    data : array-like of shape (n_samples, n_features)
+        The input data.
+    y : array-like of shape (n_samples,)
+        The target variable.
+    test_size : float or int
+        If float, represents the proportion of the dataset to include in the test split.
+        If int, represents the absolute number of samples to include in the test split.
+    random_state : int, RandomState instance or None, optional (default=None)
+        Controls the random seed used to shuffle the data.
+    n_bins : int, optional (default=10)
+        The number of bins to use for discretization.
+    strategy : {'uniform', 'quantile', 'kmeans'}, optional (default='uniform')
+        The strategy used to define the widths of the bins.
+    encode : {'ordinal', 'onehot', 'onehot-dense'}, optional (default='ordinal')
+        The encoding scheme used to encode the transformed result.
+
+    Returns
+    -------
+    train_index : ndarray
+        The indices of the training samples.
+    test_index : ndarray
+        The indices of the test samples.
+    """
     if y is None:
-        raise ValueError(
-            "Y data are required to use Kbins discretized Stratified sampling"
-        )
+        raise ValueError("Y data are required to use Kbins discretized Stratified sampling")
 
     discretizer = KBinsDiscretizer(n_bins=n_bins, encode=encode, strategy=strategy)
     y_discrete = discretizer.fit_transform(y)
@@ -42,33 +68,36 @@ def kbins_stratified_sampling(
     return next(split_model.split(data, y_discrete))
 
 
-# TODO Refactor - uniformize varnames, clean code
 def kmean_sampling(
     data, test_size, *, random_state=None, pca_components=None, metric="euclidean"
 ):
-    """_summary_
+    """
+    Perform sampling using K-means clustering.
 
     Parameters
     ----------
-    data : _type_
-        _description_
-    test_size : _type_
-        _description_
-    random_state : _type_, optional
-        _description_, by default None
-    pca_components : _type_, optional
-        _description_, by default None
-    metric : str, optional
-        The distance metric to use. If a string, the distance function can be 
-        ‘braycurtis’, ‘canberra’, ‘chebyshev’, ‘cityblock’, ‘correlation’, ‘cosine’,
-        ‘dice’, ‘euclidean’, ‘hamming’, ‘jaccard’, ‘jensenshannon’, ‘kulczynski1’, 
-        ‘mahalanobis’, ‘matching’, ‘minkowski’, ‘rogerstanimoto’, ‘russellrao’, 
-        ‘seuclidean’, ‘sokalmichener’, ‘sokalsneath’, ‘sqeuclidean’, ‘yule’.
+    data : array-like of shape (n_samples, n_features)
+        The input data.
+    test_size : float or int
+        If float, represents the proportion of the dataset to include in the test split.
+        If int, represents the absolute number of samples to include in the test split.
+    random_state : int, RandomState instance or None, optional (default=None)
+        Controls the random seed used to initialize the centroids.
+    pca_components : int or None, optional (default=None)
+        The number of principal components to use for dimensionality reduction using PCA.
+    metric : str, optional (default='euclidean')
+        The distance metric to use. Possible values are:
+        'braycurtis', 'canberra', 'chebyshev', 'cityblock', 'correlation', 'cosine',
+        'dice', 'euclidean', 'hamming', 'jaccard', 'jensenshannon', 'kulczynski1',
+        'mahalanobis', 'matching', 'minkowski', 'rogerstanimoto', 'russellrao',
+        'seuclidean', 'sokalmichener', 'sokalsneath', 'sqeuclidean', 'yule'.
 
     Returns
     -------
-    _type_
-        _description_
+    train_index : ndarray
+        The indices of the training samples.
+    test_index : ndarray
+        The indices of the test samples.
     """
     n_samples = _num_samples(data)
     n_train, n_test = _validate_shuffle_split(n_samples, test_size, None)
@@ -92,30 +121,31 @@ def kmean_sampling(
 
 
 def split_sampling(data, test_size, *, random_state=None):
-    # """
-    # FONCTION d'échantillonnage : ``split_sampling``
-    # --------
-    # Permet le tirage non-aléatoire d'échantillons dans un dataset, selon la 
-    # méthode des supports points.
-    # Paramètres
-    # ----------
-    # * ``size`` : Int/Float
-    #         Pourcentage d'échantillons à prélever.
-    # * ``data`` : DataFrame
-    #         Dataset dans lequel on prélève les échantillons.
-    # * ``random_state`` : Int, default=None
-    #         Valeur de la seed, pour la reproductibilité des résultats.
-    # Return
-    # ------
-    # * ``Tuple`` : Tuple(List[Int], List[Int])
-    #         Retourne un split entre le train_set et le test_set.
-    # Exemple
-    # -------
-    # >>> index_train, index_test = split_sampling(0.2, data, None)
-    # >>> print(sorted(index_test))
-    # [1, 5, ..., 49, 55, ..., 100, 105]
-    # """
+    """
+    FONCTION d'échantillonnage : ``split_sampling``
+    --------
+    Permet le tirage non-aléatoire d'échantillons dans un dataset, selon la méthode des supports points.
 
+    Paramètres
+    ----------
+    size : int or float
+        Pourcentage d'échantillons à prélever.
+    data : DataFrame
+        Dataset dans lequel on prélève les échantillons.
+    random_state : int, default=None
+        Valeur de la seed, pour la reproductibilité des résultats.
+
+    Return
+    ------
+    Tuple : (List[int], List[int])
+        Retourne un split entre le train_set et le test_set.
+
+    Exemple
+    -------
+    >>> index_train, index_test = split_sampling(0.2, data, None)
+    >>> print(sorted(index_test))
+    [1, 5, ..., 49, 55, ..., 100, 105]
+    """
     n_samples = _num_samples(data)
     n_features = _num_features(data)
     n_train, n_test = _validate_shuffle_split(n_samples, test_size, None)

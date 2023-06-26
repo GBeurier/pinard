@@ -6,29 +6,32 @@ from sklearn.utils.validation import _num_samples
 from ..sklearn._utils import _validate_shuffle_split
 
 
-# TODO refactor for perf
 def _max_min_distance_split(distance, train_size):
     """
-    FUNCTION : ``max_min_distance_split``
-    --------
-    Sample set split method based on maximun minimun distance, which is the core 
-    of Kennard Stone method.
+    Sample set split method based on maximum minimum distance, which is the core 
+    of the Kennard Stone method.
+
     Parameters
     ----------
-    * ``distance`` : Ndarray
-            Semi-positive real symmetric matrix of a certain distance metric.
-    * ``train_size`` : Int
-            Should be greater than 2.
+    distance : ndarray
+        Semi-positive real symmetric matrix of a certain distance metric.
+
+    train_size : int
+        Should be greater than 2.
+
     Returns
     -------
-    * ``Tuple`` : (List of int, List of int)
-            Index of selected spetrums as train data, index is zero-based.
-             Index of remaining spectrums as test data, index is zero-based.
+    tuple
+        (List of int, List of int)
+        Index of selected spectra as train data, index is zero-based.
+        Index of remaining spectra as test data, index is zero-based.
+
     Example
     -------
     >>> index_train, index_test = max_min_distance_split(distance, train_size)
     >>> print(index_test[0:3])
     [6, 22, 33, 39]
+
     """
 
     index_train = np.array([]).astype(np.int32)
@@ -63,38 +66,45 @@ def _max_min_distance_split(distance, train_size):
     return (index_train, index_test)
 
 
-def ks_sampling(
-    data, test_size, *, random_state=None, pca_components=None, metric="euclidean"
-):
+def ks_sampling(data, test_size, *, random_state=None, pca_components=None, metric="euclidean"):
     """
-    FUNCTION of sampling : ``ks_sampling``
-    --------
-    Samples data using the kennard_stone method.
+    Samples data using the Kennard Stone method.
+
     Parameters
     ----------
-    * ``size`` : Float/int
-            Size of the test_set.
-    * ``data`` : DataFrame
-            Dataset used to get a train_set and a test_set.
-    * ``pca`` : Int/Float, default=None
-            Value to perform ``PCA``.
-    * ``metric`` : Str, default="euclidean"
-            The distance metric to use, by default 'euclidean'.
-            See scipy.spatial.distance.cdist for more infomation.
-    Return
+    size : float/int
+        Size of the test set.
+
+    data : DataFrame
+        Dataset used to get a train set and a test set.
+
+    pca_components : int/float, default=None
+        Value to perform PCA.
+
+    metric : str, default="euclidean"
+        The distance metric to use, by default 'euclidean'.
+        See scipy.spatial.distance.cdist for more information.
+
+    Returns
+    -------
+    tuple
+        (List of int, List of int)
+        Index of selected spectra as train data, index is zero-based.
+        Index of remaining spectra as test data, index is zero-based.
+
+    Raises
     ------
-    * ``Tuple`` : (List of int, List of int)
-            Index of selected spetrums as train data, index is zero-based.
-             Index of remaining spectrums as test data, index is zero-based.
-    * ``Exceptation`` : ValueError
-            Return error of type ``ValueError`` if train sample size isn't at least 2.
+    ValueError
+        If train sample size is not at least 2.
+
     Example
     -------
-    >>> index_train, index_test = ks_sampling(0.2, data, None, "euclidean")
+    >>> index_train, index_test = ks_sampling(data, 0.2, None, "euclidean")
     >>> print(index_test[0:4])
     [22, 23, 33, 66]
+
     References
-    --------
+    ----------
     Kennard, R. W., & Stone, L. A. (1969). Computer aided design of experiments.
     Technometrics, 11(1), 137-148. (https://www.jstor.org/stable/1266770)
     """
@@ -113,40 +123,49 @@ def ks_sampling(
         raise ValueError("Train sample size should be at least 2.")
 
 
-def spxy_sampling(
-    data, y, test_size, *, random_state=None, pca_components=None, metric="euclidean"
-):
+def spxy_sampling(data, y, test_size, *, random_state=None, pca_components=None, metric="euclidean"):
     """
-    FUNCTION of sampling : ``spxy_sampling``
-    -------
-    Samples data using the spxy method.
+    Samples data using the SPXY method.
+
     Parameters
     ----------
-    * ``size`` : Float/int
-            Size of the test_set.
-    * ``features`` : DataFrame
-            Features used to get a train_set and a test_set.
-    * ``labels`` : DataFrame
-            Labels used to get a train_set and a test_set.
-    * ``pca`` : Int/Float, default=None
-            Value to perform ``PCA``.
-    * ``metric`` : Str, default="euclidean"
-            The distance metric to use, by default 'euclidean'.
-            See scipy.spatial.distance.cdist for more infomation.
+    size : float/int
+        Size of the test set.
+
+    data : DataFrame
+        Features used to get a train set and a test set.
+
+    y : DataFrame
+        Labels used to get a train set and a test set.
+
+    pca_components : int/float, default=None
+        Value to perform PCA.
+
+    metric : str, default="euclidean"
+        The distance metric to use, by default 'euclidean'.
+        See scipy.spatial.distance.cdist for more information.
+
     Returns
     -------
-    * ``Tuple`` : (List of int, List of int)
-            Index of selected spetrums as train data, index is zero-based.
-             Index of remaining spectrums as test data, index is zero-based.
-    * ``Exceptation`` : ValueError
-            Return error of type ``ValueError`` if train sample size isn't at least 2.
+    tuple
+        (List of int, List of int)
+        Index of selected spectra as train data, index is zero-based.
+        Index of remaining spectra as test data, index is zero-based.
+
+    Raises
+    ------
+    ValueError
+        If train sample size is not at least 2.
+        If y data is not provided.
+
     Example
     -------
-    >>> index_train, index_test = spxy_sampling(0.2, data, None, "euclidean")
+    >>> index_train, index_test = spxy_sampling(data, y, 0.2, None, "euclidean")
     >>> print(index_test[0:4])
     [6, 22, 33, 39]
+
     References
-    ---------
+    ----------
     Galvao et al. (2005). A method for calibration and validation subset partitioning.
     Talanta, 67(4), 736-740. (https://www.sciencedirect.com/science/article/pii/S003991400500192X)
     Li, Wenze, et al. "HSPXY: A hybrid‐correlation and diversity‐distances based data partition 
@@ -154,7 +173,7 @@ def spxy_sampling(
     """
 
     if y is None:
-        raise ValueError("Y data are required to use spxy sampling")
+        raise ValueError("Y data is required to use SPXY sampling")
 
     n_samples = _num_samples(data)
     n_train, n_test = _validate_shuffle_split(n_samples, test_size, None)
@@ -173,107 +192,3 @@ def spxy_sampling(
         return _max_min_distance_split(distance, n_train)
     else:
         raise ValueError("Train sample size should be at least 2.")
-
-
-#  if train_size > 2:
-#         yvalues = yvalues.reshape(yvalues.shape[0], -1)
-#         distance_spectra = cdist(spectra, spectra, metric=metric, *args, **kwargs)
-#         distance_y = cdist(yvalues, yvalues, metric=metric, *args, **kwargs)
-#         distance_spectra = distance_spectra / distance_spectra.max()
-#         distance_y = distance_y / distance_y.max()
-
-#         distance = distance_spectra + distance_y
-#         select_pts, remaining_pts = max_min_distance_split(distance, train_size)
-#     else:
-#         raise ValueError("train sample size should be at least 2")
-
-
-# # =============================================
-# # || FONCTION : ks_sampling_train_test_split ||
-# # =============================================
-
-
-# def ks_sampling_train_test_split(
-#     data, test_size, pca_components=None, metric="euclidean"
-# ):
-#     """
-#     FONCTION de splitting : ``ks_sampling_train_test_split``
-#     --------
-#     Permet le splitting d'un jeu de données, en quatre parties : x_train, x_test, y_train, y_test
-#             x_train, y_train : Données d'entraînement
-#             x_test, y_test   : Données de test
-#     Paramètres
-#     ----------
-#     * ``features`` : DataFrame
-#             DataFrame contenant les variables.
-#     * ``labels`` : DataFrame
-#             DataFrame contenant les étiquettes à prédire.
-#     * ``test_size`` : Int/Float
-#             Pourcentage d'échantillons que l'on souhaite avoir dans le test_set.
-#     * ``pca`` : Int/Float, default=None
-#             Nombre de composantes principales pour effectuer la ``PCA``.
-#              Effectue une ``PCA`` si l'argument est non-nul.
-#     * ``metric`` : Str, default="euclidean"
-#             Métrique de distance à utiliser pour les calculs.
-#              Voir scipy.spatial.distance.cdist pour plus d'informations.
-#     Return
-#     ------
-#     * ``Tuple`` : (DataFrame, DataFrame, DataFrame, DataFrame)
-#             Retourne un tuple de quatre éléments contenant des DataFrames.
-#     """
-
-#     return ks_sampling(test_size, features, pca, metric)
-
-
-# # ===============================================
-# # || FONCTION : spxy_sampling_train_test_split ||
-# # ===============================================
-# def spxy_sampling_train_test_split(
-#     features: pd.DataFrame,
-#     labels: pd.DataFrame,
-#     test_size: tp.Union[int, float],
-#     pca: tp.Union[int, float] = None,
-#     metric: str = "euclidean",
-# ) -> tp.Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-#     """
-#     FONCTION de splitting : ``spxy_sampling_train_test_split``
-#     --------
-#     Permet le splitting d'un jeu de données, en quatre parties : ``x_train``, ``x_test``, ``y_train``, ``y_test``
-#             x_train, y_train : Données d'entraînement
-#             x_test, y_test   : Données de test
-#     Paramètres
-#     ----------
-#     * ``features`` : DataFrame
-#             DataFrame contenant les variables.
-#     * ``labels`` : DataFrame
-#             DataFrame contenant les étiquettes à prédire.
-#     * ``test_size`` : Int/Float
-#             Pourcentage d'échantillons que l'on souhaite avoir dans le test_set.
-#     * ``pca`` : Int/Float, default=None
-#             Nombre de composantes principales pour effectuer la ``PCA``.
-#              Effectue une ``PCA`` si l'argument est non-nul.
-#     * ``metric`` : Str, default="euclidean"
-#             Métrique de distance à utiliser pour les calculs.
-#              Voir scipy.spatial.distance.cdist pour plus d'informations.
-#     Return
-#     ------
-#     * ``Tuple`` : (DataFrame, DataFrame, DataFrame, DataFrame)
-#             Retourne un tuple de quatre éléments contenant des dataFrames.
-#     Exemple
-#     -------
-#     >>> x_train, x_test, y_train, y_test = spxy_sampling_train_test_split(features, labels, 0.2, None, "euclidean")
-#     >>> print(type(x_train))
-#     <class 'pandas.core.frame.DataFrame'>
-#     >>> print(len(features))
-#     108
-#     >>> print(len(x_train))
-#     86
-#     >>> print(len(x_test))
-#     22
-#     """
-#     # Vérification des entrées
-#     gt.input_verification(features, labels)
-#     # Application de la pca + récupération des index du train_set, et du test_set
-#     index_train, index_test = spxy_sampling(test_size, features, labels, pca, metric)
-#     # Récupération des lignes des datasets, selon leurs index
-#     return gt.get_train_test_tuple(features, labels, index_train, index_test)

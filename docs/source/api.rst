@@ -1,5 +1,10 @@
-API Reference — Pinard 0.1.0 documentation
-==========================================
+.. _api:
+
+API Reference
+=============
+Pinard 1.0 - 06/2023
+
+
 .. automodule:: pinard
     :members:
     :undoc-members:
@@ -7,40 +12,36 @@ API Reference — Pinard 0.1.0 documentation
 
 
 
-Augmentation Module
-===================
+Augmentation API
+----------------
 .. automodule:: pinard.augmentation
     :members:
     :undoc-members:
     :show-inheritance:
-    :special-members: __init__
 
 
 
-Preprocessing Module
-====================
+Preprocessing API
+-----------------
 .. automodule:: pinard.preprocessing
     :members:
     :undoc-members:
     :show-inheritance:
-    :special-members: __init__
 
 
 
-Model Selection Module
-======================
+Model Selection API
+-------------------
 .. automodule:: pinard.model_selection
     :members:
     :undoc-members:
     :show-inheritance:
-    :special-members: __init__
 
 
 
-Sci-kit learn wrappers and utilities
-====================================
+Sci-kit learn API
+-----------------
 .. automodule:: pinard.sklearn
     :members:
     :undoc-members:
     :show-inheritance:
-    :special-members: __init__

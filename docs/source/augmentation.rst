@@ -1,7 +1,10 @@
+.. _augmentation:
+
 Augmentation Module
 ===================
 
-The `pinard.augmentation` module in Pinard provides functionalities for data augmentation techniques. Data augmentation is a crucial step in improving the generalization and robustness of machine learning models by increasing the diversity and size of the training data.
+
+The :mod:`pinard.augmentation` module in Pinard provides functionalities for data augmentation techniques. Data augmentation is a crucial step in improving the generalization and robustness of machine learning models by increasing the diversity and size of the training data.
 
 This module includes several augmentation functions that can be used to apply specific techniques to NIRS data:
 
@@ -17,8 +20,3 @@ In addition, the `pinard.augmentation` module provides an abstract Python class 
 The `Augmenter` class provides a consistent interface for data augmentation, allowing users to apply their custom augmentation methods to NIRS data. By inheriting from `Augmenter`, users can leverage the underlying functionality of the Pinard package while extending it with their own augmentation logic.
 
 For more information on the available augmentation functions and the usage of the `Augmenter` class, please refer to the API reference documentation for `pinard.augmentation`.
-
-
-Pinard Augmentation API
------------------------
-:mod:`pinard.augmentation`

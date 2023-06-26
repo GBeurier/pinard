@@ -6,12 +6,15 @@
 Pinard Documentation
 ====================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+.. image:: ../pinard_logo.jpg
+   :width: 25%
+   :alt: Pinard logo
 
-Overview
-========
+
+.. image:: https://img.shields.io/pypi/v/pinard.svg
+   :target: https://pypi.python.org/pypi/pinard
+   :alt: PyPI version
+
 
 Pinard is a Python package designed to provide functionalities dedicated to the preprocessing and processing of NIRS (Near Infrared Spectroscopy) data. It offers a convenient way to develop prediction models by extending scikit-learn pipelines.
 
@@ -48,6 +51,57 @@ Once Pinard is installed, you can import it in your Python code:
 
 For detailed usage instructions and examples, please refer to the official Pinard documentation and the provided examples.
 
+
+Pinard Architecture
+-------------------
+
+The Pinard package provides modules to facilitate the preprocessing, processing, and modeling of NIRS (Near Infrared Spectroscopy) data. These modules offer functionalities for data augmentation, splitting and cross-validation, a wide range of preprocessing methods, and seamless integration with scikit-learn pipelines.
+
+'Data Augmentation with "augmentation" Module'
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. toctree::
+   :maxdepth: 1
+
+   augmentation
+
+The "augmentation" module in Pinard focuses on data augmentation techniques. Data augmentation is crucial for enhancing the diversity and size of the training data, which helps improve the generalization and robustness of machine learning models. Pinard's "augmentation" module offers various methods to generate augmented samples from the existing data, enabling researchers and practitioners to effectively increase the dataset size and improve model performance.
+
+
+Splitting and Cross-Validation with "model_selection" Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _model_selection:
+.. toctree::
+   :maxdepth: 1
+
+   model_selection
+
+The "model_selection" module in Pinard is dedicated to splitting and cross-validation techniques. It provides functionalities for splitting the NIRS data into training and testing sets based on various strategies such as Kennard Stone, SPXY, random sampling, stratified sampling, and k-means. Additionally, Pinard's "model_selection" module supports cross-validation methods for evaluating model performance, allowing users to perform robust and reliable model assessments.
+
+Preprocessing Methods in "preprocessing" Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _preprocessing:
+.. toctree::
+   :maxdepth: 1
+
+   preprocessing
+
+
+The "preprocessing" module in Pinard offers a comprehensive collection of preprocessing methods specifically designed for NIRS data. These methods include baseline correction, standard normal variate, robust normal variate, Savitzky-Golay filtering, normalization, detrending, multiplicative scatter correction, derivative computation, Gaussian filtering, Haar wavelet transformation, and more. With the "preprocessing" module, users can efficiently preprocess their NIRS data and remove unwanted variations or noise before further analysis or modeling.
+
+Seamless Integration with scikit-learn Pipelines via "sklearn" Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _sklearn:
+.. toctree::
+   :maxdepth: 1
+
+   sklearn
+
+Pinard seamlessly integrates with scikit-learn pipelines through the "sklearn" module. This module provides wrappers and dedicated code to interact with scikit-learn pipelines, enabling users to incorporate Pinard's preprocessing methods and NIRS-specific functionalities into their machine learning workflows. By leveraging the power of scikit-learn, users can benefit from the extensive range of tools and models available in scikit-learn while leveraging Pinard's specialized features for NIRS data processing and modeling.
+
+Overall, the Pinard package offers a comprehensive suite of tools and modules that cater to the unique requirements of NIRS data analysis and modeling. From data augmentation to preprocessing and seamless integration with scikit-learn, Pinard provides a powerful and user-friendly environment for efficient NIRS data processing and predictive modeling.
+
+
+
 Authors
 =======
 
@@ -64,94 +118,27 @@ Pinard is an open-source project. Contributions, bug reports, and feature reques
 
 
 
-Pinard Package Modules
-======================
-
-The Pinard package provides several modules to facilitate the preprocessing, processing, and modeling of NIRS (Near Infrared Spectroscopy) data. These modules offer functionalities for data augmentation, splitting and cross-validation, a wide range of preprocessing methods, and seamless integration with scikit-learn pipelines.
-
-Data Augmentation with "augmentation" Module
----------------------------------------------
-
-The "augmentation" module in Pinard focuses on data augmentation techniques. Data augmentation is crucial for enhancing the diversity and size of the training data, which helps improve the generalization and robustness of machine learning models. Pinard's "augmentation" module offers various methods to generate augmented samples from the existing data, enabling researchers and practitioners to effectively increase the dataset size and improve model performance.
-
-Splitting and Cross-Validation with "model_selection" Module
--------------------------------------------------------------
-
-The "model_selection" module in Pinard is dedicated to splitting and cross-validation techniques. It provides functionalities for splitting the NIRS data into training and testing sets based on various strategies such as Kennard Stone, SPXY, random sampling, stratified sampling, and k-means. Additionally, Pinard's "model_selection" module supports cross-validation methods for evaluating model performance, allowing users to perform robust and reliable model assessments.
-
-Preprocessing Methods in "preprocessing" Module
-------------------------------------------------
-
-The "preprocessing" module in Pinard offers a comprehensive collection of preprocessing methods specifically designed for NIRS data. These methods include baseline correction, standard normal variate, robust normal variate, Savitzky-Golay filtering, normalization, detrending, multiplicative scatter correction, derivative computation, Gaussian filtering, Haar wavelet transformation, and more. With the "preprocessing" module, users can efficiently preprocess their NIRS data and remove unwanted variations or noise before further analysis or modeling.
-
-Seamless Integration with scikit-learn Pipelines via "sklearn" Module
-----------------------------------------------------------------------
-
-Pinard seamlessly integrates with scikit-learn pipelines through the "sklearn" module. This module provides wrappers and dedicated code to interact with scikit-learn pipelines, enabling users to incorporate Pinard's preprocessing methods and NIRS-specific functionalities into their machine learning workflows. By leveraging the power of scikit-learn, users can benefit from the extensive range of tools and models available in scikit-learn while leveraging Pinard's specialized features for NIRS data processing and modeling.
-
-Overall, the Pinard package offers a comprehensive suite of tools and modules that cater to the unique requirements of NIRS data analysis and modeling. From data augmentation to preprocessing and seamless integration with scikit-learn, Pinard provides a powerful and user-friendly environment for efficient NIRS data processing and predictive modeling.
-
-
-
-API Reference
+API Overview
 =============
+
+.. toctree::
+   :maxdepth: 1
+
+   api
+
 
 For detailed information about the classes, methods, and attributes provided by the Pinard package, please refer to the following API references:
 
-- Pinard Augmentation API: :mod:`pinard.augmentation` - :ref:`pinard.augmentation <augmentation>`
-- Pinard Model Selection API: :mod:`pinard.model_selection` - :ref:`pinard.model_selection <model_selection>`
-- Pinard Preprocessing API: :mod:`pinard.preprocessing` - :ref:`pinard.preprocessing <preprocessing>`
-- Pinard scikit-learn Integration API: :mod:`pinard.sklearn` - :ref:`pinard.sklearn <sklearn>`
+- Pinard Augmentation API: :mod:`pinard.augmentation`
+- Pinard Model Selection API: :mod:`pinard.model_selection`
+- Pinard Preprocessing API: :mod:`pinard.preprocessing`
+- Pinard scikit-learn Integration API: :mod:`pinard.sklearn`
 
 
 Click on the links above to access the respective API reference documentation, which includes detailed explanations and usage examples for each module and its components.
 
 Please note that the API reference provides in-depth technical information and is intended for users who want to explore the inner workings of the Pinard package. If you are new to Pinard or NIRS data analysis, we recommend starting with the user guide and examples provided in the Pinard documentation to get a better understanding of the package's capabilities and how to utilize them effectively.
 
-
-.. _augmentation:
-Augmentation
-------------
-.. toctree::
-   :maxdepth: 2
-
-   augmentation
-
-.. _model_selection:
-Model Selection
----------------
-.. toctree::
-   :maxdepth: 2
-
-   model_selection
-
-
-.. _preprocessing:
-Preprocessing
--------------
-.. toctree::
-   :maxdepth: 2
-
-   preprocessing
-
-
-.. _sklearn:
-Sklearn utils and wrappers
---------------------------
-.. toctree::
-   :maxdepth: 2
-
-   sklearn
-
-
-
-.. _api:
-API Reference
--------------
-.. toctree::
-   :maxdepth: 2
-
-   api
 
 
 

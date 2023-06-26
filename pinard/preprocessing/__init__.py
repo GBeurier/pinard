@@ -6,10 +6,8 @@ from sklearn.preprocessing import FunctionTransformer as IdentityTransformer
 from sklearn.preprocessing import RobustScaler as RobustNormalVariate
 from sklearn.preprocessing import StandardScaler as StandardNormalVariate
 
-from ._nirs import (Haar, MultiplicativeScatterCorrection, SavitzkyGolay,
-                    Wavelet, msc, savgol, wavelet_transform)
-from ._scaler import (Derivate, Normalize, SimpleScale, derivate, norml,
-                      spl_norml)
+from ._nirs import (Haar, MultiplicativeScatterCorrection, SavitzkyGolay, Wavelet, msc, savgol, wavelet_transform)
+from ._scaler import (Derivate, Normalize, SimpleScale, derivate, norml, spl_norml)
 from ._standard import Baseline, Detrend, Gaussian, baseline, detrend, gaussian
 
 __all__ = [

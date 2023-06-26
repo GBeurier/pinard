@@ -3,6 +3,7 @@ from ._helpers import train_test_split_idx
 from ._nirs_sampling import ks_sampling, spxy_sampling
 from ._random_sampling import shuffle_sampling, systematic_circular_sampling
 
+
 __all__ = [
     "train_test_split_idx",
     "kmean_sampling",

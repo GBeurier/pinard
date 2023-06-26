@@ -13,14 +13,18 @@ class Augmenter(TransformerMixin, BaseEstimator, metaclass=abc.ABCMeta):
         """
         Initialize the augmenter.
 
-        Parameters:
-            apply_on (str): The level at which augmentation is applied.
-                Can be one of 'samples', 'features', 'subsets', or 'global'.
-                Defaults to 'samples'.
-            random_state (int or None): Seed for the random number generator.
-                If None, no random seed is set. Defaults to None.
-            copy (bool): Whether to make a copy of the input data.
-                Defaults to True.
+        Parameters
+        ----------
+        apply_on : str
+            The level at which augmentation is applied.
+            Can be one of 'samples', 'features', 'subsets', or 'global'.
+            Defaults to 'samples'.
+        random_state : int or None
+            Seed for the random number generator.
+            If None, no random seed is set. Defaults to None.
+        copy : bool
+            Whether to make a copy of the input data.
+            Defaults to True.
         """
         self.copy = copy
         self.apply_on = apply_on
@@ -30,13 +34,19 @@ class Augmenter(TransformerMixin, BaseEstimator, metaclass=abc.ABCMeta):
         """
         Fit to data and transform it.
 
-        Parameters:
-            X (array-like): Input data to fit and transform.
-            y (array-like or None): Target variable (unused).
-            **fit_params: Additional fitting parameters (unused).
+        Parameters
+        ----------
+        X : array-like
+            Input data to fit and transform.
+        y : array-like or None
+            Target variable (unused).
+        **fit_params : dict
+            Additional fitting parameters (unused).
 
-        Returns:
-            array-like: Transformed data.
+        Returns
+        -------
+        array-like
+            Transformed data.
         """
         return self.transform(X)
 
@@ -44,12 +54,17 @@ class Augmenter(TransformerMixin, BaseEstimator, metaclass=abc.ABCMeta):
         """
         Fit to data.
 
-        Parameters:
-            X (array-like): Input data to fit.
-            y (array-like or None): Target variable (unused).
+        Parameters
+        ----------
+        X : array-like
+            Input data to fit.
+        y : array-like or None
+            Target variable (unused).
 
-        Returns:
-            self (object): Returns the instance itself.
+        Returns
+        -------
+        self : object
+            Returns the instance itself.
         """
         return self
 
@@ -58,14 +73,19 @@ class Augmenter(TransformerMixin, BaseEstimator, metaclass=abc.ABCMeta):
         """
         Perform data augmentation.
 
-        Parameters:
-            X (array-like): Input data to augment.
-            apply_on (str): The level at which augmentation is applied.
-                Can be one of 'samples', 'features', 'subsets', or 'global'.
-                Defaults to 'samples'.
+        Parameters
+        ----------
+        X : array-like
+            Input data to augment.
+        apply_on : str
+            The level at which augmentation is applied.
+            Can be one of 'samples', 'features', 'subsets', or 'global'.
+            Defaults to 'samples'.
 
-        Returns:
-            array-like: Augmented data.
+        Returns
+        -------
+        array-like
+            Augmented data.
         """
         pass
 
@@ -73,11 +93,15 @@ class Augmenter(TransformerMixin, BaseEstimator, metaclass=abc.ABCMeta):
         """
         Transform the input data by applying data augmentation.
 
-        Parameters:
-            X (array-like): Input data to transform.
+        Parameters
+        ----------
+        X : array-like
+            Input data to transform.
 
-        Returns:
-            array-like: Transformed data after augmentation.
+        Returns
+        -------
+        array-like
+            Transformed data after augmentation.
         """
         X = self._validate_data(
             X, reset=False, copy=self.copy, dtype=FLOAT_DTYPES, estimator=self
@@ -91,8 +115,10 @@ class Augmenter(TransformerMixin, BaseEstimator, metaclass=abc.ABCMeta):
         """
         Provide additional tags for the estimator.
 
-        Returns:
-            dict: Additional tags.
+        Returns
+        -------
+        dict
+            Additional tags.
         """
         return {"allow_nan": False}
 
@@ -104,11 +130,16 @@ class IdentityAugmenter(Augmenter):
         """
         Perform identity augmentation.
 
-        Parameters:
-            X (array-like): Input data to augment.
-            _ (str): Placeholder for unused parameter.
+        Parameters
+        ----------
+        X : array-like
+            Input data to augment.
+        _ : str
+            Placeholder for unused parameter.
 
-        Returns:
-            array-like: Augmented data (same as input data).
+        Returns
+        -------
+        array-like
+            Augmented data (same as input data).
         """
         return X
