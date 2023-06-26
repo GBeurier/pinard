@@ -5,14 +5,25 @@ from sklearn.utils import check_array
 from sklearn.utils.validation import FLOAT_DTYPES, check_is_fitted
 
 
+# The Baseline class is a Python class that inherits from TransformerMixin and BaseEstimator.
 class Baseline(TransformerMixin, BaseEstimator):
-    """Removes baseline (mean) from each spectrum.
+    """
+    Removes baseline (mean) from each spectrum.
 
     Args:
         copy (bool, optional): _description_. Defaults to True.
     """
 
     def __init__(self, *, copy=True):
+        """
+        This is the constructor method for a class that takes a boolean argument "copy" with a default
+        value of True.
+
+        :param copy: The "copy" parameter is a boolean flag that determines whether the object should be
+        copied or not. If set to True, a copy of the object will be made, and any changes made to the
+        copy will not affect the original object. If set to False, the object will not be copied,,
+        defaults to True (optional)
+        """
         self.copy = copy
 
     def _reset(self):
@@ -80,42 +91,82 @@ def baseline(spectra):
 
 
 def detrend(spectra, bp=0):
-    """Perform spectral detrending to remove linear trend from data.
-    Args:
-        spectra < numpy.ndarray > : NIRS data matrix.
-        bp < list > : A sequence of break points. If given, an individual linear fit is
-        performed for each part of data
-        between two break points. Break points are specified as indices into data.
-    Returns:
-        spectra < numpy.ndarray > : Detrended NIR spectra
+    """
+    Perform spectral detrending to remove linear trend from data.
+
+    :param spectra: NIRS data matrix.
+    :type spectra: numpy.ndarray
+    :param bp: A sequence of break points. If given, an individual linear fit is performed for each part of data between two break points. Break points are specified as indices into data. Default is 0.
+    :type bp: list
+    :returns: Detrended NIR spectra.
+    :rtype: numpy.ndarray
     """
     return signal.detrend(spectra, bp=bp)
 
 
 class Detrend(TransformerMixin, BaseEstimator):
+    """
+    Perform spectral detrending to remove linear trend from data.
+
+    :param bp: Breakpoints for piecewise linear detrending. Default is 0.
+    :type bp: int
+    :param copy: Whether to make a copy of the input data. Default is True.
+    :type copy: bool
+    """
+
     def __init__(self, bp=0, *, copy=True):
         self.copy = copy
         self.bp = bp
 
     def _reset(self):
+        """
+        Reset internal data-dependent state of the transformer.
+        """
         pass
 
     def fit(self, X, y=None):
+        """
+        Fit the transformer to the data.
+
+        :param X: The input data.
+        :type X: array-like of shape (n_samples, n_features)
+        :param y: Ignored
+        :returns: Returns self.
+        :rtype: object
+        """
         if sparse.issparse(X):
             raise ValueError('Sparse matrices not supported!"')
         return self
 
     def transform(self, X, copy=None):
+        """
+        Transform the data by removing linear trend.
+
+        :param X: The input data.
+        :type X: array-like of shape (n_samples, n_features)
+        :param copy: Whether to make a copy of the input data. If None, `self.copy` is used. Default is None.
+        :type copy: bool or None
+        :returns: The transformed data.
+        :rtype: ndarray of shape (n_samples, n_features)
+        """
         if sparse.issparse(X):
             raise ValueError('Sparse matrices not supported!"')
+
         X = self._validate_data(
             X, reset=False, copy=self.copy, dtype=FLOAT_DTYPES, estimator=self
         )
 
         X = detrend(X, bp=self.bp)
+
         return X
 
     def _more_tags(self):
+        """
+        Get tags for the estimator.
+
+        :returns: Dictionary of tags for the estimator.
+        :rtype: dict
+        """
         return {"allow_nan": False}
 
 

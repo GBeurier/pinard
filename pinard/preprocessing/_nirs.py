@@ -110,6 +110,30 @@ def savgol(spectra, window_length=11, polyorder=3, deriv=0, delta=1.0):
 
 
 class SavitzkyGolay(TransformerMixin, BaseEstimator):
+    """
+    A class for smoothing and differentiating data using the Savitzky-Golay filter.
+
+    Parameters:
+    -----------
+    window_length : int, optional (default=11)
+        The length of the window used for smoothing.
+    polyorder : int, optional (default=3)
+        The order of the polynomial used for fitting the samples within the window.
+    deriv : int, optional (default=0)
+        The order of the derivative to compute.
+    delta : float, optional (default=1.0)
+        The sampling distance of the data.
+    copy : bool, optional (default=True)
+        Whether to copy the input data.
+
+    Methods:
+    --------
+    fit(X, y=None)
+        Fits the transformer to the data X.
+    transform(X, copy=None)
+        Applies the Savitzky-Golay filter to the data X.
+    """
+
     def __init__(self, window_length=11, polyorder=3, deriv=0, delta=1.0, *, copy=True):
         self.copy = copy
         self.window_length = window_length
@@ -126,6 +150,21 @@ class SavitzkyGolay(TransformerMixin, BaseEstimator):
         return self
 
     def transform(self, X, copy=None):
+        """
+        Applies the Savitzky-Golay filter to the data X.
+
+        Parameters:
+        -----------
+        X : array-like
+            The input data.
+        copy : bool, optional (default=None)
+            Whether to copy the input data.
+
+        Returns:
+        --------
+        X_smoothed : array-like
+            The smoothed data.
+        """
         if sparse.issparse(X):
             raise ValueError('Sparse matrices not supported!"')
 

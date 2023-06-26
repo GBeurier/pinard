@@ -13,11 +13,11 @@ authors:
     affiliation: "1"
   - name: Denis Cornet
     orcid: 0000-0001-9297-2680
-    equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
+    equal-contrib: true
     affiliation: "1"
   - name: Lauriane Rouan
     orcid: 0000-0002-0478-3634
-    corresponding: true # (This is how to denote the corresponding author)
+    corresponding: true
     affiliation: "1"
 affiliations:
  - name: AGAP, Univ Montpellier, CIRAD, INRA, and Montpellier SupAgro, Montpellier, France
@@ -68,5 +68,7 @@ libraries (scikit-learn, tensorflow, pytorch, etc.).
 # Figures
 
 # Acknowledgements
+
+We acknowledge contributions from the Phenomen team @ CIRAD.
 
 # References
