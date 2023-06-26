@@ -65,10 +65,13 @@ libraries (scikit-learn, tensorflow, pytorch, etc.).
 
 # Citations
 
-# Figures
+For a quick reference, the following citation commands can be used:
+- `@author:2001`  ->  "Author et al. (2001)"
+- `[@author:2001]` -> "(Author et al., 2001)"
+- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
 
 # Acknowledgements
 
-We acknowledge contributions from the Phenomen team @ CIRAD.
+We acknowledge contributions from the Phenomen team at CIRAD (www.cirad.fr).
 
 # References
