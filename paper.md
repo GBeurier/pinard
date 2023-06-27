@@ -31,14 +31,14 @@ NIRS measures the light reflected from a sample after irradiating it with wavele
 ranging from visible to shortwave infrared. This provides a signature of the physical 
 and chemical characteristics of the sample. Thanks to its low cost NIRS has been widely 
 used for determining chemical traits in various fields - pharmaceutical, agricultural, and
-food sectors (Shepherd and Walsh, 2007; Wójcicki, 2015; Biancolillo and Marini, 2018; 
-Pasquini, 2018)
+food sectors ([@Shepherd2007:2007]; [@Biancolillo2018Chemometric:2018];  [@Pasquini2018Near:2018])
 Although NIRS data are simple to acquire, they quickly generate a very large amount of 
 information and this information must be processed to allow quality predictions for desired 
 traits.
 Pinard provides a set of python functionalities dedicated to the preprocessing and processing 
 of NIRS data and allows the fast development of prediction models thanks to the extension of 
-scikit-learn pipelines.
+scikit-learn pipelines. Pinard has been used successfully in a number of scientific projects
+([@Vasseur2022Perspective:2022], [@Przybylska2023AraDiv:2023])
 
 # Statement of need
 
@@ -47,28 +47,22 @@ they also require extensive post-processing, via chemiometric and multivariate s
 analyses. Usually, spectral information can be exploited through the development of calibration 
 models relating spectra and reference trait data. For that, different statistical methods are 
 commonly used to predict trait data from spectra, including partial least squares regression 
-(PLSR; (Wold et al., 1983)), principal components analysis (Dreccer et al., 2014), and 2D 
-correlation plots (Darvishzadeh et al., 2008). However, (1) the performance of these methods, 
+(PLSR; [@Wold1983Multivariate:1983]), principal components analysis, and 2D 
+correlation plots [@Darvishzadeh2008LAI:2008]. However, (1) the performance of these methods, 
 and especially PLSR, has been shown to vary significantly across samples depending on conditions
-(Fu et al., 2020) and (2) the strong statistical background of the methods used has limited
+[@fu2020estimating:2020] and (2) the strong statistical background of the methods used has limited
 the strong dependence on statistical methods has limited the integration of methods developed 
 outside platforms like R or Matlab.
 In recent years, Machine Learning approaches have become widespread in multiple fields due 
-to their better predictive performance and has been applied with success in NIRS (Vasseur et al.
-, 2021). Machine Learning tools and methods are leaning heavily towards Python langage and 
-therefore their adoption by the chemometry community is rather complex.
+to their better predictive performance and has been applied with success in NIRS 
+([@Vasseur2022Perspective:2022]; [@Zhang2022Review:2022]; [@Le2020Application:2020]). 
+Machine Learning tools and methods are leaning heavily towards Python langage and therefore 
+their adoption by the chemometry community is rather complex.
 Pinard provides a way to solve this difficulty by providing all the traditional tools of NIRS
 analysis (dedicated signal processing, dataset splitting methods, etc.) but compatible with
-the scikit-learn pipelines (REF). Scikit-learn pipeline provides a elegant and efficient way 
-to assemble several processing step and are compatibles with the most known Machine Learning
-libraries (scikit-learn, tensorflow, pytorch, etc.).
-
-# Citations
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
+the [scikit-learn Pipelines](https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html). Scikit-learn pipeline provides a elegant and efficient 
+way to assemble several processing step and are compatibles with the most known Machine Learning
+libraries ([scikit-learn](https://scikit-learn.org/stable/), [tensorflow](https://www.tensorflow.org), [pytorch](https://pytorch.org/), etc.).
 
 # Acknowledgements
 
