@@ -1,5 +1,5 @@
 ---
-title: 'Pinard: A Python package for Near Infrared Reflectance Spectroscopy'
+title: "Pinard: A Python package for Near Infrared Reflectance Spectroscopy"
 tags:
   - Python
   - near infrared reflectance spectroscpy (NIRS)
@@ -24,6 +24,7 @@ affiliations:
    index: 1
 date: 15 June 2023
 bibliography: paper.bib
+---
 
 # Summary
 
