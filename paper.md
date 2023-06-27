@@ -22,7 +22,7 @@ authors:
 affiliations:
  - name: AGAP, Univ Montpellier, CIRAD, INRA, and Montpellier SupAgro, Montpellier, France
    index: 1
-date: October 2022
+date: 15 June 2023
 bibliography: paper.bib
 
 # Summary
