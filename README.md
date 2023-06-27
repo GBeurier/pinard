@@ -14,6 +14,10 @@ Pinard provides a set of python functionalities dedicated to the preprocessing a
 
 Moreover, because Pinard extends scikit-learn, all scikit-learn features are natively available (split, regressor, etc.).
 
+![](docs/pipeline.jpg)
+*Illustrated End-to-End NIRS Analysis Pipeline using Pinard, Scikit-learn and Tensorflow: Data Input, Augmentation, Preprocessing, Training, Prediction, and Interpretation*
+
+
 ## Authors
 
 Pinard is a python package developed at AGAP institute (https://umr-agap.cirad.fr/) by Grégory Beurier (beurier@cirad.fr) in collaboration with Denis Cornet (denis.cornet@cirad.fr) and Lauriane Rouan (lauriane.rouan@cirad.fr)

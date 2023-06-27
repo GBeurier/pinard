@@ -31,6 +31,14 @@ Pinard includes the following features:
 
 4. **Compatibility with scikit-learn**: As Pinard extends scikit-learn, it natively inherits all the features provided by scikit-learn, such as data splitting, regression models, and more.
 
+
+..  figure:: ../pipeline.jpg
+   :width: 100%
+   :class: with-shadow
+   
+   *Illustrated End-to-End NIRS Analysis Pipeline using Pinard, Scikit-learn and Tensorflow: Data Input, Augmentation, Preprocessing, Training, Prediction, and Interpretation*
+
+
 Installation
 ============
 
@@ -39,6 +47,13 @@ To install Pinard, you can use pip:
 .. code-block:: bash
 
    pip install pinard
+
+or directly from the repository:
+
+.. code-block:: bash
+
+   pip install git+https://github.com/Gbeurier/pinard.git
+
 
 Usage
 =====
@@ -49,7 +64,13 @@ Once Pinard is installed, you can import it in your Python code:
 
    import pinard
 
-For detailed usage instructions and examples, please refer to the official Pinard documentation and the provided examples.
+For detailed usage, please refer to the notebook examples:
+
+.. toctree::
+   :maxdepth: 1
+
+   simple_pipelines
+   stacking
 
 
 Pinard Architecture
@@ -69,7 +90,6 @@ The "augmentation" module in Pinard focuses on data augmentation techniques. Dat
 
 Splitting and Cross-Validation with "model_selection" Module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. _model_selection:
 .. toctree::
    :maxdepth: 1
 
@@ -79,7 +99,6 @@ The "model_selection" module in Pinard is dedicated to splitting and cross-valid
 
 Preprocessing Methods in "preprocessing" Module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. _preprocessing:
 .. toctree::
    :maxdepth: 1
 
@@ -90,7 +109,6 @@ The "preprocessing" module in Pinard offers a comprehensive collection of prepro
 
 Seamless Integration with scikit-learn Pipelines via "sklearn" Module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. _sklearn:
 .. toctree::
    :maxdepth: 1
 
