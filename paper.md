@@ -9,6 +9,7 @@ tags:
 authors:
   - name: Grégory Beurier
     orcid: 0000-0002-5621-7079
+    corresponding: true
     equal-contrib: true
     affiliation: "1"
   - name: Denis Cornet
@@ -17,7 +18,7 @@ authors:
     affiliation: "1"
   - name: Lauriane Rouan
     orcid: 0000-0002-0478-3634
-    corresponding: true
+    equal-contrib: true
     affiliation: "1"
 affiliations:
  - name: AGAP, Univ Montpellier, CIRAD, INRA, and Montpellier SupAgro, Montpellier, France
