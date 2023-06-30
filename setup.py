@@ -47,7 +47,6 @@ setup(
         'numpy',
         'scikit-learn',
         'scipy',
-        'tensorflow',
         'PyWavelets',
     ],
 
