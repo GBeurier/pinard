@@ -56,7 +56,8 @@ def kbins_stratified_sampling(
     if y is None:
         raise ValueError("Y data are required to use Kbins discretized Stratified sampling")
 
-    discretizer = KBinsDiscretizer(n_bins=n_bins, encode=encode, strategy=strategy)
+    discretizer = KBinsDiscretizer(n_bins=n_bins, encode=encode, strategy=strategy,
+                                   subsample=200000)
     y_discrete = discretizer.fit_transform(y)
 
     split_model = StratifiedShuffleSplit(
@@ -100,13 +101,13 @@ def kmean_sampling(
         The indices of the test samples.
     """
     n_samples = _num_samples(data)
-    n_train, n_test = _validate_shuffle_split(n_samples, test_size, None)
+    n_train, _ = _validate_shuffle_split(n_samples, test_size, None)
 
     if pca_components is not None:
         pca = PCA(pca_components, random_state=random_state)
         data = pca.fit_transform(data)
 
-    kmean = KMeans(n_train, random_state=random_state)
+    kmean = KMeans(n_train, random_state=random_state, n_init=10)
     kmean.fit(data)
     centroids = kmean.cluster_centers_
 

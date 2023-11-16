@@ -36,7 +36,7 @@ def split_validation_data():
     split_validation_data = np.loadtxt(
         path_to("test_split_validation.csv"), delimiter=";"
     )
-    return split_validation_data.astype(np.int32)
+    return split_validation_data.astype(int)
 
 
 @pytest.fixture(scope="session")

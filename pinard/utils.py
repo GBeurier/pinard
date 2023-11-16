@@ -76,7 +76,8 @@ def load_csv(
     # TODO - add assert/exceptions on non-numerical columns
     # TODO - better management of NaN and Null (esp exception msg)
 
-    x_df = pd.read_csv(x_fname, sep=sep, header=x_hdr, index_col=x_index_col)
+    x_df = pd.read_csv(x_fname, sep=sep, header=x_hdr, index_col=x_index_col,
+                       engine="python")
     x_df = x_df.apply(pd.to_numeric, args=("coerce",))
 
     x_data = x_df.astype(np.float32).values
@@ -94,7 +95,8 @@ def load_csv(
         y_data = x_data[:, y_cols]
         x_data = np.delete(x_data, y_cols, axis=1)
     else:
-        y_df = pd.read_csv(y_fname, sep=sep, header=y_hdr, index_col=y_index_col)
+        y_df = pd.read_csv(y_fname, sep=sep, header=y_hdr, index_col=y_index_col,
+                           engine="python")
         y_df = y_df.apply(pd.to_numeric, args=("coerce",))
 
         y_data = y_df.astype(np.float32).values

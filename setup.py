@@ -43,12 +43,14 @@ setup(
     packages=find_packages(),
 
     install_requires=[
-        'pandas',
+        'joblib',
+        'kennard-stone',
         'numpy',
+        'pandas',
+        'PyWavelets',
         'scikit-learn',
         'scipy',
-        'tensorflow',
-        'PyWavelets',
+        'twinning',
     ],
 
     extras_require={
