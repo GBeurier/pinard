@@ -21,4 +21,4 @@ build:
 
 python:
   install:
-    - requirements: "readthedocs.requirements.txt"
+    - requirements: "docs/readthedocs.requirements.txt"
