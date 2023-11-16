@@ -76,19 +76,17 @@ class Rotate_Translate(Augmenter):
         """
         def deformation(x):
             x_range = np.linspace(0, 1, x.shape[-1])
-            p2 = np.random.uniform(-self.p_range, self.p_range)
-            p1 = np.random.uniform(-self.p_range, self.p_range)
-            xI = np.random.uniform(0, 1)
-            yI = np.random.uniform(0, np.max(x) / self.y_factor)
+            p2 = self.random_gen.uniform(-self.p_range/5, self.p_range/5)
+            p1 = self.random_gen.uniform(-self.p_range/5, self.p_range/5)
+            xI = self.random_gen.uniform(0, 1)
+            yI = self.random_gen.uniform(0, np.max(x) / self.y_factor)
             distor = v_angle_p(x_range, xI, yI, p1, p2)
             return distor
 
-        if apply_on == "samples":
-            increment = np.array([deformation(x) * np.std(x) for x in X])
-        elif apply_on == "global":
+        if apply_on == "global":
             increment = deformation(X) * np.std(X)
         else:
-            raise ValueError("Rotation transform can only be applied on samples or globally.")
+            increment = np.array([deformation(x) * np.std(x) for x in X])
 
         new_X = X + increment
 
@@ -137,12 +135,10 @@ class Random_X_Operation(Augmenter):
         min_val = self.operator_range[0]
         interval = self.operator_range[1] - self.operator_range[0]
 
-        if apply_on == "samples":
-            increment = np.random.rand(len(X)) * interval + min_val
-        elif apply_on == "features":
-            increment = np.random.rand(*X.shape) * interval + min_val
+        if apply_on == "global":
+            increment = self.random_gen.random(X.shape[-1]) * interval + min_val
         else:
-            increment = np.random.uniform(*self.operator_range)
+            increment = self.random_gen.random(X.shape) * interval + min_val
 
         new_X = self.operator_func(X, increment)
 
