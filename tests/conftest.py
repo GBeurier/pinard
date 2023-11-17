@@ -24,6 +24,11 @@ def simple_data_na():
 
 
 @pytest.fixture(scope="module")
+def bad_data():
+    return path_to("test_bad_data.csv")
+
+
+@pytest.fixture(scope="module")
 def split_data():
     split_data = np.loadtxt(path_to("test_split.csv"), delimiter=";")
     y = np.reshape(split_data[:, 0], (-1, 1))

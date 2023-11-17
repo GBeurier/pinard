@@ -95,8 +95,7 @@ def load_csv(
         y_data = x_data[:, y_cols]
         x_data = np.delete(x_data, y_cols, axis=1)
     else:
-        y_df = pd.read_csv(y_fname, sep=sep, header=y_hdr, index_col=y_index_col,
-                           engine="python")
+        y_df = pd.read_csv(y_fname, sep=sep, header=y_hdr, index_col=y_index_col, engine="python")
         y_df = y_df.apply(pd.to_numeric, args=("coerce",))
 
         y_data = y_df.astype(np.float32).values
