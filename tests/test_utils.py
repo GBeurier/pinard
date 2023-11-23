@@ -1,3 +1,6 @@
+from data_loader import load_XY_csv, DatasetFormatError
+from data_loader import load_csv
+from data_loader import analyze_csv_file
 from pinard import utils
 import pytest
 
@@ -65,3 +68,39 @@ def test_errors(bad_data):
 #     exc_message = str(excinfo.value)
 #     assert "Invalid X shape:" in exc_message
 #     assert "Invalid Y shape:" in exc_message
+
+
+# def test_analyze_csv_file():
+#     filename = 'test_data.csv'  # Replace with a path to a test CSV file
+#     delimiter, numeric_delimiter, header = analyze_csv_file(filename)
+
+#     assert delimiter in [';', '\t', ','], "Delimiter not correctly identified"
+#     assert numeric_delimiter in ['.', ','], "Numeric delimiter not correctly identified"
+#     assert isinstance(header, (int, type(None))), "Header detection failed"
+
+
+# def test_load_csv():
+#     file_path = 'test_data.csv'  # Replace with a path to a test CSV file
+#     data, indexes_with_na = load_csv(file_path, na_policy='auto')
+
+#     assert isinstance(data, np.ndarray), "Data is not in numpy array format"
+#     assert all(not np.isnan(data).any()), "NA values not handled correctly"
+
+
+# def test_load_XY_csv_single_file():
+#     x_data, y_data = load_XY_csv('test_data.csv', y_cols=[0], sep=';', x_hdr=0)
+
+#     assert isinstance(x_data, np.ndarray) and isinstance(y_data, np.ndarray), "Data is not in numpy array format"
+#     assert len(x_data) == len(y_data), "X and Y datasets have different row counts"
+
+
+# def test_load_XY_csv_separate_files():
+#     x_data, y_data = load_XY_csv('test_x_data.csv', y_fname='test_y_data.csv', sep=';', x_hdr=0, y_hdr=0)
+
+#     assert isinstance(x_data, np.ndarray) and isinstance(y_data, np.ndarray), "Data is not in numpy array format"
+#     assert len(x_data) == len(y_data), "X and Y datasets have different row counts"
+
+
+# def test_load_XY_csv_error_handling():
+#     with pytest.raises(ValueError):
+#         load_XY_csv('test_data.csv', y_fname=None, y_cols=None, sep=';', x_hdr=0)
