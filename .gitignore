@@ -24,3 +24,5 @@ docs/build/html/_static/
 docs/build/
 build/
 .gitignore.orig
+tests/tester.ipynb
+tests/test.ipynb

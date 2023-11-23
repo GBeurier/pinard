@@ -1,17 +1,18 @@
 from ._random_augmentation import (Random_X_Operation,
                                    Rotate_Translate)
-from ._spline_augmentation import (Dependent_Spline_Simplification,
-                                   Monotonous_Spline_Simplification,
-                                   Random_Spline_Addition,
-                                   Random_X_Spline_Deformation)
+from ._spline_augmentation import (Spline_Curve_Simplification,
+                                   Spline_X_Simplification,
+                                   Spline_Y_Perturbations,
+                                   Spline_X_Perturbations,
+                                   Spline_Smoothing)
 from .augmenter import Augmenter, IdentityAugmenter
 
 __all__ = [
-    "Random_X_Spline_Deformation",
-    # "Random_X_Spline_Shift",
-    "Monotonous_Spline_Simplification",
-    "Dependent_Spline_Simplification",
-    "Random_Spline_Addition",
+    "Spline_Smoothing",
+    "Spline_X_Perturbations",
+    "Spline_Y_Perturbations",
+    "Spline_X_Simplification",
+    "Spline_Curve_Simplification",
     "Rotate_Translate",
     "Random_X_Operation",
     "Augmenter",
