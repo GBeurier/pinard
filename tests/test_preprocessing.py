@@ -39,6 +39,12 @@ def test_preprocessings(
         reverse_data = preprocess.inverse_transform(transformed_data)
         np.testing.assert_array_almost_equal(sample_data, reverse_data, decimal=5)
 
+    transformed_data = preprocess.fit_transform(sample_data)
+    x = transformed_data[0]
+    np.testing.assert_array_almost_equal(
+        x, preprocessing_validation_data[index], decimal=5
+    )
+
 
 preprocessing_func = [
     ("baseline", pp.baseline, 1),
