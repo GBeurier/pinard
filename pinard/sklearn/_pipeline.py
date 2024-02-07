@@ -30,7 +30,7 @@ class FeatureAugmentation(FeatureUnion):
         Xs = np.swapaxes(Xs, 1, 2)
         return Xs
 
-    def transform(self, X, params=None):
+    def transform(self, X, **params):
         Xs = Parallel(n_jobs=self.n_jobs)(
             delayed(_transform_one)(trans, X, None, weight, params)
             for _, trans, weight in self._iter()
