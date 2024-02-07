@@ -32,7 +32,7 @@ class FeatureAugmentation(FeatureUnion):
 
     def transform(self, X, **params):
         Xs = Parallel(n_jobs=self.n_jobs)(
-            delayed(_transform_one)(trans, X, None, weight, {})
+            delayed(_transform_one)(trans, X, None, weight, params)
             for _, trans, weight in self._iter()
         )
 
