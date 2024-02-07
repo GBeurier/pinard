@@ -29,6 +29,7 @@ class Augmenter(TransformerMixin, BaseEstimator, metaclass=abc.ABCMeta):
         self.copy = copy
         self.apply_on = apply_on
         self.random_state = random_state
+        self.random_gen = np.random.default_rng(random_state)
 
     def fit_transform(self, X, y=None, **fit_params):
         """

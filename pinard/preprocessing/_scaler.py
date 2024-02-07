@@ -1,14 +1,17 @@
-from sklearn.utils.validation import check_array, check_is_fitted
 import warnings
 
 import numpy as np
 import scipy
 from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.preprocessing import FunctionTransformer as IdentityTransformer
-from sklearn.preprocessing import RobustScaler as RobustNormalVariate
-from sklearn.preprocessing import StandardScaler as StandardNormalVariate
-from sklearn.utils import check_array
-from sklearn.utils.validation import FLOAT_DTYPES, check_is_fitted
+from sklearn.preprocessing import FunctionTransformer
+from sklearn.preprocessing import RobustScaler
+from sklearn.preprocessing import StandardScaler
+from sklearn.utils.validation import check_array, check_is_fitted, FLOAT_DTYPES
+
+
+IdentityTransformer = FunctionTransformer
+RobustNormalVariate = RobustScaler
+StandardNormalVariate = StandardScaler
 
 
 class Normalize(TransformerMixin, BaseEstimator):
@@ -79,8 +82,7 @@ class Normalize(TransformerMixin, BaseEstimator):
         feature_range = self.feature_range
         if self.user_defined and feature_range[0] >= feature_range[1]:
             warnings.warn(
-                "Minimum of desired feature range should be smaller than "
-                "maximum. Got %s." % str(feature_range),
+                f"Minimum of desired feature range should be smaller than maximum. Got {feature_range}",
                 SyntaxWarning,
             )
 
