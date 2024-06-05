@@ -1,6 +1,6 @@
 import numpy as np
 from joblib import Parallel, delayed
-from sklearn.pipeline import FeatureUnion, _fit_transform_one, _transform_one
+from sklearn.pipeline import FeatureUnion, _fit_transform_one, _transform_one, _safe_indexing
 from sklearn.preprocessing import FunctionTransformer
 
 
@@ -68,7 +68,7 @@ class SampleAugmentation(FeatureUnion):
         List of (name, trans) tuples specifying the transformer objects to be applied to the data.
     """
 
-    def __init__(self, transformer_list, *, n_jobs=None, verbose=False):
+    def __init__(self, transformer_list, n_jobs=None, transformer_weights=None, verbose=False):
         """
         This is the constructor for a class that initializes a list of transformers with optional
         parameters.
@@ -86,6 +86,7 @@ class SampleAugmentation(FeatureUnion):
         transformer_origin_list = []
         self.augmentation_count = []
         self.total_count = 0
+        self.transformer_weights = transformer_weights
         for tpl in transformer_list:
             if len(tpl) == 2:
                 transformer_origin_list.append(tpl)
@@ -117,7 +118,42 @@ class SampleAugmentation(FeatureUnion):
                     trans = FunctionTransformer(feature_names_out="one-to-one")
                 yield (name, trans, get_weight(name))
 
-    def transform(self, X, y=None):
+                
+    def _transform_one(transformer, X, y, weight, columns=None, params=None):
+        """Call transform and apply weight to output.
+
+        Parameters
+        ----------
+        transformer : estimator
+            Estimator to be used for transformation.
+
+        X : {array-like, sparse matrix} of shape (n_samples, n_features)
+            Input data to be transformed.
+
+        y : ndarray of shape (n_samples,)
+            Ignored.
+
+        weight : float
+            Weight to be applied to the output of the transformation.
+
+        columns : str, array-like of str, int, array-like of int, array-like of bool, slice
+            Columns to select before transforming.
+
+        params : dict
+            Parameters to be passed to the transformer's ``transform`` method.
+        """
+        if columns is not None:
+            X = _safe_indexing(X, columns, axis=1)
+
+        if params is not None and hasattr(params, 'transform'):
+            res = transformer.transform(X, **params.transform)
+        else:
+            res = transformer.transform(X)
+
+        return res
+
+
+    def transform(self, X, y=None, **transform_params):
         """Transform X separately by each transformer, concatenate results.
 
         Parameters
@@ -134,7 +170,7 @@ class SampleAugmentation(FeatureUnion):
         """
         Xs = zip(
             *Parallel(n_jobs=self.n_jobs)(
-                delayed(_transform_one)(trans, X, y, weight)
+                delayed(SampleAugmentation._transform_one)(trans, X, y, weight, params=transform_params)
                 for name, trans, weight in self._iter()
             )
         )
@@ -148,3 +184,105 @@ class SampleAugmentation(FeatureUnion):
         Ys = np.repeat(y, self.total_count, axis=0)
 
         return Xs, Ys
+
+
+
+
+# from sklearn.pipeline import Pipeline
+# from joblib import Parallel, delayed
+# from sklearn.base import BaseEstimator, TransformerMixin
+# from sklearn.preprocessing import FunctionTransformer
+
+# class SampleAugmentation(Pipeline):
+#     def __init__(self, transformer_list, n_jobs=None, transformer_weights=None, verbose=False):
+        
+#         self.n_jobs = n_jobs
+#         self.transformer_weights = transformer_weights
+#         # self.verbose = verbose
+#         # self.augmentation_count = [count for count, name, trans in transformer_list]
+#         # self.total_count = sum(self.augmentation_count)
+        
+#         transformer_origin_list = []
+#         self.augmentation_count = []
+#         self.total_count = 0
+#         self.transformer_weights = transformer_weights
+#         for tpl in transformer_list:
+#             if len(tpl) == 2:
+#                 transformer_origin_list.append(tpl)
+#                 self.augmentation_count.append(1)
+#                 self.total_count += 1
+#             elif len(tpl) == 3:
+#                 transformer_origin_list.append((tpl[1], tpl[2]))
+#                 self.augmentation_count.append(tpl[0])
+#                 self.total_count += tpl[0]
+                
+#         self.transformer_list = transformer_origin_list
+#         super().__init__(
+#             self.transformer_list,
+#             # n_jobs=n_jobs,
+#             # transformer_weights=None,
+#             verbose=verbose,
+#         )
+
+#     def _iter(self):
+#         """
+#         Generate (name, trans, weight) x count tuples excluding None and
+#         'drop' transformers.
+#         """
+#         get_weight = (self.transformer_weights or {}).get
+
+#         for i, (name, trans) in enumerate(self.transformer_list):
+#             for _ in range(self.augmentation_count[i]):
+#                 if trans == "drop":
+#                     continue
+#                 if trans == "passthrough":
+#                     trans = FunctionTransformer(feature_names_out="one-to-one")
+#                 yield (name, trans, get_weight(name))
+
+#     def _transform_one(transformer, X, y, weight, columns=None, params=None):
+#         """Call transform and apply weight to output."""
+#         if columns is not None:
+#             X = _safe_indexing(X, columns, axis=1)
+
+#         if params is not None and 'transform' in params:
+#             res = transformer.transform(X, **params['transform'])
+#         else:
+#             res = transformer.transform(X)
+
+#         return res
+
+#     def transform(self, X, y=None, **transform_params):
+#         """Transform X separately by each transformer, concatenate results."""
+#         Xs = zip(
+#             *Parallel(n_jobs=self.n_jobs)(
+#                 delayed(SampleAugmentation._transform_one)(trans, X, y, weight, params=transform_params)
+#                 for name, trans, weight in self._iter()
+#             )
+#         )
+
+#         if not Xs:
+#             return np.zeros((self.total_count, 0)), np.zeros((self.total_count, 0))
+#         else:
+#             Xs = np.array(list(Xs))
+
+#         Xs = np.concatenate(Xs, axis=0)
+#         Ys = np.repeat(y, self.total_count, axis=0)
+
+#         return Xs, Ys
+
+#     # def transform(self, X, y=None, **transform_params):
+#     #     """Transform X separately by each transformer, concatenate results."""
+#     #     results = Parallel(n_jobs=self.n_jobs)(
+#     #         delayed(SampleAugmentation._transform_one)(trans, X, y, weight, params=transform_params)
+#     #         for name, trans, weight in self._iter()
+#     #     )
+        
+#     #     Xs, Ys = zip(*results)
+
+#     #     if not Xs:
+#     #         return np.zeros((self.total_count, 0)), np.zeros((self.total_count, 0))
+#     #     else:
+#     #         Xs = np.concatenate(Xs, axis=0)
+#     #         Ys = np.concatenate(Ys, axis=0)
+
+#     #     return Xs, Ys
