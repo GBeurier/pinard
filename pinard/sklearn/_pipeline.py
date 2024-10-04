@@ -1,6 +1,6 @@
 import numpy as np
 from joblib import Parallel, delayed
-from sklearn.pipeline import FeatureUnion, _fit_transform_one, _transform_one, _safe_indexing
+from sklearn.pipeline import FeatureUnion, _fit_transform_one, _transform_one
 from sklearn.preprocessing import FunctionTransformer
 
 
@@ -142,9 +142,6 @@ class SampleAugmentation(FeatureUnion):
         params : dict
             Parameters to be passed to the transformer's ``transform`` method.
         """
-        if columns is not None:
-            X = _safe_indexing(X, columns, axis=1)
-
         if params is not None and hasattr(params, 'transform'):
             res = transformer.transform(X, **params.transform)
         else:
@@ -241,8 +238,6 @@ class SampleAugmentation(FeatureUnion):
 
 #     def _transform_one(transformer, X, y, weight, columns=None, params=None):
 #         """Call transform and apply weight to output."""
-#         if columns is not None:
-#             X = _safe_indexing(X, columns, axis=1)
 
 #         if params is not None and 'transform' in params:
 #             res = transformer.transform(X, **params['transform'])
