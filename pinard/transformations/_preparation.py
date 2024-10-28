@@ -43,22 +43,22 @@ class ResampleTransformer(BaseEstimator, TransformerMixin):
         return np.array(resampled)
 
 
-# Example usage:
-if __name__ == "__main__":
-    X = np.array([
-        [1.0, 2.0, 3.0, 4.0, 5.0],
-        [6.0, 7.0, 8.0, 9.0, 10.0]
-    ])
+# # Example usage:
+# if __name__ == "__main__":
+#     X = np.array([
+#         [1.0, 2.0, 3.0, 4.0, 5.0],
+#         [6.0, 7.0, 8.0, 9.0, 10.0]
+#     ])
 
-    crop_transformer = CropTransformer(start=1, end=4)
-    resample_transformer = ResampleTransformer(num_samples=3)
+#     crop_transformer = CropTransformer(start=1, end=4)
+#     resample_transformer = ResampleTransformer(num_samples=3)
 
-    X_cropped = crop_transformer.transform(X)
-    X_resampled = resample_transformer.transform(X)
+#     X_cropped = crop_transformer.transform(X)
+#     X_resampled = resample_transformer.transform(X)
 
-    print("Original X:")
-    print(X)
-    print("Cropped X:")
-    print(X_cropped)
-    print("Resampled X:")
-    print(X_resampled)
+#     print("Original X:")
+#     print(X)
+#     print("Cropped X:")
+#     print(X_cropped)
+#     print("Resampled X:")
+#     print(X_resampled)

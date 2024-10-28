@@ -15,6 +15,7 @@ from ._nirs import (Haar, MultiplicativeScatterCorrection, SavitzkyGolay, Wavele
 from ._scaler import (Derivate, Normalize, SimpleScale, derivate, norml, spl_norml)
 from ._standard import Baseline, Detrend, Gaussian, baseline, detrend, gaussian
 from ._preparation import CropTransformer, ResampleTransformer
+from .augmenter import Augmenter, IdentityAugmenter
 
 
 __all__ = [
@@ -51,4 +52,6 @@ __all__ = [
     "gaussian",
     "CropTransformer",
     "ResampleTransformer",
+    "Augmenter",
+    "IdentityAugmenter",
 ]

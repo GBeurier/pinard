@@ -11,10 +11,7 @@ from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.preprocessing import KBinsDiscretizer
-
-tweening = importlib.util.find_spec("tweening")
-if tweening is not None:
-    from tweening import twin
+from twinning import twin
 
 
 def _validate_shuffle_split(n_samples, test_size, train_size, default_test_size=None):
@@ -346,6 +343,31 @@ class SPXYSplitter(CustomSplitter):
             index_test = np.delete(index_test, next_point)
 
         return index_train, index_test
+
+    def get_n_splits(self, X=None, y=None, groups=None):
+        return self.n_splits
+
+
+class SPlitSplitter(CustomSplitter):
+    """
+    Implements the SPlit sampling.
+    """
+
+    def __init__(self, test_size, random_state=None):
+        super().__init__()
+        self.test_size = test_size
+        self.random_state = random_state
+        self.n_splits = 1  # Single split
+
+    def split(self, X, y=None, groups=None):
+        n_samples = X.shape[0]
+        # n_features = X.shape[1]
+        # n_train, n_test = _validate_shuffle_split(n_samples, self.test_size, None)
+
+        r = int(1 / self.test_size)
+        index_test = twin(X, r)
+        index_train = np.delete(np.arange(n_samples), index_test)
+        yield index_train, index_test
 
     def get_n_splits(self, X=None, y=None, groups=None):
         return self.n_splits

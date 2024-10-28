@@ -18,7 +18,7 @@ extra_bin = [
 extra_test = [
     *extra_api,
     'pytest>=4',
-    'pytest-cov>=2',
+    'pytest-cov>=5',
 ]
 extra_dev = [
     *extra_test,

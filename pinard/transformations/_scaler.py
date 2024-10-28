@@ -33,7 +33,7 @@ class Normalize(TransformerMixin, BaseEstimator):
     def __init__(self, feature_range=(-1, 1), *, copy=True):
         self.copy = copy
         self.feature_range = feature_range
-        self.user_defined = feature_range[0] != -1 and feature_range[1] != -1
+        self.user_defined = feature_range[0] != -1 or feature_range[1] != 1
 
     def _reset(self):
         if hasattr(self, "min_"):
@@ -80,7 +80,7 @@ class Normalize(TransformerMixin, BaseEstimator):
             Returns the instance itself.
         """
         feature_range = self.feature_range
-        if self.user_defined and feature_range[0] >= feature_range[1]:
+        if self.user_defined and feature_range[0] > feature_range[1]:
             warnings.warn(
                 f"Minimum of desired feature range should be smaller than maximum. Got {feature_range}",
                 SyntaxWarning,
@@ -121,23 +121,15 @@ class Normalize(TransformerMixin, BaseEstimator):
             The transformed data.
         """
         check_is_fitted(self)
-
-        X = self._validate_data(
-            X, reset=False, copy=self.copy, dtype=FLOAT_DTYPES, estimator=self
-        )
+        X = self._validate_data(X, reset=False, copy=self.copy, dtype=FLOAT_DTYPES, estimator=self)
 
         if self.user_defined:
             imin = self.feature_range[0]
             f = self.f_
-            n = X.shape
-            arr = np.empty((0, n[0]), dtype=float)
-            for i in range(0, n[1]):
-                d = X[:, i]
-                dnorm = imin + f * d
-                arr = np.append(arr, [dnorm], axis=0)
-            X = np.transpose(arr)
+            X = imin + f * (X - self.min_)
         else:
             X = X / self.linalg_norm_
+
         return X
 
     def inverse_transform(self, X):
@@ -154,21 +146,15 @@ class Normalize(TransformerMixin, BaseEstimator):
             The inverse transformed data.
         """
         check_is_fitted(self)
-
         X = check_array(X, copy=self.copy, dtype=FLOAT_DTYPES)
 
         if self.user_defined:
             imin = self.feature_range[0]
             f = self.f_
-            n = X.shape
-            arr = np.empty((0, n[0]), dtype=float)
-            for i in range(0, n[1]):
-                d = X[:, i]
-                dnorm = d / f - imin
-                arr = np.append(arr, [dnorm], axis=0)
-            X = np.transpose(arr)
+            X = (X - imin) / f + self.min_
         else:
             X = X * self.linalg_norm_
+
         return X
 
     def _more_tags(self):
@@ -193,10 +179,10 @@ def norml(spectra, feature_range=(-1, 1)):
     spectra : numpy.ndarray
         Normalized NIR spectra.
     """
-    if feature_range[0] != -1 and feature_range[1] != -1:
+    if feature_range[0] != -1 and feature_range[1] != 1:
         imin = feature_range[0]
         imax = feature_range[1]
-        if imin >= imax:
+        if imin > imax:
             warnings.warn(
                 "Minimum of desired feature range should be smaller than maximum. "
                 f"Got {feature_range}.",
