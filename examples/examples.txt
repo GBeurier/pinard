@@ -1,0 +1,485 @@
+# Examples Illustrating the Use of the Pinard Package
+
+Below are six examples that progressively demonstrate the capabilities of the Pinard package, from simple data transformations to fine-tuning custom TensorFlow models. Each example includes comments to explain the steps involved.
+
+---
+
+## **Example 1: Applying a Simple Data Transformation**
+
+In this example, we load a dataset and apply a Standard Normal Variate (SNV) transformation using Pinard. This is a basic preprocessing step often used in spectral data analysis.
+
+```python
+# Example 1: Applying a Simple Data Transformation using Pinard
+
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname('__file__'), '..')))
+
+from pinard.core.config import Config
+from pinard.core.runner import ExperimentRunner
+from pinard.transformations import StandardNormalVariate as SNV
+from sklearn.preprocessing import MinMaxScaler
+
+# Define the dataset path
+dataset_path = "sample_data/mock_data"
+
+# Define the data transformation pipeline
+# Here we apply Standard Normal Variate (SNV) transformation
+x_pipeline = [
+    SNV(),            # Apply SNV transformation
+    MinMaxScaler()    # Scale features to [0,1]
+]
+
+# No model is used in this example; we focus on data transformation
+config = Config(
+    dataset_path=dataset_path,
+    x_pipeline=x_pipeline,
+    y_pipeline=None,
+    model=None,
+    experiment_params=None,
+    seed=42
+)
+
+# Run the experiment
+runner = ExperimentRunner(configs=[config])
+dataset, model_manager = runner.run()
+
+# Access the transformed data
+transformed_data = dataset.x_train
+
+print("Transformed data shape:", transformed_data.shape)
+```
+
+**Explanation:**
+
+- **Imports:** Import necessary modules from Pinard and scikit-learn.
+- **Data Path:** Specify the path to the dataset.
+- **Pipeline:** Define an `x_pipeline` that includes SNV transformation and scaling.
+- **Configuration:** Create a `Config` object without specifying a model.
+- **Run Experiment:** Use `ExperimentRunner` to process the data.
+- **Output:** Print the shape of the transformed data.
+
+---
+
+## **Example 2: Preprocessing and Training a Simple Model**
+
+This example extends the previous one by adding a preprocessing pipeline and training a simple Linear Regression model using scikit-learn.
+
+```python
+# Example 2: Applying a Preprocessing Pipeline and Training a Simple Model
+
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname('__file__'), '..')))
+
+from pinard.core.config import Config
+from pinard.core.runner import ExperimentRunner
+from pinard.transformations import StandardNormalVariate as SNV, SavitzkyGolay as SG
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.linear_model import LinearRegression
+
+# Define the dataset path
+dataset_path = "sample_data/mock_data"
+
+# Define the data transformation pipeline
+x_pipeline = [
+    SG(window_length=11, polyorder=2),  # Apply Savitzky-Golay filter
+    SNV(),                              # Apply SNV transformation
+    MinMaxScaler()                      # Scale features to [0,1]
+]
+
+# Define the model
+model = {
+    "class": "sklearn.linear_model.LinearRegression",
+    "model_params": {}
+}
+
+# Training parameters
+train_params = {
+    "action": "train",
+    "training_params": {}
+}
+
+# Define the configuration
+config = Config(
+    dataset_path=dataset_path,
+    x_pipeline=x_pipeline,
+    y_pipeline=None,
+    model=model,
+    experiment_params=train_params,
+    seed=42
+)
+
+# Run the experiment
+runner = ExperimentRunner(configs=[config])
+dataset, model_manager = runner.run()
+
+# Access the trained model
+trained_model = model_manager.models[0].model
+
+# Print model coefficients
+print("Model coefficients:", trained_model.coef_)
+```
+
+**Explanation:**
+
+- **Pipeline:** Adds a Savitzky-Golay filter to smooth the data.
+- **Model:** Specifies a Linear Regression model.
+- **Training:** Defines training parameters for the model.
+- **Run Experiment:** Processes data and trains the model.
+- **Output:** Prints the coefficients of the trained model.
+
+---
+
+## **Example 3: Using Cross-Validation**
+
+Here, we introduce cross-validation into the pipeline using `RepeatedKFold`. This allows us to assess the model's performance more robustly.
+
+```python
+# Example 3: Using Cross-Validation with Pinard
+
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname('__file__'), '..')))
+
+from pinard.core.config import Config
+from pinard.core.runner import ExperimentRunner
+from pinard.transformations import StandardNormalVariate as SNV, SavitzkyGolay as SG
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import RepeatedKFold
+from sklearn.linear_model import Ridge
+
+# Define the dataset path
+dataset_path = "sample_data/mock_data"
+
+# Define the data transformation pipeline with cross-validation
+x_pipeline = [
+    {"split": RepeatedKFold(n_splits=5, n_repeats=2, random_state=42)},
+    SG(window_length=11, polyorder=2),
+    SNV(),
+    MinMaxScaler()
+]
+
+# Define the model
+model = {
+    "class": "sklearn.linear_model.Ridge",
+    "model_params": {
+        "alpha": 1.0
+    }
+}
+
+# Training parameters
+train_params = {
+    "action": "train",
+    "training_params": {}
+}
+
+# Define the configuration
+config = Config(
+    dataset_path=dataset_path,
+    x_pipeline=x_pipeline,
+    y_pipeline=None,
+    model=model,
+    experiment_params=train_params,
+    seed=42
+)
+
+# Run the experiment
+runner = ExperimentRunner(configs=[config])
+dataset, model_manager = runner.run()
+
+# Evaluate the model
+scores = model_manager.models[0].scores
+print("Cross-validation scores:", scores)
+```
+
+**Explanation:**
+
+- **Cross-Validation:** Uses `RepeatedKFold` in the `x_pipeline`.
+- **Model:** Switches to Ridge Regression with an `alpha` parameter.
+- **Evaluation:** After training, cross-validation scores are printed.
+
+---
+
+## **Example 4: Fine-Tuning a Model**
+
+In this example, we demonstrate how to fine-tune a model's hyperparameters using Pinard's finetuning capabilities.
+
+```python
+# Example 4: Fine-tuning a Model with Pinard
+
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname('__file__'), '..')))
+
+from pinard.core.config import Config
+from pinard.core.runner import ExperimentRunner
+from pinard.transformations import StandardNormalVariate as SNV, SavitzkyGolay as SG
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import RepeatedKFold
+from sklearn.linear_model import Ridge
+
+# Define the dataset path
+dataset_path = "sample_data/mock_data"
+
+# Define the data transformation pipeline with cross-validation
+x_pipeline = [
+    {"split": RepeatedKFold(n_splits=5, n_repeats=2, random_state=42)},
+    SG(window_length=11, polyorder=2),
+    SNV(),
+    MinMaxScaler()
+]
+
+# Define the model
+model = {
+    "class": "sklearn.linear_model.Ridge",
+    "model_params": {}
+}
+
+# Define the finetune parameters
+finetune_params = {
+    "action": "finetune",
+    "finetune_params": {
+        'model_params': {
+            'alpha': ('float', 0.1, 10.0)
+        },
+        'training_params': {},
+        'n_trials': 20,
+        'tuner': 'sklearn'  # Use scikit-learn's GridSearchCV
+    }
+}
+
+# Define the configuration
+config = Config(
+    dataset_path=dataset_path,
+    x_pipeline=x_pipeline,
+    y_pipeline=None,
+    model=model,
+    experiment_params=finetune_params,
+    seed=42
+)
+
+# Run the experiment
+runner = ExperimentRunner(configs=[config])
+dataset, model_manager = runner.run()
+
+# Get the best model and its parameters
+best_model = model_manager.models[0].best_model
+best_params = model_manager.models[0].best_params
+
+print("Best model parameters:", best_params)
+```
+
+**Explanation:**
+
+- **Finetuning:** Specifies an `alpha` range for Ridge Regression.
+- **Trials:** Runs 20 trials to find the best `alpha`.
+- **Output:** Prints the best hyperparameters found.
+
+---
+
+## **Example 5: Training a Custom TensorFlow Model**
+
+This example shows how to integrate a custom TensorFlow model into Pinard for training.
+
+```python
+# Example 5: Training a Custom TensorFlow Model with Pinard
+
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname('__file__'), '..')))
+
+from pinard.core.config import Config
+from pinard.core.runner import ExperimentRunner
+from pinard.transformations import StandardNormalVariate as SNV, SavitzkyGolay as SG
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import RepeatedKFold
+import tensorflow as tf
+
+# Define the dataset path
+dataset_path = "sample_data/mock_data"
+
+# Placeholder for input shape (to be defined later)
+input_shape = None
+
+# Define the custom TensorFlow model
+def create_tf_model():
+    model = tf.keras.Sequential([
+        tf.keras.layers.Dense(64, activation='relu', input_shape=(input_shape,)),
+        tf.keras.layers.Dense(1)
+    ])
+    model.compile(optimizer='adam', loss='mse')
+    return model
+
+model = {
+    "class": "tensorflow.keras.models.Sequential",
+    "model_params": {
+        "build_fn": create_tf_model
+    }
+}
+
+# Training parameters
+train_params = {
+    "action": "train",
+    "training_params": {
+        "epochs": 50,
+        "batch_size": 32,
+        "verbose": 1
+    }
+}
+
+# Define the data transformation pipeline with cross-validation
+x_pipeline = [
+    {"split": RepeatedKFold(n_splits=5, n_repeats=2, random_state=42)},
+    SG(window_length=11, polyorder=2),
+    SNV(),
+    MinMaxScaler()
+]
+
+# Define the configuration
+config = Config(
+    dataset_path=dataset_path,
+    x_pipeline=x_pipeline,
+    y_pipeline=None,
+    model=model,
+    experiment_params=train_params,
+    seed=42
+)
+
+# Run the experiment
+runner = ExperimentRunner(configs=[config])
+
+# Set the input shape after data is loaded
+dataset, model_manager = runner.load_data_only()
+input_shape = dataset.x_train.shape[1]
+model['model_params']['build_fn'] = create_tf_model
+
+# Run the training
+dataset, model_manager = runner.run()
+
+# Access the trained model
+trained_model = model_manager.models[0].model
+
+# Evaluate the model
+loss = trained_model.evaluate(dataset.x_test, dataset.y_test)
+print("Test loss:", loss)
+```
+
+**Explanation:**
+
+- **Custom Model:** Defines a simple TensorFlow Sequential model.
+- **Input Shape:** Obtains `input_shape` after loading data.
+- **Training:** Trains the model using Pinard's infrastructure.
+- **Evaluation:** Evaluates the model on the test set.
+
+---
+
+## **Example 6: Fine-Tuning a Custom TensorFlow Model**
+
+Finally, we fine-tune hyperparameters of a custom TensorFlow model using Pinard.
+
+```python
+# Example 6: Fine-tuning a Custom TensorFlow Model with Pinard
+
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname('__file__'), '..')))
+
+from pinard.core.config import Config
+from pinard.core.runner import ExperimentRunner
+from pinard.transformations import StandardNormalVariate as SNV, SavitzkyGolay as SG
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import RepeatedKFold
+import tensorflow as tf
+from kerastuner import HyperModel
+
+# Define the dataset path
+dataset_path = "sample_data/mock_data"
+
+# Placeholder for input shape (to be defined later)
+input_shape = None
+
+# Define a hypermodel for Keras Tuner
+class MyHyperModel(HyperModel):
+    def build(self, hp):
+        model = tf.keras.Sequential()
+        units = hp.Int('units', min_value=32, max_value=128, step=32)
+        model.add(tf.keras.layers.Dense(units=units, activation='relu', input_shape=(input_shape,)))
+        model.add(tf.keras.layers.Dense(1))
+        optimizer = hp.Choice('optimizer', ['adam', 'sgd'])
+        model.compile(optimizer=optimizer, loss='mse')
+        return model
+
+# Define the model
+model = {
+    "class": "tensorflow.keras.models.Sequential",
+    "model_params": {
+        "build_fn": MyHyperModel()
+    }
+}
+
+# Define the finetune parameters
+finetune_params = {
+    "action": "finetune",
+    "finetune_params": {
+        'model_params': {
+            'units': ('int', 32, 128, 32),
+            'optimizer': ['adam', 'sgd']
+        },
+        'training_params': {
+            'epochs': 50,
+            'batch_size': 32
+        },
+        'n_trials': 20,
+        'tuner': 'keras'  # Use Keras Tuner
+    }
+}
+
+# Define the data transformation pipeline with cross-validation
+x_pipeline = [
+    {"split": RepeatedKFold(n_splits=5, n_repeats=2, random_state=42)},
+    SG(window_length=11, polyorder=2),
+    SNV(),
+    MinMaxScaler()
+]
+
+# Define the configuration
+config = Config(
+    dataset_path=dataset_path,
+    x_pipeline=x_pipeline,
+    y_pipeline=None,
+    model=model,
+    experiment_params=finetune_params,
+    seed=42
+)
+
+# Run the experiment
+runner = ExperimentRunner(configs=[config])
+
+# Set the input shape after data is loaded
+dataset, model_manager = runner.load_data_only()
+input_shape = dataset.x_train.shape[1]
+model['model_params']['build_fn'] = MyHyperModel()
+
+# Run the finetuning
+dataset, model_manager = runner.run()
+
+# Get the best model and its parameters
+best_model = model_manager.models[0].best_model
+best_params = model_manager.models[0].best_params
+
+print("Best model parameters:", best_params)
+```
+
+**Explanation:**
+
+- **HyperModel:** Uses Keras Tuner's `HyperModel` class to define search space.
+- **Hyperparameters:** Tunes `units` in hidden layers and `optimizer`.
+- **Finetuning:** Runs trials to find the best hyperparameters.
+- **Output:** Prints the best hyperparameters found.
+
+---
+
+These examples showcase how Pinard can be used for data preprocessing, model training, cross-validation, and hyperparameter tuning, both with scikit-learn and TensorFlow models. Each example builds upon the previous ones to demonstrate more advanced features.
+
+Feel free to explore and modify these examples to suit your specific use cases with the Pinard package.
