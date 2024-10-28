@@ -1,3 +1,3 @@
-__version__ = "1.1.2"
+__version__ = "2.0.0b1"
 
-__all__ = ["augmentation", "model_selection", "sklearn", "preprocessing"]
+__all__ = ["core", "data", "data_splitters", "presets", "transformations"]
