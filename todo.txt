@@ -1,10 +1,8 @@
-- remover augmenter.py, keep as sklearn transformers.
-
-
 - CSV LOADER !!!!!!!!
-
-
+- parametric augmentation {"samples":[], "target":"per_sample", "balance":"y", "balance_transformation":"bins"}
+- remover augmenter.py, keep as sklearn transformers.
 - test_splitter all wrong now
+- fix pip folders
 
 ---------------------------------------------------------------------------------------
 TODO NEXT

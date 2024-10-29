@@ -26,3 +26,5 @@ build/
 .gitignore.orig
 tests/tester.ipynb
 tests/test.ipynb
+/examples/results
+/examples/sample_data
