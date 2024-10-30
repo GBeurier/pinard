@@ -51,6 +51,7 @@ setup(
         'scikit-learn',
         'scipy',
         'twinning',
+        'optuna'
     ],
 
     extras_require={

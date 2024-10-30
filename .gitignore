@@ -26,6 +26,7 @@ build/
 .gitignore.orig
 tests/tester.ipynb
 tests/test.ipynb
+<<<<<<< HEAD
 bak/conftest.py
 bak/test.ipynb
 bak/test_augmentation.py
@@ -193,3 +194,7 @@ examples/FOOD_CHEM_lost/Wheat_Proteine_100_Kalivas2/Ycal.csv
 examples/FOOD_CHEM_lost/Wheat_Proteine_100_Kalivas2/Yval2.csv
 examples/example.csv
 examples/example1.csv
+=======
+/examples/results
+/examples/sample_data
+>>>>>>> wizard_integration
