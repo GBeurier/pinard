@@ -379,7 +379,7 @@ if TF_AVAILABLE:
         def __init__(self):
             super(BestModelMemory, self).__init__()
             self.best_weights = None
-            self.best_val_loss = np.Inf
+            self.best_val_loss = np.inf
 
         def on_epoch_end(self, epoch, logs=None):
             val_loss = logs.get('val_loss')

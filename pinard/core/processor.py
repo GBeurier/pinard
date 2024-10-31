@@ -1,3 +1,5 @@
+# processor.py
+
 import numpy as np
 from sklearn.pipeline import Pipeline
 from joblib import Parallel, delayed
@@ -179,34 +181,83 @@ def exec_step_x(
         split_key = next((k for k in step if k in ["split", "spl", "splitter", "SPL"]), None)
 
         if sample_key is not None:
-            # Sample augmentation
-            # logger.info(indent + "Sample augmentation")
+            balanced = step.get("balance", False)
             sample_transformers = step[sample_key]
-            num_transformers = len(sample_transformers)
-            train_data = np.repeat(train_data, num_transformers, axis=0)
 
-            def process_sample_transformer(i_st):
-                i, st = i_st
-                aug_range = range(i * n_augmentations, (i + 1) * n_augmentations)
-                aug_data = train_data[aug_range, :, :, :]
-                augmented_dataset = Dataset(_x_train=aug_data)
-                augmented_dataset = exec_step_x(
-                    augmented_dataset, st, logger, indent + " ", fit_test, True, cache
-                )
-                return (aug_range, augmented_dataset.raw_x_train)
-            
-            # Parallel execution
-            # results = Parallel(n_jobs=-1, backend='loky')(
-                # delayed(process_sample_transformer)((i, st)) for i, st in enumerate(sample_transformers)
-            # )
-            # Sequential execution
-            results = [process_sample_transformer((i, st)) for i, st in enumerate(sample_transformers)]
+            if balanced:
+                # Balanced augmentation
+                y_train = dataset.raw_y_train
+                classes, class_counts = np.unique(y_train, return_counts=True)
+                max_count = np.max(class_counts)
+                augmented_data_list = []
+                augmented_labels_list = []
 
-            for aug_range, aug_train_data in results:
-                train_data[aug_range, :, :, :] = aug_train_data
+                for cls, count in zip(classes, class_counts):
+                    num_needed = max_count - count
+                    if num_needed > 0:
+                        # Get indices of samples belonging to this class
+                        class_indices = np.where(y_train.flatten() == cls)[0]
+                        num_class_samples = len(class_indices)
+                        repeats_per_sample = int(np.ceil(num_needed / num_class_samples))
 
-            dataset.raw_x_train = train_data
-            return dataset
+                        for idx in class_indices:
+                            sample_data = dataset.raw_x_train[:, idx:idx+1, :, :]
+                            sample_label = y_train[idx:idx+1]
+
+                            for _ in range(repeats_per_sample):
+                                for st in sample_transformers:
+                                    augmented_dataset = Dataset(_x_train=sample_data)
+                                    augmented_dataset = exec_step_x(
+                                        augmented_dataset, st, logger, indent + " ", fit_test, True, cache
+                                    )
+                                    augmented_data_list.append(augmented_dataset.raw_x_train)
+                                    augmented_labels_list.append(sample_label)
+                                    num_needed -= 1
+                                    if num_needed <= 0:
+                                        break
+                                if num_needed <= 0:
+                                    break
+                            if num_needed <= 0:
+                                break
+
+                #print shape and number of element per class ({class: number of elements})
+                print(dataset.raw_x_train.shape, dataset.raw_y_train.shape)
+                print({cls: len(np.where(y_train.flatten() == cls)[0]) for cls in classes})
+                print({cls: len(np.where(np.concatenate(augmented_labels_list).flatten() == cls)[0]) for cls in classes})
+                if augmented_data_list:
+                    # Concatenate augmented data and labels
+                    augmented_data = np.concatenate(augmented_data_list, axis=1)
+                    augmented_labels = np.concatenate(augmented_labels_list, axis=0)
+                    # Update dataset with augmented data
+                    dataset.raw_x_train = np.concatenate([dataset.raw_x_train, augmented_data], axis=1)
+                    dataset._y_train = np.concatenate([dataset.raw_y_train, augmented_labels], axis=0)
+                print(dataset.raw_x_train.shape, dataset.raw_y_train.shape)
+                print({cls: len(np.where(dataset.y_train_().flatten() == cls)[0]) for cls in classes})
+                # print({cls: len(np.where(np.concatenate(augmented_labels_list).flatten() == cls)[0]) for cls in classes})    
+                
+                return dataset
+            else:
+                # Original behavior (uniform augmentation)
+                num_transformers = len(sample_transformers)
+                train_data = np.repeat(train_data, num_transformers, axis=0)
+
+                def process_sample_transformer(i_st):
+                    i, st = i_st
+                    aug_range = range(i * n_augmentations, (i + 1) * n_augmentations)
+                    aug_data = train_data[aug_range, :, :, :]
+                    augmented_dataset = Dataset(_x_train=aug_data)
+                    augmented_dataset = exec_step_x(
+                        augmented_dataset, st, logger, indent + " ", fit_test, True, cache
+                    )
+                    return (aug_range, augmented_dataset.raw_x_train)
+
+                results = [process_sample_transformer((i, st)) for i, st in enumerate(sample_transformers)]
+
+                for aug_range, aug_train_data in results:
+                    train_data[aug_range, :, :, :] = aug_train_data
+
+                dataset.raw_x_train = train_data
+                return dataset
 
         elif feature_key is not None:
             # Feature augmentation
@@ -401,224 +452,3 @@ def apply_step_x(
 def hash_data_crc32(data):
     return zlib.crc32(data) & 0xffffffff  # Mask to ensure 32-bit output
 
-
-# import numpy as np
-# from sklearn.pipeline import Pipeline
-# from joblib import Parallel, delayed
-# from sklearn.base import TransformerMixin
-# import importlib
-# import inspect
-# import hashlib
-# from typing import Any, List, Tuple, Optional
-
-# from dataset.dataset import Dataset
-# from experiments.folder import run_splitter
-
-
-# def instantiate_class(class_name: str, params: dict):
-#     """
-#     Instantiate a class given its name and parameters.
-#     """
-#     try:
-#         components = class_name.split('.')
-#         module_name = '.'.join(components[:-1])
-#         class_name = components[-1]
-
-#         module = importlib.import_module(module_name)
-#         class_ = getattr(module, class_name)
-#         return class_(**params)
-#     except Exception as e:
-#         raise ValueError(f"Class {class_name} not found: {str(e)}") from e
-
-
-# def get_transformer(config):
-#     """
-#     Get a transformer instance from the config.
-#     """
-#     if isinstance(config, TransformerMixin):
-#         return config
-#     elif isinstance(config, tuple):
-#         class_def, params = config
-#         if isinstance(class_def, str):
-#             return instantiate_class(class_def, params)
-#         elif inspect.isclass(class_def):
-#             return class_def(**params)
-#         else:
-#             raise ValueError("Invalid transformer configuration")
-#     elif isinstance(config, str):
-#         return instantiate_class(config, {})
-#     elif isinstance(config, dict):
-#         return instantiate_class(config['class'], config.get('params', {}))
-#     elif inspect.isclass(config):
-#         return config()
-#     else:
-#         raise ValueError("Invalid transformer configuration")
-
-
-# def run_pipeline(dataset, x_pipeline, y_pipeline, logger, cache):
-#     dataset = exec_step_x(dataset, x_pipeline, logger, "", fit_test=False, cache=cache)
-#     dataset = exec_step_y(dataset, y_pipeline, fit_test=False)
-#     return dataset
-
-
-# def exec_step_y(dataset, step, fit_test=False):
-#     train_data, test_data = dataset.raw_y_train, dataset.raw_y_test
-#     if isinstance(step, dict):
-#         raise NotImplementedError("Sample and feature augmentation not authorized for y data")
-
-#     elif isinstance(step, list):
-#         raise NotImplementedError("Sequential pipeline not authorized for y data")
-
-#     elif isinstance(step, TransformerMixin):
-#         transformer = get_transformer(step)
-#         if not fit_test:
-#             train_data = train_data if transformer is None else transformer.fit_transform(train_data)
-#             test_data = test_data if transformer is None else transformer.transform(test_data)
-#         else:
-#             agg_data = np.concatenate((train_data, test_data), axis=0)
-#             step.fit(agg_data)
-#             train_data = step.transformer(train_data)
-#             test_data = step.transformer(test_data)
-        
-#         dataset.y_train, dataset.y_test, dataset.y_transformer = train_data, test_data, transformer
-#         return dataset
-
-#     elif step is None:
-#         return dataset
-    
-#     raise ValueError("Invalid step format")
-
-
-# def exec_step_x(dataset, step, logger, tab, fit_test=False, skip_test=False, cache=None):
-#     train_data, test_data = dataset.raw_x_train, dataset.raw_x_test
-#     n_augmentations = train_data.shape[0]
-#     n_samples = train_data.shape[1]
-#     n_transformations = train_data.shape[2]
-#     n_features = train_data.shape[3]
-
-#     if isinstance(step, dict):
-#         sample_key = next((k for k in step if k in ["s", "samples", "sample_augmentation", "S"]), None)
-#         feature_key = next((k for k in step if k in ["f", "features", "feature_augmentation", "F", "parallel"]), None)
-#         split_key = next((k for k in step if k in ["split", "spl", "splitter", "SPL"]), None)
-        
-#         if sample_key is not None:
-#             # logger.info(tab + "Sample augmentation")
-#             # logger.info(dataset.to_str())
-#             sample_transformers = step[sample_key]
-#             train_data = np.repeat(train_data, len(sample_transformers), axis=0)
-#             for (i, st) in enumerate(sample_transformers):  # should be parallel execution
-#                 aug_range = range(i * n_augmentations, (i + 1) * n_augmentations)
-#                 aug_data = train_data[aug_range, :, :, :]
-#                 augmented_dataset = Dataset(_x_train=aug_data)
-#                 augmented_dataset = exec_step_x(augmented_dataset, st, logger, tab + " ", fit_test, True, cache=cache)
-#                 train_data[aug_range, :, :, :] = augmented_dataset.raw_x_train
-#             dataset.raw_x_train = train_data
-#             return dataset
-
-#         elif feature_key is not None:
-#             # logger.info(tab + "Feature augmentation")
-#             # logger.info(dataset.to_str())
-#             feature_transformers = step[feature_key]
-#             train_data = np.repeat(train_data, len(feature_transformers), axis=2)
-#             if not skip_test:
-#                 test_data = np.repeat(test_data, len(feature_transformers), axis=2)
-            
-#             for (i, ft) in enumerate(feature_transformers):  # should be parallel execution
-#                 tr_range = range(i * n_transformations, (i + 1) * n_transformations)
-#                 tr_train_data = train_data[:, :, tr_range, :]
-#                 if not skip_test:
-#                     tr_test_data = test_data[:, :, tr_range, :]
-                    
-#                 transformed_dataset = Dataset(_x_train=tr_train_data, _x_test=tr_test_data)
-#                 transformed_dataset = exec_step_x(transformed_dataset, ft, logger, tab + " ", fit_test, skip_test, cache=cache)
-                
-#                 train_data[:, :, tr_range, :] = transformed_dataset.raw_x_train
-#                 if not skip_test:
-#                     test_data[:, :, tr_range, :] = transformed_dataset.raw_x_test
-            
-#             dataset.raw_x_train = train_data
-#             if not skip_test:
-#                 dataset.raw_x_test = test_data
-#             return dataset
-        
-#         elif split_key is not None:
-#             # logger.info(tab + "Splitting dataset")
-#             # logger.info(dataset.to_str())
-#             splitter_config = step[split_key]
-#             dataset.folds = run_splitter(splitter_config, dataset)
-#             return dataset
-        
-#         elif "class" in step:
-#             transformer = get_transformer(step)
-#             return apply_step_x(dataset, transformer, logger, tab, fit_test, skip_test, cache=cache)
-        
-#         raise ValueError("Invalid step format")
-
-#     elif isinstance(step, list):
-#         # logger.info(tab + "Sequential pipeline")
-#         # logger.info(dataset.to_str())
-#         for s in step:
-#             dataset = exec_step_x(dataset, s, logger, tab + " ", fit_test, skip_test, cache=cache)
-#         return dataset
-
-#     elif isinstance(step, TransformerMixin):
-#         return apply_step_x(dataset, step, logger, tab, fit_test, skip_test, cache=cache)
-
-#     elif inspect.isclass(step):
-#         transformer = get_transformer(step)
-#         return apply_step_x(dataset, transformer, logger, tab, fit_test, skip_test, cache=cache)
-        
-#     elif isinstance(step, str):
-#         transformer = get_transformer(step)
-#         return apply_step_x(dataset, transformer, logger, tab, fit_test, skip_test, cache=cache)
-
-#     elif step is None:
-#         # Identity transformation
-#         return dataset
-
-#     raise ValueError("Invalid step format")
-
-
-# def apply_step_x(dataset, step, logger, tab, fit_test=False, skip_test=False, cache=None):
-#     train_data, test_data = dataset.raw_x_train, dataset.raw_x_test
-#     n_augmentations = train_data.shape[0]
-#     n_samples = train_data.shape[1]
-#     n_transformations = train_data.shape[2]
-#     n_features = train_data.shape[3]
-    
-#     # logger.info(tab + f"Single transformer: {step.__class__.__name__}")
-#     # logger.info(dataset.to_str())
-#     for tr in range(n_transformations):  # should be parallel execution
-#         transformer = get_transformer(step)
-#         transformer_id = hash_data_crc32(str(transformer).encode()).hexdigest()
-        
-#         train_data_view = train_data[:, :, tr, :].reshape(n_augmentations * n_samples, n_features)
-#         train_data_id = hashlib.md5(train_data_view.tobytes()).hexdigest()
-#         if not skip_test:
-#             n_test_samples = test_data.shape[1]
-#             test_data_view = test_data[:, :, tr, :].reshape(n_test_samples, n_features)
-#             test_data_id = hash_data_crc32(test_data_view.tobytes())
-        
-#         cache_key_train = f"{train_data_id}_{transformer_id}"
-#         cache_key_test = f"{test_data_id}_{transformer_id}"
-#         if not fit_test:
-#             if cache_key_train in cache:
-#             train_data_view = train_data_view if transformer is None else transformer.fit_transform(train_data_view)
-#             if not skip_test:
-#                 test_data_view = test_data_view if transformer is None else transformer.transform(test_data_view)
-#             train_data[:, :, tr, :] = train_data_view.reshape(n_augmentations, n_samples, n_features)
-#             if not skip_test:
-#                 test_data[:, :, tr, :] = test_data_view.reshape(n_test_samples, n_features)
-#         else:
-#             agg_data = np.concatenate((train_data_view, test_data_view), axis=0) if test_data is not None else train_data_view
-#             step.fit(agg_data)
-#             train_data_view = step.transformer(train_data_view)
-#             if not skip_test:
-#                 test_data_view = step.transformer(test_data_view)
-#             train_data[:, :, tr, :] = train_data_view.reshape(n_augmentations, n_samples, n_features)
-#             if not skip_test:
-#                 test_data[:, :, tr, :] = test_data_view.reshape(n_samples, n_features)
-#     dataset.raw_x_train = train_data
-#     if not skip_test:
-#         dataset.raw_x_test = test_data
-#     return dataset

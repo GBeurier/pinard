@@ -104,6 +104,11 @@ class OptunaFineTuner(BaseFineTuner):
         best_model = ModelBuilderFactory.build_single_model(self.model_manager.model_config, dataset, best_model_params)
         self.model_manager.model = best_model
 
+        if src_training_params is not None:
+            for key, value in src_training_params.items():
+                if key not in best_training_params:
+                    best_training_params[key] = value
+
         # Optionally, retrain the best model on the full training data
         self.model_manager.train(dataset, training_params=best_training_params)
 
@@ -159,6 +164,11 @@ class SklearnFineTuner(BaseFineTuner):
 
         # Optional training with new parameters
         training_params = finetune_params.get('training_params', {})
+        
+        if src_training_params is not None:
+            for key, value in src_training_params.items():
+                if key not in training_params:
+                    training_params[key] = value
         self.model_manager.train(dataset, training_params=training_params, metrics=metrics)
 
         return best_params
