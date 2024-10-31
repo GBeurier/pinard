@@ -1,9 +1,11 @@
-- CSV LOADER !!!!!!!!
-- parametric augmentation {"samples":[], "target":"per_sample", "balance":"y", "balance_transformation":"bins"}
-- remover augmenter.py, keep as sklearn transformers.
-- test_splitter all wrong now
-- fix pip folders
+- provide cross_val score in score.json
 
+- remover augmenter.py, keep as sklearn transformers.
+- parametric augmentation {"samples":[], "target":"per_sample", "balance":"y", "balance_transformation":"bins"}
+- CSV LOADER !!!!!!!!
+
+- fix pip folders
+- test_splitter all wrong now
 ---------------------------------------------------------------------------------------
 TODO NEXT
 ---------------------------------------------------------------------------------------

@@ -48,11 +48,12 @@ class ModelBuilderFactory:
         # Build the initial model
         model = ModelBuilderFactory.build_single_model(model_config, dataset, task, force_params=force_params)
         framework = ModelBuilderFactory.detect_framework(model)
+        models.append(model)
         
-        # Build models for the folds
-        for _ in range(nb_folds):
-            model_copy = ModelBuilderFactory._clone_model(model, framework)
-            models.append(model_copy)
+        if nb_folds > 1:
+            for _ in range(nb_folds - 1):
+                model_copy = ModelBuilderFactory._clone_model(model, framework)
+                models.append(model_copy)
 
         return models, framework
 
@@ -177,6 +178,7 @@ class ModelBuilderFactory:
             if TF_AVAILABLE:
                 from tensorflow.keras.models import clone_model
                 cloned_model = clone_model(model)
+                print("Model cloned")
                 return cloned_model
 
         # elif framework == 'pytorch':

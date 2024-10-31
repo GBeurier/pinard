@@ -25,10 +25,12 @@ class OptunaFineTuner(BaseFineTuner):
 
     def finetune(self, dataset, finetune_params, src_training_params=None, metrics=None, task=None):
         union = 'concat' if self.model_manager.framework == 'sklearn' else 'union'
-
+        model_config = copy.deepcopy(self.model_config)
+        model = ModelBuilderFactory.build_single_model(model_config, dataset, task)
+        finetune_model_manager = ModelManagerFactory.get_model_manager(model, dataset, task) #TODO avoid multiple models if not necessary
+        
         def objective(trial):
             # Deep copy to avoid mutations
-            model_config = copy.deepcopy(self.model_config)
             model_params = {}
             training_params = {}
 
@@ -58,10 +60,8 @@ class OptunaFineTuner(BaseFineTuner):
                         training_params[key] = trial.suggest_float(key, values[1], values[2])
 
             # Build the model with updated parameters
-            model = ModelBuilderFactory.build_single_model(model_config, dataset, model_params)
-            
-            # Create a new ModelManager instance with the updated model
-            temp_model_manager = ModelManagerFactory.get_model_manager(model, dataset, task)
+            model = ModelBuilderFactory.build_single_model(model_config, dataset, task, model_params)
+            finetune_model_manager.models = [model]
             
             # merge training params and src_training_params, keeping the training_params
             if src_training_params is not None:
@@ -70,13 +70,12 @@ class OptunaFineTuner(BaseFineTuner):
                         training_params[key] = value
             
             # Train the model
-            temp_model_manager.train(dataset, training_params=training_params, metrics=metrics)
+            finetune_model_manager.train(dataset, training_params=training_params, metrics=metrics, no_folds=True)
 
             # Predict and evaluate
-            y_pred = temp_model_manager.predict(dataset, task)
+            y_pred = finetune_model_manager.predict(dataset, task, no_folds=True)
             y_true = dataset.y_test
-
-            scores = temp_model_manager.evaluate(y_true, y_pred, metrics)
+            scores = finetune_model_manager.evaluate(y_true, y_pred, metrics)
             
             return scores[metrics[0]]
 
@@ -87,7 +86,7 @@ class OptunaFineTuner(BaseFineTuner):
         # print(f"Best hyperparameters: {best_params}")
 
         # Update the model_manager with the best model
-        best_trial = study.best_trial
+        # best_trial = study.best_trial
         # Rebuild the model with best parameters
         best_model_params = {}
         best_training_params = {}
@@ -101,10 +100,15 @@ class OptunaFineTuner(BaseFineTuner):
 
         # self.model_manager.model_config['model_params'].update(best_model_params)
         # Build the best model
-        best_model = ModelBuilderFactory.build_single_model(self.model_manager.model_config, dataset, best_model_params)
-        self.model_manager.model = best_model
+        best_models, _ = ModelBuilderFactory.build_models(self.model_manager.model_config, dataset, task, best_model_params)
+        self.model_manager.models = best_models
 
         # Optionally, retrain the best model on the full training data
+        if src_training_params is not None:
+            for key, value in src_training_params.items():
+                if key not in best_training_params:
+                    best_training_params[key] = value
+                    
         self.model_manager.train(dataset, training_params=best_training_params)
 
         return best_params
@@ -139,19 +143,22 @@ class SklearnFineTuner(BaseFineTuner):
         # Build base estimator
         estimator = ModelBuilderFactory.build_single_model(self.model_config, dataset=dataset, task=task)
 
-        cv = finetune_params.get('cv', 5)
+        # cv = finetune_params.get('cv', 5)
         
         # print(param_dict)
         if approach == 'grid':
-            search = GridSearchCV(estimator, param_dict, cv=cv, n_jobs=n_jobs)
+            search = GridSearchCV(estimator, param_dict, cv=None, n_jobs=n_jobs)
         elif approach == 'random':
-            search = RandomizedSearchCV(estimator, param_dict, n_iter=n_trials, cv=cv, n_jobs=n_jobs)
+            search = RandomizedSearchCV(estimator, param_dict, n_iter=n_trials, cv=None, n_jobs=n_jobs)
         else:
-            search = GridSearchCV(estimator, param_dict, cv=cv, n_jobs=n_jobs)
+            search = GridSearchCV(estimator, param_dict, cv=None, n_jobs=n_jobs)
 
         search.fit(x_train, y_train)
         best_params = search.best_params_
-        self.model_manager.model = search.best_estimator_
+        # self.model_manager.model = search.best_estimator_
+        
+        best_models, _ = ModelBuilderFactory.build_models(search.best_estimator_, dataset, task, best_params)
+        self.model_manager.models = best_models
 
         # Update the model_config
         print(f"Best model params: {best_params}")
@@ -159,6 +166,10 @@ class SklearnFineTuner(BaseFineTuner):
 
         # Optional training with new parameters
         training_params = finetune_params.get('training_params', {})
+        if src_training_params is not None:
+            for key, value in src_training_params.items():
+                if key not in training_params:
+                    training_params[key] = value
         self.model_manager.train(dataset, training_params=training_params, metrics=metrics)
 
         return best_params

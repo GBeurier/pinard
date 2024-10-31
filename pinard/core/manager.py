@@ -7,7 +7,7 @@ import hashlib
 import logging
 import shutil
 import dataclasses
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union, List
 
 import numpy as np
 import pandas as pd
@@ -176,42 +176,71 @@ class ExperimentManager:
         metrics_exists = os.path.exists(os.path.join(experiment_path, 'metrics.json'))
         return model_exists and metrics_exists
 
-    def save_results(self, model_manager: Any, y_pred: np.ndarray, y_true: np.ndarray, metrics: list, best_params: dict = None) -> None:
-        """Save evaluation metrics and predictions to the experiment directory."""
+
+    def save_results(self, model_manager: Any, y_pred: Union[np.ndarray, List[np.ndarray]], y_true: np.ndarray, metrics: list, best_params: dict = None, fold_scores: List[dict] = None) -> None:
         if not self.experiment_path:
             self.logger.error("Experiment path not set. Cannot save results.")
             return
-        # print("EVALUATING", metrics)
-        
+
         if not isinstance(y_pred, list):
             y_pred = [y_pred]
-        
-        for i, y_pred_i in enumerate(y_pred):
-            scores = model_manager.evaluate(y_true, y_pred_i, metrics)
-            scores_path = os.path.join(self.experiment_path, "metrics.json")
-            with open(scores_path, "w", encoding="utf-8") as f:
-                json.dump(scores, f, cls=NumpyEncoder, indent=4)
-            self.logger.info("Metrics saved to %s", scores_path)
-            self.logger.info("Evaluation Metrics: %s", scores)
+        if fold_scores is None:
+            fold_scores = []
 
+        results_df = pd.DataFrame({'y_true': y_true.flatten()})
+        scores_dict = {}
+        total_preds = len(y_pred)
+
+        for i, y_pred_i in enumerate(y_pred):
+            # Determine the key for saving metrics and predictions
+            if i < total_preds - 3:
+                key = f'fold_{i}'
+                pred_column = f'y_pred_fold_{i}'
+            elif i == total_preds - 3:
+                key = 'mean'
+                pred_column = 'y_pred_mean'
+            elif i == total_preds - 2:
+                key = 'best'
+                pred_column = 'y_pred_best'
+            elif i == total_preds - 1:
+                key = 'weighted'
+                pred_column = 'y_pred_weighted'
+            else:
+                key = f'prediction_{i}'
+                pred_column = f'y_pred_{i}'
+
+            # Retrieve scores
+            scores = fold_scores[i] if i < len(fold_scores) else model_manager.evaluate(y_true, y_pred_i, metrics)
+            scores_dict[key] = scores
+
+            # Save metrics to log
+            self.logger.info("Evaluation Metrics %s: %s", key, scores)
+
+            # Add predictions to DataFrame
+            results_df[pred_column] = y_pred_i.flatten()
+
+        # Save all metrics to a single JSON file
+        scores_path = os.path.join(self.experiment_path, "metrics.json")
+        with open(scores_path, "w", encoding="utf-8") as f:
+            json.dump(scores_dict, f, cls=NumpyEncoder, indent=4)
+        self.logger.info("Metrics saved to %s", scores_path)
+
+        # Save best parameters if available
         if best_params:
             best_params_path = os.path.join(self.experiment_path, "best_params.json")
             with open(best_params_path, "w", encoding="utf-8") as f:
                 json.dump(best_params, f, cls=NumpyEncoder, indent=4)
             self.logger.info("Best parameters %s saved to %s", best_params, best_params_path)
 
-        # Save predictions [y_true, and one col per y_pred]
-        results_df = pd.DataFrame({
-            'y_true': y_true.flatten(),
-            **{f'y_pred_{i}': y_pred_i.flatten() for i, y_pred_i in enumerate(y_pred)}
-        })
+        # Save predictions to CSV
         results_csv_path = os.path.join(self.experiment_path, 'predictions.csv')
         results_df.to_csv(results_csv_path, index=False)
         self.logger.info("Predictions saved to %s", results_csv_path)
-        
-        self.update_centralized_results(scores, best_params)
-        
-        
+
+        # Update centralized results if necessary
+        self.update_centralized_results(scores_dict, best_params)
+
+
 
     def make_config_serializable(self, config: Any) -> Dict[str, Any]:
         """

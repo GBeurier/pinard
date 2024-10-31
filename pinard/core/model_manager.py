@@ -322,11 +322,11 @@ class BaseModelManager(ABC):
             raise FileNotFoundError(f"Model file not found at: {path}")
 
     @abstractmethod
-    def train(self, X_train, y_train, X_val, y_val, training_params, input_dim, metrics):
+    def train(self, X_train, y_train, X_val, y_val, training_params, input_dim, metrics, no_folds):
         pass
 
     @abstractmethod
-    def predict(self, X):
+    def predict(self, X, task, return_all, no_folds, raw_class_output):
         pass
 
 
@@ -396,8 +396,11 @@ if TF_AVAILABLE:
             super(TFModelManager, self).__init__(models, model_config)
             self.framework = 'tensorflow'
         
-        def train(self, dataset, training_params, input_dim=None, metrics=None):
-            for (x_train, y_train, x_val, y_val), model in zip(dataset.fold_data('union'), self.models):
+        def train(self, dataset, training_params, input_dim=None, metrics=None, no_folds=False):
+            # models = [self.model]
+            models = [self.models[0]] if no_folds else self.models
+            
+            for (x_train, y_train, x_val, y_val), model in zip(dataset.fold_data('union', no_folds), models):
                 print(f"Training fold with shapes:", x_train.shape, y_train.shape, x_val.shape, y_val.shape)
                 loss = training_params.get('loss', 'mse')
                 
@@ -429,7 +432,6 @@ if TF_AVAILABLE:
                 # print(np.unique(y_val))
                 
                 print("Training with shapes:", x_train.shape, y_train.shape, x_val.shape, y_val.shape)
-                
                 model.compile(optimizer=training_params.get('optimizer', 'adam'),
                               loss=loss,
                               metrics=metrics)
@@ -463,26 +465,27 @@ if TF_AVAILABLE:
                           callbacks=callbacks,
                           verbose=training_params.get('verbose', 1))
 
-        def predict(self, dataset, task, return_all=False):
+        def predict(self, dataset, task, return_all=False, no_folds=False, raw_class_output=False):
             y_pred = None
-            if len(self.models) == 1:
+            if len(self.models) == 1 or no_folds:
                 y_pred = self.models[0].predict(dataset.x_test_('union'))
-                if task == 'classification':
+                if task == 'classification' and not raw_class_output:
                     return np.argmax(y_pred, axis=1)
                 else:
                     return y_pred
             else:
                 y_preds = [model.predict(dataset.x_test_('union')) for model in self.models]
-                if task != 'classification' and return_all:
-                    y_preds = [np.argmax(y_pred, axis=1) for y_pred in y_preds]
-                    return y_preds
-                elif task == 'classification':
-                    y_preds = np.mean(y_preds, axis=0)
-                    return np.argmax(y_preds, axis=1)
-                else:
+                if task == 'classification':
                     if return_all:
+                        if raw_class_output:
+                            return y_preds  # Return raw probabilities/logits for each fold
+                        y_preds = [np.argmax(y_pred, axis=1) for y_pred in y_preds]
                         return y_preds
-                    return np.mean(y_preds, axis=0)
+                    else:
+                        y_preds = np.mean(y_preds, axis=0)
+                        return np.argmax(y_preds, axis=1) if not raw_class_output else y_preds
+                else:
+                    return y_preds if return_all else np.mean(y_preds, axis=0)
             
         def save_model(self, path):
             os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -504,9 +507,10 @@ class SklearnModelManager(BaseModelManager):
         super(SklearnModelManager, self).__init__(models, model_config)
         self.framework = 'sklearn'
         
-    def train(self, dataset, training_params, metrics=None):
+    def train(self, dataset, training_params, metrics=None, no_folds=False):
         i = 0
-        for (x_train, y_train, x_val, y_val), model in zip(dataset.fold_data('concat'), self.models):
+        models = [self.models[0]] if no_folds else self.models
+        for (x_train, y_train, x_val, y_val), model in zip(dataset.fold_data('concat', no_folds), models):
             print(f"Training fold {i + 1}, with shapes:", x_train.shape, y_train.shape, x_val.shape, y_val.shape)
             i += 1
             if 'accuracy' in metrics:
@@ -519,8 +523,8 @@ class SklearnModelManager(BaseModelManager):
             #     metrics = BaseModelManager.evaluate(y_val, y_pred, training_params.get('metrics', ['mse', 'r2']))
             #     print(f"Validation Metrics: {metrics}")
 
-    def predict(self, dataset, task=None, return_all=False):
-        if len(self.models) == 1:
+    def predict(self, dataset, task=None, return_all=False, no_folds=False, raw_class_output=False):
+        if len(self.models) == 1 or no_folds:
             return self.models[0].predict(dataset.x_test_('concat'))
         else:
             y_preds = [model.predict(dataset.x_test_('concat')) for model in self.models]

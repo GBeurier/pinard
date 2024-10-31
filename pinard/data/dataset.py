@@ -67,8 +67,8 @@ class Dataset:
             return filtered_y
         return np.repeat(filtered_y, self._x_train.shape[0], axis=0)
     
-    def fold_data(self, union_type='concat'):
-        if self.folds is None or len(self.folds) == 0:
+    def fold_data(self, union_type='concat', no_folds=False):
+        if self.folds is None or len(self.folds) == 0 or no_folds:
             yield self.x_train_(union_type), self.y_train, self.x_test_(union_type), self.y_test
         else:
             for (train_indices, test_indices) in self.folds:

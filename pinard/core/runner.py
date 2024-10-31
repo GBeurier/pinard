@@ -132,23 +132,97 @@ class ExperimentRunner:
         return dataset
     
     def _evaluate_and_save_results(self, model_manager, dataset, metrics, best_params=None, task=None):
-        y_pred = model_manager.predict(dataset, task, return_all=True)
+        # Request raw outputs for classification if averaging across folds
+        y_pred = model_manager.predict(dataset, task, return_all=True, raw_class_output=(task == 'classification'))
         y_true = dataset.y_test_init
-        
+
         if isinstance(y_pred, list):
-            for i, y_pred_i in enumerate(y_pred):
-                if 'accuracy' in metrics and len(y_pred_i.shape) > 1 and y_pred_i.shape[-1] == dataset.num_classes:
-                    y_pred_i = np.argmax(y_pred_i, axis=-1)
-                y_pred_inverse = dataset.inverse_transform(y_pred_i)
-                y_pred[i] = y_pred_inverse
-            self.manager.save_results(model_manager, y_pred, y_true, metrics, best_params)
-                
+            raw_preds = []          # To store raw model outputs (probabilities or logits)
+            fold_scores = []        # To store per-fold evaluation scores
+
+            for y_pred_i in y_pred:
+                raw_preds.append(y_pred_i)  # Store raw predictions for averaging later
+
+                # Convert to class predictions if classification
+                if task == 'classification' and y_pred_i.ndim > 1 and y_pred_i.shape[-1] == dataset.num_classes:
+                    y_pred_class = np.argmax(y_pred_i, axis=-1)
+                else:
+                    y_pred_class = y_pred_i
+
+                # Apply inverse transform if necessary (after obtaining class labels)
+                y_pred_inverse = dataset.inverse_transform(y_pred_class)
+
+                # Evaluate scores for this fold
+                scores = model_manager.evaluate(y_true, y_pred_inverse, metrics)
+                fold_scores.append(scores)
+
+            # Compute mean prediction across all folds (probabilities or logits)
+            mean_raw_pred = np.mean(np.array(raw_preds), axis=0)
+            if task == 'classification':
+                # Apply argmax to the averaged probabilities to get final class predictions
+                mean_pred_class = np.argmax(mean_raw_pred, axis=-1)
+                mean_pred_inverse = dataset.inverse_transform(mean_pred_class)
+            else:
+                mean_pred_inverse = dataset.inverse_transform(mean_raw_pred)
+
+            # Identify the best fold based on the first metric
+            metric_to_use = metrics[0]  # Adjust if needed
+            fold_scores_values = np.array([fold_score.get(metric_to_use, 0) for fold_score in fold_scores])
+
+            if task == 'classification':
+                best_fold_index = np.argmax(fold_scores_values)  # Higher is better
+            else:
+                best_fold_index = np.argmin(fold_scores_values)  # Lower is better
+
+            best_pred_inverse = dataset.inverse_transform(np.argmax(raw_preds[best_fold_index], axis=-1))
+            best_scores = fold_scores[best_fold_index]
+
+            # Compute weighted mean prediction using fold scores as weights
+            if task == 'classification':
+                # For classification, higher scores are better
+                min_score = np.min(fold_scores_values)
+                if min_score < 0:
+                    fold_scores_values -= min_score  # Adjust to be non-negative
+                total_score = np.sum(fold_scores_values)
+                weights = fold_scores_values / total_score if total_score > 0 else np.ones_like(fold_scores_values) / len(fold_scores_values)
+            else:
+                # For regression, lower scores are better
+                max_score = np.max(fold_scores_values)
+                inverted_scores = max_score - fold_scores_values
+                total_inverted_score = np.sum(inverted_scores)
+                weights = inverted_scores / total_inverted_score if total_inverted_score > 0 else np.ones_like(fold_scores_values) / len(fold_scores_values)
+
+            # Compute weighted average of raw predictions
+            weighted_raw_pred = np.average(np.array(raw_preds), axis=0, weights=weights)
+            if task == 'classification':
+                # Apply argmax to the weighted probabilities
+                weighted_pred_class = np.argmax(weighted_raw_pred, axis=-1)
+                weighted_pred_inverse = dataset.inverse_transform(weighted_pred_class)
+            else:
+                weighted_pred_inverse = dataset.inverse_transform(weighted_raw_pred)
+
+            # Evaluate mean and weighted predictions
+            mean_scores = model_manager.evaluate(y_true, mean_pred_inverse, metrics)
+            weighted_scores = model_manager.evaluate(y_true, weighted_pred_inverse, metrics)
+
+            # Collect all predictions and scores
+            all_preds = [dataset.inverse_transform(np.argmax(y, axis=-1)) for y in raw_preds]  # Inverse transform each fold prediction
+            all_preds.extend([mean_pred_inverse, best_pred_inverse, weighted_pred_inverse])
+            all_scores = fold_scores + [mean_scores, best_scores, weighted_scores]
+
+            # Save all results
+            self.manager.save_results(model_manager, all_preds, y_true, metrics, best_params, all_scores)
         else:
-            if 'accuracy' in metrics and len(y_pred.shape) > 1 and y_pred.shape[-1] == dataset.num_classes:
-                y_pred = np.argmax(y_pred, axis=-1)
-            y_pred_inverse = dataset.inverse_transform(y_pred)
-            self.manager.save_results(model_manager, y_pred_inverse, y_true, metrics, best_params)
-            
+            # Handle single prediction case
+            if task == 'classification' and y_pred.ndim > 1 and y_pred.shape[-1] == dataset.num_classes:
+                y_pred_class = np.argmax(y_pred, axis=-1)
+                y_pred_inverse = dataset.inverse_transform(y_pred_class)
+            else:
+                y_pred_inverse = dataset.inverse_transform(y_pred)
+            scores = model_manager.evaluate(y_true, y_pred_inverse, metrics)
+            self.manager.save_results(model_manager, y_pred_inverse, y_true, metrics, best_params, [scores])
+
+
 
     def _train(self, model_manager, dataset, training_params, metrics, task):
         self.logger.info("Training the model")
