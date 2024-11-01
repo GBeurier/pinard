@@ -144,8 +144,19 @@ class ExperimentRunner:
                 raw_preds.append(y_pred_i)  # Store raw predictions for averaging later
 
                 # Convert to class predictions if classification
-                if task == 'classification' and y_pred_i.ndim > 1 and y_pred_i.shape[-1] == dataset.num_classes:
-                    y_pred_class = np.argmax(y_pred_i, axis=-1)
+                if task == 'classification':
+                    if y_pred_i.ndim > 1:
+                        if y_pred_i.shape[-1] == dataset.num_classes and dataset.num_classes > 1:
+                            # Multi-class classification
+                            y_pred_class = np.argmax(y_pred_i, axis=-1)
+                        elif y_pred_i.shape[-1] == 1 or dataset.num_classes == 1:
+                            # Binary classification with outputs of shape (num_samples, 1)
+                            y_pred_class = (y_pred_i >= 0.5).astype(int).flatten()
+                        else:
+                            raise ValueError("Unexpected output shape for classification task")
+                    else:
+                        # y_pred_i.ndim == 1, binary classification
+                        y_pred_class = (y_pred_i >= 0.5).astype(int)
                 else:
                     y_pred_class = y_pred_i
 
@@ -159,22 +170,51 @@ class ExperimentRunner:
             # Compute mean prediction across all folds (probabilities or logits)
             mean_raw_pred = np.mean(np.array(raw_preds), axis=0)
             if task == 'classification':
-                # Apply argmax to the averaged probabilities to get final class predictions
-                mean_pred_class = np.argmax(mean_raw_pred, axis=-1)
+                if mean_raw_pred.ndim > 1:
+                    if mean_raw_pred.shape[-1] == dataset.num_classes and dataset.num_classes > 1:
+                        # Multi-class classification
+                        mean_pred_class = np.argmax(mean_raw_pred, axis=-1)
+                    elif mean_raw_pred.shape[-1] == 1 or dataset.num_classes == 1:
+                        # Binary classification
+                        mean_pred_class = (mean_raw_pred >= 0.5).astype(int).flatten()
+                    else:
+                        raise ValueError("Unexpected output shape for classification task")
+                else:
+                    # mean_raw_pred.ndim == 1, binary classification
+                    mean_pred_class = (mean_raw_pred >= 0.5).astype(int)
                 mean_pred_inverse = dataset.inverse_transform(mean_pred_class)
             else:
                 mean_pred_inverse = dataset.inverse_transform(mean_raw_pred)
 
             # Identify the best fold based on the first metric
             metric_to_use = metrics[0]  # Adjust if needed
-            fold_scores_values = np.array([fold_score.get(metric_to_use, 0) for fold_score in fold_scores])
+
+            # Ensure fold_scores_values contains numeric values
+            fold_scores_values = np.array([
+                fold_score.get(metric_to_use, 0)
+                for fold_score in fold_scores
+            ])
 
             if task == 'classification':
                 best_fold_index = np.argmax(fold_scores_values)  # Higher is better
             else:
                 best_fold_index = np.argmin(fold_scores_values)  # Lower is better
 
-            best_pred_inverse = dataset.inverse_transform(np.argmax(raw_preds[best_fold_index], axis=-1))
+            # Get the best fold's predictions
+            best_raw_pred = raw_preds[best_fold_index]
+            if task == 'classification':
+                if best_raw_pred.ndim > 1:
+                    if best_raw_pred.shape[-1] == dataset.num_classes and dataset.num_classes > 1:
+                        best_pred_class = np.argmax(best_raw_pred, axis=-1)
+                    elif best_raw_pred.shape[-1] == 1 or dataset.num_classes == 1:
+                        best_pred_class = (best_raw_pred >= 0.5).astype(int).flatten()
+                    else:
+                        raise ValueError("Unexpected output shape for classification task")
+                else:
+                    best_pred_class = (best_raw_pred >= 0.5).astype(int)
+                best_pred_inverse = dataset.inverse_transform(best_pred_class)
+            else:
+                best_pred_inverse = dataset.inverse_transform(best_raw_pred)
             best_scores = fold_scores[best_fold_index]
 
             # Compute weighted mean prediction using fold scores as weights
@@ -186,17 +226,35 @@ class ExperimentRunner:
                 total_score = np.sum(fold_scores_values)
                 weights = fold_scores_values / total_score if total_score > 0 else np.ones_like(fold_scores_values) / len(fold_scores_values)
             else:
-                # For regression, lower scores are better
-                max_score = np.max(fold_scores_values)
-                inverted_scores = max_score - fold_scores_values
-                total_inverted_score = np.sum(inverted_scores)
-                weights = inverted_scores / total_inverted_score if total_inverted_score > 0 else np.ones_like(fold_scores_values) / len(fold_scores_values)
+                mse_array = np.array(fold_scores_values, dtype=float)
+                print("MSE array:", mse_array)
+                # Handle potential division by zero by adding a small epsilon if necessary
+                epsilon = 1e-8
+                mse_array = mse_array + epsilon  # Avoid division by zero
+
+                # Compute inverse of MSEs
+                inverse_mse = 1.0 / mse_array
+
+                # Normalize the inverses to sum to 1
+                weights = inverse_mse / np.sum(inverse_mse)
+
+                # total_inverted_score = np.sum(inverted_scores)
+                # weights = inverted_scores / total_inverted_score if total_inverted_score > 0 else np.ones_like(fold_scores_values) / len(fold_scores_values)
+
+            print("Weights:", weights)
 
             # Compute weighted average of raw predictions
             weighted_raw_pred = np.average(np.array(raw_preds), axis=0, weights=weights)
             if task == 'classification':
-                # Apply argmax to the weighted probabilities
-                weighted_pred_class = np.argmax(weighted_raw_pred, axis=-1)
+                if weighted_raw_pred.ndim > 1:
+                    if weighted_raw_pred.shape[-1] == dataset.num_classes and dataset.num_classes > 1:
+                        weighted_pred_class = np.argmax(weighted_raw_pred, axis=-1)
+                    elif weighted_raw_pred.shape[-1] == 1 or dataset.num_classes == 1:
+                        weighted_pred_class = (weighted_raw_pred >= 0.5).astype(int).flatten()
+                    else:
+                        raise ValueError("Unexpected output shape for classification task")
+                else:
+                    weighted_pred_class = (weighted_raw_pred >= 0.5).astype(int)
                 weighted_pred_inverse = dataset.inverse_transform(weighted_pred_class)
             else:
                 weighted_pred_inverse = dataset.inverse_transform(weighted_raw_pred)
@@ -206,7 +264,23 @@ class ExperimentRunner:
             weighted_scores = model_manager.evaluate(y_true, weighted_pred_inverse, metrics)
 
             # Collect all predictions and scores
-            all_preds = [dataset.inverse_transform(np.argmax(y, axis=-1)) for y in raw_preds]  # Inverse transform each fold prediction
+            all_preds = []
+            for y in raw_preds:
+                if task == 'classification':
+                    if y.ndim > 1:
+                        if y.shape[-1] == dataset.num_classes and dataset.num_classes > 1:
+                            y_pred_class = np.argmax(y, axis=-1)
+                        elif y.shape[-1] == 1 or dataset.num_classes == 1:
+                            y_pred_class = (y >= 0.5).astype(int).flatten()
+                        else:
+                            raise ValueError("Unexpected output shape for classification task")
+                    else:
+                        y_pred_class = (y >= 0.5).astype(int)
+                    y_pred_inverse = dataset.inverse_transform(y_pred_class)
+                else:
+                    y_pred_inverse = dataset.inverse_transform(y)
+                all_preds.append(y_pred_inverse)
+
             all_preds.extend([mean_pred_inverse, best_pred_inverse, weighted_pred_inverse])
             all_scores = fold_scores + [mean_scores, best_scores, weighted_scores]
 
@@ -214,13 +288,22 @@ class ExperimentRunner:
             self.manager.save_results(model_manager, all_preds, y_true, metrics, best_params, all_scores)
         else:
             # Handle single prediction case
-            if task == 'classification' and y_pred.ndim > 1 and y_pred.shape[-1] == dataset.num_classes:
-                y_pred_class = np.argmax(y_pred, axis=-1)
+            if task == 'classification':
+                if y_pred.ndim > 1:
+                    if y_pred.shape[-1] == dataset.num_classes and dataset.num_classes > 1:
+                        y_pred_class = np.argmax(y_pred, axis=-1)
+                    elif y_pred.shape[-1] == 1 or dataset.num_classes == 1:
+                        y_pred_class = (y_pred >= 0.5).astype(int).flatten()
+                    else:
+                        raise ValueError("Unexpected output shape for classification task")
+                else:
+                    y_pred_class = (y_pred >= 0.5).astype(int)
                 y_pred_inverse = dataset.inverse_transform(y_pred_class)
             else:
                 y_pred_inverse = dataset.inverse_transform(y_pred)
             scores = model_manager.evaluate(y_true, y_pred_inverse, metrics)
             self.manager.save_results(model_manager, y_pred_inverse, y_true, metrics, best_params, [scores])
+
 
 
 

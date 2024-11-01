@@ -126,7 +126,7 @@ class Random_X_Operation(Augmenter):
         self.operator_range = operator_range
         super().__init__(apply_on, random_state, copy=copy)
 
-    def augment(self, X, apply_on="samples"):
+    def augment(self, X, apply_on="global"):
         """
         Augment the data by applying random operation.
 

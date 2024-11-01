@@ -404,16 +404,6 @@ if TF_AVAILABLE:
                 print(f"Training fold with shapes:", x_train.shape, y_train.shape, x_val.shape, y_val.shape)
                 loss = training_params.get('loss', 'mse')
                 
-                # training_metrics = training_params.get('metrics', ['mse', 'r2']) if metrics is None else metrics
-                # training_metrics = get_keras_metric(training_metrics)
-                # loss = training_params.get('loss', training_metrics[0] if len(training_metrics) == 1 else 'mse')
-                
-                # if loss == 'categorical_crossentropy':
-                #     if y_train.ndim == 1 or y_train.shape[1] == 1:
-                #         y_train = to_categorical(y_train)
-                #         y_val = to_categorical(y_val)
-                # print("LOSS:", loss, "METRICS:", training_metrics)
-                
                 # Reshape labels for sparse categorical cross-entropy
                 if loss == 'sparse_categorical_crossentropy':
                     y_train = y_train.reshape(-1)  # Flatten to (n_samples,)
