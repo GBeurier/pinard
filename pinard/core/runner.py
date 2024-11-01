@@ -18,6 +18,7 @@ class ExperimentRunner:
         self.configs = configs
         self.manager = ExperimentManager(results_dir, resume_mode, verbose=3)
         self.logger = self.manager.logger
+        self.results_dir = results_dir
         self.cache = {}
 
     def _prepare_experiment(self, config, dataset):
@@ -85,6 +86,7 @@ class ExperimentRunner:
             self.configs = [self.configs]
 
         for config in self.configs:
+            self.cache = {}
             self.logger.info("=" * 80)
             self.logger.info("### PREPARING DATA ###")
             dataset = self._prepare_data(config)

@@ -1,8 +1,8 @@
-import .csv_loader
-import .data_config_parser
-import .dataset_loader
-import .dataset
-import .schema
+from . import csv_loader
+from . import data_config_parser
+from . import dataset_loader
+from . import dataset
+from . import schema
 
 __all__ = [
     'csv_loader',

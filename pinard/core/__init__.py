@@ -1,11 +1,11 @@
-import .config
-import .finetuner
-import .manager
-import .model_builder_factory
-import .model_manager
-import .processor
-import .runner
-import .utils
+from . import config
+from . import finetuner
+from . import manager
+from . import model_builder_factory
+from . import model_manager
+from . import processor
+from . import runner
+from . import utils
 
 __all__ = [
     'config',
