@@ -11,8 +11,8 @@ sys.path.append(parent_dir)
 
 
 from sklearn.ensemble import RandomForestClassifier
-from operators.preprocessings import decon_set, bacon_set
-from operators.ref_models import decon, bacon, customizable_bacon, bacon_classification
+from operators.preprocessings import decon_set, nicon_set
+from operators.ref_models import decon, nicon, customizable_nicon, nicon_classification
 from experiments.config import Config
 from experiments.runner import ExperimentRunner
 from sklearn.model_selection import KFold, RepeatedKFold, StratifiedKFold, RepeatedStratifiedKFold, ShuffleSplit, GroupKFold, StratifiedShuffleSplit, BaseCrossValidator, TimeSeriesSplit
@@ -44,9 +44,9 @@ finetune_pls_experiment = {
     }
 }
 
-bacon_train = {"action": "train", "training_params": {"epochs": 2000, "batch_size": 500, "patience": 200, "cyclic_lr": True, "base_lr": 1e-6, "max_lr": 1e-3, "step_size": 400}}
-bacon_train_short = {"action": "train", "training_params": {"epochs": 10, "batch_size": 500, "patience": 20, "cyclic_lr": True, "base_lr": 1e-6, "max_lr": 1e-3, "step_size": 40}}
-bacon_finetune = {
+nicon_train = {"action": "train", "training_params": {"epochs": 2000, "batch_size": 500, "patience": 200, "cyclic_lr": True, "base_lr": 1e-6, "max_lr": 1e-3, "step_size": 400}}
+nicon_train_short = {"action": "train", "training_params": {"epochs": 10, "batch_size": 500, "patience": 20, "cyclic_lr": True, "base_lr": 1e-6, "max_lr": 1e-3, "step_size": 40}}
+nicon_finetune = {
     "action": "finetune",
     "n_trials": 5,
     "finetune_params": {
@@ -61,7 +61,7 @@ bacon_finetune = {
     }
 }
 
-full_bacon_finetune = {
+full_nicon_finetune = {
     "action": "finetune",
     "training_params": {
         "epochs": 500,
@@ -132,11 +132,11 @@ x_pipeline = [
     # {"features": [None, GS]},
     # {"features": [None, GS, SG, SNV, Dv, [GS, SNV], [GS, GS],[GS, SG],[SG, SNV], [GS, Dv], [SG, Dv]]},
     # {"features": [None, SG, GS, SNV, [SG, SNV], [GS, SNV], [SG, GS]]},
-    # bacon_set(),
+    # nicon_set(),
     MinMaxScaler()
 ]
-bacon_finetune_classif = bacon_finetune.copy()
-bacon_finetune_classif["task"] = "classification"
+nicon_finetune_classif = nicon_finetune.copy()
+nicon_finetune_classif["task"] = "classification"
 
 pls_finetune_classif = finetune_pls_experiment.copy()
 pls_finetune_classif["task"] = "classification"
@@ -160,17 +160,17 @@ y_pipeline = MinMaxScaler()
 config2 = Config("mock_data3", x_pipeline_full, y_pipeline, None, None, seed)
 # TRAINING
 # regression
-config1 = Config("mock_data2", x_pipeline, y_pipeline, bacon, bacon_train_short, seed)
+config1 = Config("mock_data2", x_pipeline, y_pipeline, nicon, nicon_train_short, seed)
 config4 = Config("mock_data3", x_pipeline_PLS, y_pipeline, model_sklearn, None, seed)
 # classification
-config3 = Config("mock_data3_classif", x_pipeline, None, bacon_classification, {"task": "classification", "training_params": {"epochs": 5}}, seed*2)
+config3 = Config("mock_data3_classif", x_pipeline, None, nicon_classification, {"task": "classification", "training_params": {"epochs": 5}}, seed*2)
 config5 = Config("mock_data3_classif", x_pipeline, None, RandomForestClassifier, {"task": "classification"}, seed*2)
 # FINETUNING
 # regression
-config6 = Config("mock_data3", x_pipeline, y_pipeline, bacon, bacon_finetune, seed)
+config6 = Config("mock_data3", x_pipeline, y_pipeline, nicon, nicon_finetune, seed)
 config7 = Config("mock_data3", x_pipeline, y_pipeline, model_sklearn, finetune_pls_experiment, seed)
 # classification
-config8 = Config("mock_data3_classif", x_pipeline, None, bacon_classification, bacon_finetune_classif, seed*2)
+config8 = Config("mock_data3_classif", x_pipeline, None, nicon_classification, nicon_finetune_classif, seed*2)
 config9 = Config("mock_data3_classif", x_pipeline, None, RandomForestClassifier, finetune_randomForestclassifier, seed*2)
 
 # ALL TESTS

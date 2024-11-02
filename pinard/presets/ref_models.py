@@ -163,7 +163,7 @@ def decon_Sep(input_shape, params={}):
 
 
 @framework('tensorflow')
-def bacon(input_shape, params={}):
+def nicon(input_shape, params={}):
     """
     Builds a custom CNN model with depthwise convolutions.
 
@@ -190,7 +190,7 @@ def bacon(input_shape, params={}):
 
 
 @framework('tensorflow')
-def customizable_bacon(input_shape, params={}):
+def customizable_nicon(input_shape, params={}):
     """
     Builds a custom CNN model with depthwise convolutions.
 
@@ -215,7 +215,7 @@ def customizable_bacon(input_shape, params={}):
     model.add(Dense(1, activation="sigmoid"))
     return model
 
-bacon_sample_finetune = {
+nicon_sample_finetune = {
     'spatial_dropout': (float, 0.01, 0.5),
     'filters1': [4, 8, 16, 32, 64, 128, 256],
     'kernel_size1': [3, 5, 7, 9, 11, 13, 15],
@@ -238,7 +238,7 @@ bacon_sample_finetune = {
 
 
 @framework('tensorflow')
-def bacon_VG(input_shape, params={}):
+def nicon_VG(input_shape, params={}):
     """
     Builds a custom CNN model.
 
@@ -553,7 +553,7 @@ def decon_Sep_classification(input_shape, num_classes=2, params={}):
 
 
 @framework('tensorflow')
-def bacon_classification(input_shape, num_classes=2, params={}):
+def nicon_classification(input_shape, num_classes=2, params={}):
     """
     Builds a custom CNN model with depthwise convolutions for classification.
 
@@ -584,7 +584,7 @@ def bacon_classification(input_shape, num_classes=2, params={}):
 
 
 @framework('tensorflow')
-def customizable_bacon_classification(input_shape, num_classes=2, params={}):
+def customizable_nicon_classification(input_shape, num_classes=2, params={}):
     """
     Builds a custom CNN model with depthwise convolutions for classification.
 
@@ -615,7 +615,7 @@ def customizable_bacon_classification(input_shape, num_classes=2, params={}):
 
 
 @framework('tensorflow')
-def bacon_VG_classification(input_shape, num_classes=2, params={}):
+def nicon_VG_classification(input_shape, num_classes=2, params={}):
     """
     Builds a custom CNN model for classification.
 

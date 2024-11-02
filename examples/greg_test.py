@@ -9,8 +9,8 @@ except NameError:
 parent_dir = os.path.abspath(os.path.join(script_dir, '..'))
 sys.path.append(parent_dir)
 
-from operators.preprocessings import decon_set, bacon_set
-from operators.ref_models import decon, bacon
+from operators.preprocessings import decon_set, nicon_set
+from operators.ref_models import decon, nicon
 from experiments.config import Config
 from experiments.runner import ExperimentRunner
 from sklearn.model_selection import KFold, RepeatedKFold, StratifiedKFold, RepeatedStratifiedKFold, ShuffleSplit, GroupKFold, StratifiedShuffleSplit, BaseCrossValidator, TimeSeriesSplit

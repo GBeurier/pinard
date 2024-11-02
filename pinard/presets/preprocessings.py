@@ -14,7 +14,7 @@ def haar_only():
     return pp.Wavelet("haar")
 
 
-def bacon_set():
+def nicon_set():
     return {
         "parallel": [
             pp.IdentityTransformer(),
@@ -253,7 +253,7 @@ def optimal_set_2D():
 
 
 def preprocessing_list():
-    # return [id_preprocessing, savgol, haar, bacon_set, decon_set]
+    # return [id_preprocessing, savgol, haar, nicon_set, decon_set]
     # return [id_preprocessing, transf_set, decon_set]
     # return [decon_set, dumb_set]
     # return [transf_set]

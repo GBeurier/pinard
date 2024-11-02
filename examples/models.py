@@ -94,7 +94,7 @@ def xception(input_shape):
     outputs = xception_exit_flow(xception_middle_flow(xception_entry_flow(inputs)))
     return Model(inputs, outputs)
 
-def bacon_vg_big(input_shape):
+def nicon_vg_big(input_shape):
     model = Sequential()
     model.add(Input(shape=input_shape))
     model.add(SpatialDropout1D(0.2))
@@ -117,7 +117,7 @@ def bacon_vg_big(input_shape):
     return model
     
 
-def bacon_vg(input_shape):
+def nicon_vg(input_shape):
     model = Sequential()
     model.add(Input(shape=input_shape))
     model.add(SpatialDropout1D(0.2))
@@ -139,7 +139,7 @@ def bacon_vg(input_shape):
     return model
     
     
-def bacon(input_shape):
+def nicon(input_shape):
     model = Sequential()
     model.add(Input(shape=input_shape))
     model.add(SpatialDropout1D(0.08))
