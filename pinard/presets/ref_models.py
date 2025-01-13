@@ -282,49 +282,148 @@ def customizable_decon(input_shape, params={}):
     """
     model = Sequential()
     model.add(Input(shape=input_shape))
+    
+    # First block
     model.add(SpatialDropout1D(params.get('spatial_dropout1', 0.2)))
     model.add(DepthwiseConv1D(
-        kernel_size=params.get('kernel_size1', 7), padding="same", depth_multiplier=2, activation=params.get('activationDCNN1', "relu")
+        kernel_size=params.get('kernel_size1', 7), 
+        padding=params.get('padding1', "same"), 
+        depth_multiplier=params.get('depth_multiplier1', 2), 
+        activation=params.get('activationDCNN1', "relu")
     ))
     model.add(DepthwiseConv1D(
-        kernel_size=params.get('kernel_size2', 7), padding="same", depth_multiplier=2, activation=params.get('activationDCNN2', "relu")
+        kernel_size=params.get('kernel_size2', 7), 
+        padding=params.get('padding2', "same"), 
+        depth_multiplier=params.get('depth_multiplier2', 2), 
+        activation=params.get('activationDCNN2', "relu")
     ))
-    model.add(MaxPooling1D(pool_size=2, strides=2))
+    model.add(MaxPooling1D(pool_size=params.get('pool_size1', 2), strides=params.get('strides1', 2)))
     model.add(LayerNormalization())
 
+    # Second block
     model.add(DepthwiseConv1D(
-        kernel_size=params.get('kernel_size3', 5), padding="same", depth_multiplier=2, activation=params.get('activationDCNN3', "relu")
+        kernel_size=params.get('kernel_size3', 5), 
+        padding=params.get('padding3', "same"), 
+        depth_multiplier=params.get('depth_multiplier3', 2), 
+        activation=params.get('activationDCNN3', "relu")
     ))
     model.add(DepthwiseConv1D(
-        kernel_size=params.get('kernel_size4', 5), padding="same", depth_multiplier=2, activation=params.get('activationDCNN4', "relu")
+        kernel_size=params.get('kernel_size4', 5), 
+        padding=params.get('padding4', "same"), 
+        depth_multiplier=params.get('depth_multiplier4', 2), 
+        activation=params.get('activationDCNN4', "relu")
     ))
-    model.add(MaxPooling1D(pool_size=2, strides=2))
+    model.add(MaxPooling1D(pool_size=params.get('pool_size2', 2), strides=params.get('strides2', 2)))
     model.add(LayerNormalization())
 
+    # Third block
     model.add(DepthwiseConv1D(
-        kernel_size=params.get('kernel_size5', 9), padding="same", depth_multiplier=2, activation=params.get('activationDCNN5', "relu")
+        kernel_size=params.get('kernel_size5', 9), 
+        padding=params.get('padding5', "same"), 
+        depth_multiplier=params.get('depth_multiplier5', 2), 
+        activation=params.get('activationDCNN5', "relu")
     ))
     model.add(DepthwiseConv1D(
-        kernel_size=params.get('kernel_size6', 9), padding="same", depth_multiplier=2, activation=params.get('activationDCNN6', "relu")
+        kernel_size=params.get('kernel_size6', 9), 
+        padding=params.get('padding6', "same"), 
+        depth_multiplier=params.get('depth_multiplier6', 2), 
+        activation=params.get('activationDCNN6', "relu")
     ))
-    model.add(MaxPooling1D(pool_size=2, strides=2))
+    model.add(MaxPooling1D(pool_size=params.get('pool_size3', 2), strides=params.get('strides3', 2)))
     model.add(LayerNormalization())
 
-    model.add(SeparableConv1D(64, kernel_size=3, depth_multiplier=1, padding="same", activation=params.get('activationCNN1', "relu")))
-    model.add(Conv1D(filters=32, kernel_size=3, padding="same"))
-    model.add(MaxPooling1D(pool_size=5, strides=3))
+    # Final convolution and pooling block
+    model.add(SeparableConv1D(
+        filters=params.get('separable_filters', 64), 
+        kernel_size=params.get('separable_kernel_size', 3), 
+        depth_multiplier=params.get('separable_depth_multiplier', 1), 
+        padding=params.get('separable_padding', "same"), 
+        activation=params.get('activationCNN1', "relu")
+    ))
+    model.add(Conv1D(
+        filters=params.get('conv_filters', 32), 
+        kernel_size=params.get('conv_kernel_size', 3), 
+        padding=params.get('conv_padding', "same")
+    ))
+    model.add(MaxPooling1D(pool_size=params.get('final_pool_size', 5), strides=params.get('final_pool_strides', 3)))
     model.add(SpatialDropout1D(params.get('spatial_dropout2', 0.1)))
     model.add(Flatten())
 
-    # Fully Connected layers
+    # Fully connected layers
     model.add(Dense(units=params.get('dense_units1', 128), activation=params.get('activationDense1', "relu")))
     model.add(Dense(units=params.get('dense_units2', 32), activation=params.get('activationDense2', "relu")))
     model.add(Dropout(params.get('dropout_rate', 0.2)))
 
     # Output layer
-    model.add(Dense(units=1, activation=params.get('activationDense3', "sigmoid")))
+    model.add(Dense(units=params.get('output_units', 1), activation=params.get('activationDense3', "sigmoid")))
 
     return model
+
+decon_sample_finetune = {
+    'spatial_dropout1': (float, 0.01, 0.5),  # Range for first spatial dropout rate
+    'kernel_size1': [3, 5, 7, 9, 11, 13, 15],  # Kernel sizes for the first DepthwiseConv1D
+    'padding1': ['same', 'valid'],  # Padding options for the first DepthwiseConv1D
+    'depth_multiplier1': [1, 2, 4, 8],  # Depth multiplier for the first DepthwiseConv1D
+    'activationDCNN1': ['relu', 'selu', 'elu', 'swish'],  # Activation functions for the first DepthwiseConv1D
+
+    'kernel_size2': [3, 5, 7, 9, 11, 13, 15],  # Kernel sizes for the second DepthwiseConv1D
+    'padding2': ['same', 'valid'],  # Padding options for the second DepthwiseConv1D
+    'depth_multiplier2': [1, 2, 4, 8],  # Depth multiplier for the second DepthwiseConv1D
+    'activationDCNN2': ['relu', 'selu', 'elu', 'swish'],  # Activation functions for the second DepthwiseConv1D
+
+    'pool_size1': [2, 3, 4, 5],  # Pool sizes for the first MaxPooling1D
+    'strides1': [1, 2, 3],  # Stride values for the first MaxPooling1D
+
+    'kernel_size3': [3, 5, 7, 9],  # Kernel sizes for the third DepthwiseConv1D
+    'padding3': ['same', 'valid'],  # Padding options for the third DepthwiseConv1D
+    'depth_multiplier3': [1, 2, 4, 8],  # Depth multiplier for the third DepthwiseConv1D
+    'activationDCNN3': ['relu', 'selu', 'elu', 'swish'],  # Activation functions for the third DepthwiseConv1D
+
+    'kernel_size4': [3, 5, 7, 9],  # Kernel sizes for the fourth DepthwiseConv1D
+    'padding4': ['same', 'valid'],  # Padding options for the fourth DepthwiseConv1D
+    'depth_multiplier4': [1, 2, 4, 8],  # Depth multiplier for the fourth DepthwiseConv1D
+    'activationDCNN4': ['relu', 'selu', 'elu', 'swish'],  # Activation functions for the fourth DepthwiseConv1D
+
+    'pool_size2': [2, 3, 4],  # Pool sizes for the second MaxPooling1D
+    'strides2': [1, 2, 3],  # Stride values for the second MaxPooling1D
+
+    'kernel_size5': [3, 5, 7, 9],  # Kernel sizes for the fifth DepthwiseConv1D
+    'padding5': ['same', 'valid'],  # Padding options for the fifth DepthwiseConv1D
+    'depth_multiplier5': [1, 2, 4, 8],  # Depth multiplier for the fifth DepthwiseConv1D
+    'activationDCNN5': ['relu', 'selu', 'elu', 'swish'],  # Activation functions for the fifth DepthwiseConv1D
+
+    'kernel_size6': [3, 5, 7, 9],  # Kernel sizes for the sixth DepthwiseConv1D
+    'padding6': ['same', 'valid'],  # Padding options for the sixth DepthwiseConv1D
+    'depth_multiplier6': [1, 2, 4, 8],  # Depth multiplier for the sixth DepthwiseConv1D
+    'activationDCNN6': ['relu', 'selu', 'elu', 'swish'],  # Activation functions for the sixth DepthwiseConv1D
+
+    'pool_size3': [2, 3, 4],  # Pool sizes for the third MaxPooling1D
+    'strides3': [1, 2, 3],  # Stride values for the third MaxPooling1D
+
+    'separable_filters': [32, 64, 128, 256],  # Filter counts for SeparableConv1D
+    'separable_kernel_size': [3, 5, 7],  # Kernel sizes for SeparableConv1D
+    'separable_depth_multiplier': [1, 2, 4],  # Depth multiplier for SeparableConv1D
+    'activationCNN1': ['relu', 'selu', 'elu', 'swish'],  # Activation functions for SeparableConv1D
+
+    'conv_filters': [16, 32, 64, 128],  # Filter counts for Conv1D
+    'conv_kernel_size': [3, 5, 7],  # Kernel sizes for Conv1D
+    'conv_padding': ['same', 'valid'],  # Padding options for Conv1D
+
+    'final_pool_size': [2, 3, 5],  # Pool sizes for the final MaxPooling1D
+    'final_pool_strides': [1, 2, 3],  # Stride values for the final MaxPooling1D
+
+    'spatial_dropout2': (float, 0.01, 0.5),  # Range for the second spatial dropout rate
+
+    'dense_units1': [32, 64, 128, 256],  # Units for the first Dense layer
+    'activationDense1': ['relu', 'selu', 'elu', 'swish'],  # Activation functions for the first Dense layer
+    'dense_units2': [16, 32, 64, 128],  # Units for the second Dense layer
+    'activationDense2': ['relu', 'selu', 'elu', 'swish'],  # Activation functions for the second Dense layer
+    'dropout_rate': (float, 0.01, 0.5),  # Range for dropout rate
+
+    'output_units': [1, 2, 3, 10],  # Units for the output layer
+    'activationDense3': ['sigmoid', 'softmax'],  # Activation functions for the output layer
+}
+
 
 
 def transformer_model(input_shape, params={}):
