@@ -269,7 +269,7 @@ def nicon_VG(input_shape, params={}):
 
 
 @framework('tensorflow')
-def decon_layer(input_shape, params={}):
+def customizable_decon(input_shape, params={}):
     """
     Builds a model using depthwise separable convolutions and layer normalization.
 
@@ -282,47 +282,47 @@ def decon_layer(input_shape, params={}):
     """
     model = Sequential()
     model.add(Input(shape=input_shape))
-    model.add(SpatialDropout1D(params.get('spatial_dropout', 0.2)))
+    model.add(SpatialDropout1D(params.get('spatial_dropout1', 0.2)))
     model.add(DepthwiseConv1D(
-        kernel_size=params.get('kernel_size1', 7), padding="same", depth_multiplier=2, activation="relu"
+        kernel_size=params.get('kernel_size1', 7), padding="same", depth_multiplier=2, activation=params.get('activationDCNN1', "relu")
     ))
     model.add(DepthwiseConv1D(
-        kernel_size=params.get('kernel_size2', 7), padding="same", depth_multiplier=2, activation="relu"
-    ))
-    model.add(MaxPooling1D(pool_size=2, strides=2))
-    model.add(LayerNormalization())
-
-    model.add(DepthwiseConv1D(
-        kernel_size=params.get('kernel_size3', 5), padding="same", depth_multiplier=2, activation="relu"
-    ))
-    model.add(DepthwiseConv1D(
-        kernel_size=params.get('kernel_size4', 5), padding="same", depth_multiplier=2, activation="relu"
+        kernel_size=params.get('kernel_size2', 7), padding="same", depth_multiplier=2, activation=params.get('activationDCNN2', "relu")
     ))
     model.add(MaxPooling1D(pool_size=2, strides=2))
     model.add(LayerNormalization())
 
     model.add(DepthwiseConv1D(
-        kernel_size=params.get('kernel_size5', 9), padding="same", depth_multiplier=2, activation="relu"
+        kernel_size=params.get('kernel_size3', 5), padding="same", depth_multiplier=2, activation=params.get('activationDCNN3', "relu")
     ))
     model.add(DepthwiseConv1D(
-        kernel_size=params.get('kernel_size6', 9), padding="same", depth_multiplier=2, activation="relu"
+        kernel_size=params.get('kernel_size4', 5), padding="same", depth_multiplier=2, activation=params.get('activationDCNN4', "relu")
     ))
     model.add(MaxPooling1D(pool_size=2, strides=2))
     model.add(LayerNormalization())
 
-    model.add(SeparableConv1D(64, kernel_size=3, depth_multiplier=1, padding="same", activation="relu"))
+    model.add(DepthwiseConv1D(
+        kernel_size=params.get('kernel_size5', 9), padding="same", depth_multiplier=2, activation=params.get('activationDCNN5', "relu")
+    ))
+    model.add(DepthwiseConv1D(
+        kernel_size=params.get('kernel_size6', 9), padding="same", depth_multiplier=2, activation=params.get('activationDCNN6', "relu")
+    ))
+    model.add(MaxPooling1D(pool_size=2, strides=2))
+    model.add(LayerNormalization())
+
+    model.add(SeparableConv1D(64, kernel_size=3, depth_multiplier=1, padding="same", activation=params.get('activationCNN1', "relu")))
     model.add(Conv1D(filters=32, kernel_size=3, padding="same"))
     model.add(MaxPooling1D(pool_size=5, strides=3))
-    model.add(SpatialDropout1D(params.get('spatial_dropout', 0.1)))
+    model.add(SpatialDropout1D(params.get('spatial_dropout2', 0.1)))
     model.add(Flatten())
 
     # Fully Connected layers
-    model.add(Dense(units=params.get('dense_units1', 128), activation="relu"))
-    model.add(Dense(units=params.get('dense_units2', 32), activation="relu"))
+    model.add(Dense(units=params.get('dense_units1', 128), activation=params.get('activationDense1', "relu")))
+    model.add(Dense(units=params.get('dense_units2', 32), activation=params.get('activationDense2', "relu")))
     model.add(Dropout(params.get('dropout_rate', 0.2)))
 
     # Output layer
-    model.add(Dense(units=1, activation="sigmoid"))
+    model.add(Dense(units=1, activation=params.get('activationDense3', "sigmoid")))
 
     return model
 
