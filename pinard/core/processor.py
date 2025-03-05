@@ -13,6 +13,8 @@ import zlib
 
 from ..data.dataset import Dataset
 from ..data_splitters import run_splitter
+from .model.model_builder_factory import ModelBuilderFactory
+from .model.model_manager import ModelManagerFactory
 
 def instantiate_class(class_name: str, params: dict) -> Any:
     """

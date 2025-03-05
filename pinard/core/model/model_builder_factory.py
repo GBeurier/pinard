@@ -1,7 +1,11 @@
 import os
 import importlib
-from .utils import TF_AVAILABLE, TORCH_AVAILABLE
+from ..utils import TF_AVAILABLE, TORCH_AVAILABLE
 import inspect
+
+from .tensorflow.tf_model_builder import TFModelBuilder
+from .pytorch.torch_model_builder import TorchModelBuilder
+from .sklearn.sklearn_model_builder import SklearnModelBuilder
 
 
 # 1. str

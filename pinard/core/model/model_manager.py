@@ -1,6 +1,4 @@
 # model_manager.py
-
-
 from abc import ABC, abstractmethod
 import joblib
 from sklearn.metrics import get_scorer, mean_gamma_deviance
@@ -8,7 +6,11 @@ import sys
 import os
 import numpy as np
 from .model_builder_factory import ModelBuilderFactory
-from .utils import TF_AVAILABLE, TORCH_AVAILABLE
+from ..utils import TF_AVAILABLE, TORCH_AVAILABLE
+
+from .tensorflow.tf_model_manager import TFModelManager
+from .pytorch.torch_model_manager import TorchModelManager
+from .sklearn.sklearn_model_manager import SklearnModelManager
 
 METRIC_ABBREVIATIONS = {
     # Regression metrics
@@ -486,7 +488,7 @@ if TF_AVAILABLE:
             if os.path.exists(path):
                 self.models = []
                 for i in range(len(os.listdir(path))):
-                    if os.path.exists(path + f'model_{i}.keras'):
+                    if os.path.exists(path + f'model_{i}.keras')):
                         self.models.append(load_model(path + f'model_{i}.keras'))
             else:
                 raise FileNotFoundError(f"Model file not found at: {path}")

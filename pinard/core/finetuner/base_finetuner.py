@@ -2,9 +2,9 @@
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 import optuna
 from abc import ABC, abstractmethod
-from .model_builder_factory import ModelBuilderFactory
-from .model_manager import ModelManagerFactory
-from .utils import TF_AVAILABLE, TORCH_AVAILABLE
+from ..model.model_builder_factory import ModelBuilderFactory
+from ..model.model_manager import ModelManagerFactory
+from ..utils import TF_AVAILABLE, TORCH_AVAILABLE
 import copy
 import numpy as np
 
