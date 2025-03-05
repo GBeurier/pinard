@@ -25,29 +25,68 @@ Pinard is a python package developed at AGAP institute (https://umr-agap.cirad.f
 
 ## INSTALLATION
 
+### Basic Installation
+
 Installing the pinard package can be done using the Python package installer pip. To install pinard, you need to open a terminal or command prompt and enter the following command:
 
+```
 pip install pinard
+```
+
+This will install the base package with scikit-learn support only.
+
+### Optional Dependencies
+
+Pinard can work with various deep learning frameworks. You can install the optional dependencies based on your needs:
+
+```
+# Install with TensorFlow support
+pip install pinard[tf]
+
+# Install with PyTorch support
+pip install pinard[torch]
+
+# Install with Keras 3 support
+pip install pinard[keras]
+
+# Install with JAX support
+pip install pinard[jax]
+
+# Install with all ML frameworks
+pip install pinard[all]
+```
 
 It is recommended to use virtual environments to avoid any conflicts with other packages. Once the installation is complete, you should be able to import the package and use its functions in your Python code.
 It's also possible to use the package from Jupyter notebook or any other IDE, you just have to make sure the environment is the same as the one where you installed the package.
 
+### Installation from Source
+
 If you want to install from the source code, you can use the following command, after having downloaded or cloned the source code from the official repository (https://github.com/GBeurier/pinard):
 
+```
 pip install -r requirements.txt 
+```
 
 This command will install all the dependencies of the package, such as joblib, kennard-stone, numpy, pandas, pytest, PyWavelets, setuptools, scikit-learn, and scipy.
 
 Then it's possible to install the package by running :
 
+```
 python setup.py install
+```
+
+For development purposes, you can install with all optional dependencies:
+
+```
+pip install -e ".[full]"
+```
 
 
 ## USAGE
 
 ### Basic usage
 ```python
-x, y = utils.load_csv(xcal_csv, ycal_csv, x_hdr=0, y_hdr=0, remove_na=True) # Load data from CSV files, remove rows with missing values
+x, y = utils.load_csv(xcal_csv, ycal_csv, x_hdr=0, ycal_hdr=0, remove_na=True) # Load data from CSV files, remove rows with missing values
 train_index, test_index = train_test_split_idx(x, y=y, method="kennard_stone", metric="correlation" test_size=0.25, random_state=rd_seed) # Split data into training and test sets using the kennard_stone method and correlation metric, 25% of data is used for testing
 X_train, y_train, X_test, y_test = x[train_index], y[train_index], x[test_index], y[test_index] # Assign data to training and test sets
 
@@ -97,6 +136,39 @@ More complete examples can be found in examples folders and executed on google c
 - https://colab.research.google.com/github/GBeurier/pinard/blob/main/examples/simple_pipelines.ipynb
 - https://colab.research.google.com/github/GBeurier/pinard/blob/main/examples/stacking.ipynb
 
+
+## USING OPTIONAL ML BACKENDS
+
+### TensorFlow Models
+
+If you have installed Pinard with TensorFlow support (`pip install pinard[tf]`), you can use TensorFlow models in your pipelines:
+
+```python
+from pinard.presets.tf_models import create_simple_cnn
+
+# Create a pipeline with a TensorFlow model
+pipeline = Pipeline([
+    ('scaler', MinMaxScaler()),
+    ('preprocessing', FeatureUnion(preprocessing)),
+    ('tf_model', create_simple_cnn(input_shape=(n_features, 1), output_dim=1))
+])
+```
+
+### PyTorch Models
+
+If you have installed Pinard with PyTorch support (`pip install pinard[torch]`), you can integrate PyTorch models:
+
+```python
+from pinard.presets.torch_models import SimpleNN
+import torch.nn as nn
+
+# Create a pipeline with a PyTorch model
+pipeline = Pipeline([
+    ('scaler', MinMaxScaler()),
+    ('preprocessing', FeatureUnion(preprocessing)),
+    ('torch_model', SimpleNN(input_size=n_features, hidden_size=64, output_size=1))
+])
+```
 
 ## ROADMAP
 

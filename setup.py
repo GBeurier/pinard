@@ -29,6 +29,32 @@ extra_ci = [
     'python-coveralls',
 ]
 
+# Nouveaux extras pour les frameworks de ML
+extra_tf = [
+    'tensorflow>=2.10.0',
+]
+
+extra_torch = [
+    'torch>=2.0.0',
+]
+
+extra_keras = [
+    'keras>=3.0.0',
+]
+
+extra_jax = [
+    'jax>=0.4.10',
+    'jaxlib>=0.4.10',
+]
+
+# Extra qui contient tous les frameworks
+extra_all_frameworks = [
+    *extra_tf,
+    *extra_torch,
+    *extra_keras,
+    *extra_jax,
+]
+
 
 setup(
     name='pinard',
@@ -44,6 +70,7 @@ setup(
 
     install_requires=[
         'joblib',
+        'jsonschema',
         'kennard-stone',
         'numpy',
         'pandas',
@@ -60,6 +87,12 @@ setup(
         'test': extra_test,
         'dev': extra_dev,
         'ci': extra_ci,
+        'tf': extra_tf,
+        'torch': extra_torch,
+        'keras': extra_keras,
+        'jax': extra_jax,
+        'all': extra_all_frameworks,
+        'full': [*extra_ci, *extra_all_frameworks],
     },
 
     entry_points={

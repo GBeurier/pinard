@@ -1,4 +1,5 @@
 joblib>=1.4.0
+jsonschema
 kennard-stone>=2.0.0
 numpy
 pandas

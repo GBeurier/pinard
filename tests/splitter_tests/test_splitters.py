@@ -56,6 +56,9 @@ def test_KMeansSplitter():
 
 
 def test_KMeansSplitter_small_train_size():
+    """
+    Test KMeansSplitter with a small training size.
+    """
     X = np.random.rand(3, 10)
     splitter = KMeansSplitter(test_size=0.3, random_state=42)
     splits = list(splitter.split(X))
