@@ -128,13 +128,13 @@ class ExperimentManager:
             if 'class' in model_config:
                 model_name = model_config['class'].split('.')[-1]
             elif 'path' in model_config:
-                model_name = model_config['path'].split('.')[-1]
+                model_name = os.path.splitext(os.path.basename(model_config['path']))[0]
             else:
                 model_name = 'unknown_model'
         elif callable(model_config):
             model_name = model_config.__name__
         elif isinstance(model_config, str):
-            model_name = os.path.basename(model_config)
+            model_name = os.path.splitext(os.path.basename(model_config))[0]
         else:
             model_name = 'unknown_model'
         return sanitize_folder_name(model_name)

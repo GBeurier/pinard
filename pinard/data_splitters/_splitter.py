@@ -92,6 +92,10 @@ def _validate_shuffle_split(n_samples, test_size, train_size, default_test_size=
             "aforementioned parameters.".format(n_samples, test_size, train_size)
         )
 
+    # Ensure that the sum of n_train and n_test equals n_samples
+    if n_train + n_test != n_samples:
+        n_test = n_samples - n_train
+
     return n_train, n_test
 
 
@@ -197,7 +201,7 @@ class KMeansSplitter(CustomSplitter):
 
     def split(self, X, y=None, groups=None):
         n_samples = _num_samples(X)
-        n_train, _ = _validate_shuffle_split(n_samples, self.test_size, None)
+        n_train, n_test = _validate_shuffle_split(n_samples, self.test_size, None)
 
         if self.pca_components is not None:
             pca = PCA(self.pca_components, random_state=self.random_state)
@@ -217,6 +221,12 @@ class KMeansSplitter(CustomSplitter):
 
         index_train = np.unique(index_train).astype(int)
         index_test = np.delete(np.arange(n_samples), index_train)
+
+        # Ensure that the number of training and testing samples is correct
+        if len(index_train) > n_train:
+            index_train = index_train[:n_train]
+        if len(index_test) > n_test:
+            index_test = index_test[:n_test]
 
         yield index_train, index_test
 

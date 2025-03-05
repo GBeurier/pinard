@@ -25,17 +25,36 @@ def get_construction_params(instance):
 
 def deserialize_object(serialized_obj):
     """Reconstruct the object from its serialized form."""
-    module_name, class_name = serialized_obj['class'].rsplit('.', 1)
-    module = importlib.import_module(module_name)
-    obj_class = getattr(module, class_name)
-    if 'params' in serialized_obj:
-        return obj_class(**serialized_obj['params'])
-    return obj_class()
+    # Si serialized_obj est une chaîne, c'est directement le chemin de la classe
+    if isinstance(serialized_obj, str):
+        module_name, class_name = serialized_obj.rsplit('.', 1)
+        module = importlib.import_module(module_name)
+        obj_class = getattr(module, class_name)
+        return obj_class()
+    
+    # Sinon, c'est un dictionnaire avec une clé 'class' et éventuellement 'params'
+    elif isinstance(serialized_obj, dict) and 'class' in serialized_obj:
+        module_name, class_name = serialized_obj['class'].rsplit('.', 1)
+        module = importlib.import_module(module_name)
+        obj_class = getattr(module, class_name)
+        if 'params' in serialized_obj:
+            return obj_class(**serialized_obj['params'])
+        return obj_class()
+    else:
+        raise TypeError(f"Expected string or dict with 'class' key, got {type(serialized_obj)}")
 
 def deserialize_pipeline(serialized_pipeline):
     """Recursively deserialize the pipeline."""
     if isinstance(serialized_pipeline, list):
         return [deserialize_pipeline(step) for step in serialized_pipeline]
     if isinstance(serialized_pipeline, dict):
+        # Vérifie si c'est un objet sérialisé à désérialiser directement
+        if 'class' in serialized_pipeline:
+            return deserialize_object(serialized_pipeline)
+        # Sinon c'est un dictionnaire de configuration à traiter récursivement
         return {key: deserialize_pipeline(value) for key, value in serialized_pipeline.items()}
-    return deserialize_object(serialized_pipeline)
+    if isinstance(serialized_pipeline, str):
+        return deserialize_object(serialized_pipeline)
+    
+    # Pour tous les autres types (nombres, None, etc.)
+    return serialized_pipeline
