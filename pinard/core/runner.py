@@ -5,7 +5,7 @@ import numpy as np
 
 from ..data.dataset_loader import get_dataset
 from .processor import run_pipeline
-from .finetuner import FineTunerFactory
+from pinard.core.finetuner.base_finetuner import FineTunerFactory
 from .model.model_manager import ModelManagerFactory
 from .manager.experiment_manager import ExperimentManager
 
@@ -43,7 +43,7 @@ class ExperimentRunner:
                     if metrics is None:
                         metrics = ['mse', 'mae']
             elif metrics is not None:
-                if any metric in classification_metrics for metric in metrics:
+                if any(metric in classification_metrics for metric in metrics):
                     task = 'classification'
                     if dataset.num_classes is None:
                         raise ValueError("Number of classes is not defined in dataset. Please specify the number of classes in the dataset config.")

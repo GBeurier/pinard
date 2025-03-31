@@ -29,7 +29,6 @@ extra_ci = [
     'python-coveralls',
 ]
 
-# Nouveaux extras pour les frameworks de ML
 extra_tf = [
     'tensorflow>=2.10.0',
 ]
@@ -47,7 +46,7 @@ extra_jax = [
     'jaxlib>=0.4.10',
 ]
 
-# Extra qui contient tous les frameworks
+
 extra_all_frameworks = [
     *extra_tf,
     *extra_torch,
@@ -103,12 +102,16 @@ setup(
 
     classifiers=[
         'Intended Audience :: Developers',
+        'Intended Audience :: Science/Research',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Environment :: GPU :: NVIDIA CUDA :: 10.1',
+        'Environment :: GPU :: NVIDIA CUDA',
         'Development Status :: 4 - Beta',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Topic :: Scientific/Engineering :: Chemistry',
+        'Topic :: Scientific/Engineering :: Chemistry :: Analytical Chemistry',
+        'Topic :: Scientific/Engineering :: Physics :: Spectroscopy',
+        'Topic :: Scientific/Engineering :: Chemistry :: Spectroscopy',
         'Topic :: Scientific/Engineering :: Information Analysis',
     ],
 )

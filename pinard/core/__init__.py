@@ -1,17 +1,10 @@
-from . import config
-from . import finetuner
-from . import manager
-from . import model_builder_factory
-from . import model_manager
-from . import processor
-from . import runner
-from . import utils
+# Empty __init__.py file to avoid circular imports
+# Modules will be imported directly when needed rather than through the core package
 
 __all__ = [
     'config',
     'finetuner',
     'manager',
-    'model_builder_factory',
     'model_manager',
     'processor',
     'runner',

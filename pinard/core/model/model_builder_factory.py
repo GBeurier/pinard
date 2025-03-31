@@ -3,9 +3,9 @@ import importlib
 from ..utils import TF_AVAILABLE, TORCH_AVAILABLE
 import inspect
 
-from .tensorflow.tf_model_builder import TFModelBuilder
-from .pytorch.torch_model_builder import TorchModelBuilder
-from .sklearn.sklearn_model_builder import SklearnModelBuilder
+from .tensorflow import TFModelBuilder
+from .pytorch import TorchModelBuilder
+from .sklearn import SklearnModelBuilder
 
 
 # 1. str

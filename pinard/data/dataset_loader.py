@@ -53,7 +53,7 @@ def load_XY(x_path, x_filter, x_params, y_path, y_filter, y_params):
     x, report = load_csv(x_path, **x_params)
     print(report)
 
-    if "error" in report:
+    if "error" in report and report["error"] is not None:
         raise ValueError(f"Invalid data: x contains errors: {report['error']}")
 
     if x is None:
@@ -80,7 +80,7 @@ def load_XY(x_path, x_filter, x_params, y_path, y_filter, y_params):
         # Y is in a separate file
         y, report = load_csv(y_path, na_policy=y_params.get('na_policy', 'auto'), type="y", **y_params)
         
-        if "error" in report:
+        if "error" in report and report["error"] is not None:
             raise ValueError(f"Invalid data: y contains errors: {report['error']}")
 
         if y is None:
