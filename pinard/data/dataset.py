@@ -30,7 +30,17 @@ class Dataset:
         if self.y_transformer is not None:
             if len(y_pred.shape) == 1:
                 return self.y_transformer.inverse_transform(y_pred[:, np.newaxis])[:, 0]
-            return self.y_transformer.inverse_transform(y_pred)
+            elif len(y_pred.shape) == 2:
+                return self.y_transformer.inverse_transform(y_pred)
+            # elif len(y_pred.shape) == 3:
+            #     # check if last dim is 1 and remove it
+            #     if y_pred.shape[-1] == 1:
+            #         y_pred = y_pred.reshape(-1, y_pred.shape[-2])
+            #         return self.y_transformer.inverse_transform(y_pred)
+            else:
+                raise ValueError(f"Invalid y_pred shape: {y_pred.shape}. Expected 2D or 3D array.")
+                # return y_pred.reshape(-1, self.num_classes)
+            # return self.y_transformer.inverse_transform(y_pred)
         return y_pred
     
     def filter_x(self, data, union_type='concat', indices=None, disable_augmentation=False):
