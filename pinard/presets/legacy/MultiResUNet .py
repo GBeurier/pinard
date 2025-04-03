@@ -50,7 +50,7 @@ def Feature_Extraction_Block(inputs, model_width, feature_number):
 
 def dense_block(x, num_filters, num_layers, bottleneck=True):
     for i in range(num_layers):
-        cb = conv_block(x, num_filters, bottleneck=bottleneck)
+        cb = Conv_Block(x, num_filters, bottleneck=bottleneck)
         x = tf.keras.layers.concatenate([x, cb], axis=-1)
 
     return x
