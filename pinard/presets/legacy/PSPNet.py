@@ -76,7 +76,7 @@ class PSPNet:
 
         # Model Regularization
         if self.dropout is not None:
-            x = layers.SpatialDropout1D(self.dropout)(x)
+            x = tf.keras.layers.SpatialDropout1D(self.dropout)(x)
 
         # Model Head
         x = Conv_Block(x, self.model_width, 3, use_batchnorm=True)
