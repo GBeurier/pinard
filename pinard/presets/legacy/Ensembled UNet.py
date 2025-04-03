@@ -58,9 +58,9 @@ def dense_block(x, num_filters, num_layers, bottleneck=True):
 
 def Attention_Block(skip_connection, gating_signal, num_filters, multiplier):
     # Attention Block
-    conv1x1_1 = tf.keras.layers.Conv1D(num_filters*multiplier, 1, strides=2)(skip_connection)
+    conv1x1_1 = tf.keras.layers.Conv1D(num_filters * multiplier, 1, strides=2)(skip_connection)
     conv1x1_1 = tf.keras.layers.BatchNormalization()(conv1x1_1)
-    conv1x1_2 = tf.keras.layers.Conv1D(num_filters*multiplier, 1, strides=1)(gating_signal)
+    conv1x1_2 = tf.keras.layers.Conv1D(num_filters * multiplier, 1, strides=1)(gating_signal)
     conv1x1_2 = tf.keras.layers.BatchNormalization()(conv1x1_2)
     conv1_2 = tf.keras.layers.add([conv1x1_1, conv1x1_2])
     conv1_2 = tf.keras.layers.Activation('relu')(conv1_2)
@@ -105,7 +105,6 @@ class UNet:
         self.feature_number = feature_number
         self.is_transconv = is_transconv
         
-
     def UNetE(self):
         # Variable Ensemble UNet Model Design
         if self.length == 0 or self.model_depth == 0 or self.model_width == 0 or self.num_channel == 0 or self.kernel_size == 0:
@@ -154,7 +153,8 @@ class UNet:
                         x1 = tf.keras.layers.Reshape(target_shape=(1, np.int32(self.length / 2 ** j), np.int32(self.model_width * (2 ** j))))(skip_connection)
                         x2 = tf.keras.layers.Reshape(target_shape=(1, np.int32(self.length / 2 ** j), np.int32(self.model_width * (2 ** j))))(deconv)
                         merge = tf.keras.layers.concatenate([x1, x2], axis=-1)
-                        deconv = tf.keras.layers.ConvLSTM1D(filters=np.int32(self.model_width * (2 ** (j - 1))), kernel_size=3, padding='same', return_sequences=False, go_backwards=True, kernel_initializer='he_normal')(merge)
+                        deconv = tf.keras.layers.ConvLSTM1D(filters=np.int32(self.model_width * (2 ** (j - 1))), kernel_size=3, padding='same', return_sequences=False, 
+                                                            go_backwards=True, kernel_initializer='he_normal')(merge)
                     elif self.LSTM == 0:
                         deconv = Concat_Block(deconv, skip_connection)
                     deconv = Conv_Block(deconv, self.model_width, self.kernel_size, 2 ** j)
@@ -172,7 +172,8 @@ class UNet:
                         x1 = tf.keras.layers.Reshape(target_shape=(1, np.int32(self.length / 2 ** j), np.int32(self.model_width * (2 ** j))))(skip_connection)
                         x2 = tf.keras.layers.Reshape(target_shape=(1, np.int32(self.length / 2 ** j), np.int32(self.model_width * (2 ** j))))(deconv)
                         merge = tf.keras.layers.concatenate([x1, x2], axis=-1)
-                        deconv = tf.keras.layers.ConvLSTM1D(filters=np.int32(self.model_width * (2 ** (j - 1))), kernel_size=3, padding='same', return_sequences=False, go_backwards=True, kernel_initializer='he_normal')(merge)
+                        deconv = tf.keras.layers.ConvLSTM1D(filters=np.int32(self.model_width * (2 ** (j - 1))), kernel_size=3, padding='same', return_sequences=False, 
+                                                            go_backwards=True, kernel_initializer='he_normal')(merge)
                     elif self.LSTM == 0:
                         deconv = Concat_Block(deconv, skip_connection)
                     deconv = Conv_Block(deconv, self.model_width, self.kernel_size, 2 ** j)
@@ -190,7 +191,8 @@ class UNet:
                         x1 = tf.keras.layers.Reshape(target_shape=(1, np.int32(self.length / 2 ** j), np.int32(self.model_width * (2 ** j))))(skip_connection)
                         x2 = tf.keras.layers.Reshape(target_shape=(1, np.int32(self.length / 2 ** j), np.int32(self.model_width * (2 ** j))))(deconv)
                         merge = tf.keras.layers.concatenate([x1, x2], axis=-1)
-                        deconv = tf.keras.layers.ConvLSTM1D(filters=np.int32(self.model_width * (2 ** (j - 1))), kernel_size=3, padding='same', return_sequences=False, go_backwards=True, kernel_initializer='he_normal')(merge)
+                        deconv = tf.keras.layers.ConvLSTM1D(filters=np.int32(self.model_width * (2 ** (j - 1))), kernel_size=3, padding='same', return_sequences=False, 
+                                                            go_backwards=True, kernel_initializer='he_normal')(merge)
                     elif self.LSTM == 0:
                         deconv = Concat_Block(deconv, skip_connection)
                     deconv = Conv_Block(deconv, self.model_width, self.kernel_size, 2 ** j)
@@ -233,7 +235,7 @@ if __name__ == '__main__':
     LSTM = 1  # Turn on for LSTM, Implemented for UNet and MultiResUNet only
     problem_type = 'Regression'  # Regression or Classification (Commonly Regression)
     output_nums = 1  # Number of Class for Classification Problems, always '1' for Regression Problems
-    is_transconv = True # True: Transposed Convolution, False: UpSampling
+    is_transconv = True  # True: Transposed Convolution, False: UpSampling
     '''Only required if the AutoEncoder Mode is turned on'''
     feature_number = 1024  # Number of Features to be Extracted
     #

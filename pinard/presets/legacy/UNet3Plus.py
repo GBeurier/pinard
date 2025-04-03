@@ -3,9 +3,18 @@ import numpy as np
 import tensorflow as tf
 
 
-def Conv_Block(inputs, model_width, kernel, multiplier):
+def Conv_Block(inputs, model_width, kernel, multiplier, bottleneck=False):
     # 1D Convolutional Block
-    x = tf.keras.layers.Conv1D(model_width * multiplier, kernel, padding='same')(inputs)
+    if bottleneck:
+        # Bottleneck design: use 1x1 conv to reduce channels before kernel-sized conv
+        x = tf.keras.layers.Conv1D(model_width * multiplier // 4, 1, padding='same')(inputs)
+        x = tf.keras.layers.BatchNormalization()(x)
+        x = tf.keras.layers.Activation('relu')(x)
+        x = tf.keras.layers.Conv1D(model_width * multiplier, kernel, padding='same')(x)
+    else:
+        # Standard convolution
+        x = tf.keras.layers.Conv1D(model_width * multiplier, kernel, padding='same')(inputs)
+    
     x = tf.keras.layers.BatchNormalization()(x)
     x = tf.keras.layers.Activation('relu')(x)
 
@@ -50,7 +59,8 @@ def Feature_Extraction_Block(inputs, model_width, feature_number):
 
 def dense_block(x, num_filters, num_layers, bottleneck=True):
     for i in range(num_layers):
-        cb = Conv_Block(x, num_filters, bottleneck=bottleneck)
+        # Use kernel size 3 by default for Conv_Block with bottleneck parameter
+        cb = Conv_Block(x, num_filters, 3, multiplier=1, bottleneck=bottleneck)
         x = tf.keras.layers.concatenate([x, cb], axis=-1)
 
     return x
@@ -58,9 +68,9 @@ def dense_block(x, num_filters, num_layers, bottleneck=True):
 
 def Attention_Block(skip_connection, gating_signal, num_filters, multiplier):
     # Attention Block
-    conv1x1_1 = tf.keras.layers.Conv1D(num_filters*multiplier, 1, strides=2)(skip_connection)
+    conv1x1_1 = tf.keras.layers.Conv1D(num_filters * multiplier, 1, strides=2)(skip_connection)
     conv1x1_1 = tf.keras.layers.BatchNormalization()(conv1x1_1)
-    conv1x1_2 = tf.keras.layers.Conv1D(num_filters*multiplier, 1, strides=1)(gating_signal)
+    conv1x1_2 = tf.keras.layers.Conv1D(num_filters * multiplier, 1, strides=1)(gating_signal)
     conv1x1_2 = tf.keras.layers.BatchNormalization()(conv1x1_2)
     conv1_2 = tf.keras.layers.add([conv1x1_1, conv1x1_2])
     conv1_2 = tf.keras.layers.Activation('relu')(conv1_2)
@@ -105,7 +115,6 @@ class UNet:
         self.feature_number = feature_number
         self.is_transconv = is_transconv
 
-
     def UNet3P(self):
         # Variable UNet3+ Model Design
         if self.length == 0 or self.model_depth == 0 or self.model_width == 0 or self.num_channel == 0 or self.kernel_size == 0:
@@ -141,7 +150,7 @@ class UNet:
             skip_connections_all = Conv_Block(skip_connections_all, self.model_width, self.kernel_size, 2 ** 0)
             for k in range(0, self.model_depth - j - 1):
                 skip_connection = convs_list[k]
-                skip_connection = tf.keras.layers.MaxPooling1D(pool_size=(2**((self.model_depth-j)-k-1)))(skip_connection)
+                skip_connection = tf.keras.layers.MaxPooling1D(pool_size=(2**((self.model_depth - j) - k - 1)))(skip_connection)
                 skip_connection = Conv_Block(skip_connection, self.model_width, self.kernel_size, 2 ** 0)
                 skip_connections_all = tf.keras.layers.concatenate([skip_connections_all, skip_connection], axis=-1)
             deconv_tot = upConv_Block(deconv, size=2 ** 1)
@@ -149,7 +158,7 @@ class UNet:
             deconv_tot = tf.keras.layers.concatenate([skip_connections_all, deconv_tot], axis=-1)
             if j > 0:
                 for m in range(0, j):
-                    deconv = upConv_Block(deconvs["deconv%s" % m], size=(2 ** (j-m)))
+                    deconv = upConv_Block(deconvs["deconv%s" % m], size=(2 ** (j - m)))
                     deconv = Conv_Block(deconv, self.model_width, self.kernel_size, 2 ** 0)
                     deconv_tot = tf.keras.layers.concatenate([deconv_tot, deconv], axis=-1)
             deconv = Conv_Block(deconv_tot, self.model_width, self.kernel_size, self.model_depth + 1)
@@ -190,7 +199,7 @@ if __name__ == '__main__':
     LSTM = 1  # Turn on for LSTM, Implemented for UNet and MultiResUNet only
     problem_type = 'Regression'  # Regression or Classification (Commonly Regression)
     output_nums = 1  # Number of Class for Classification Problems, always '1' for Regression Problems
-    is_transconv = True # True: Transposed Convolution, False: UpSampling
+    is_transconv = True  # True: Transposed Convolution, False: UpSampling
     '''Only required if the AutoEncoder Mode is turned on'''
     feature_number = 1024  # Number of Features to be Extracted
     #

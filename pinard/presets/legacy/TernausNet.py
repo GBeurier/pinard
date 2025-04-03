@@ -1,9 +1,18 @@
 # Import Necessary Libraries
 import tensorflow as tf
 
-def Conv_Block(inputs, model_width, kernel, multiplier):
+def Conv_Block(inputs, model_width, kernel, multiplier=1, bottleneck=False):
     # 1D Convolutional Block
-    x = tf.keras.layers.Conv1D(model_width * multiplier, kernel, padding='same', kernel_initializer="he_normal")(inputs)
+    if bottleneck:
+        # Bottleneck design: use 1x1 conv to reduce channels before 3x3 conv
+        x = tf.keras.layers.Conv1D(model_width * multiplier // 4, 1, padding='same', kernel_initializer="he_normal")(inputs)
+        x = tf.keras.layers.BatchNormalization()(x)
+        x = tf.keras.layers.Activation('relu')(x)
+        x = tf.keras.layers.Conv1D(model_width * multiplier, kernel, padding='same', kernel_initializer="he_normal")(x)
+    else:
+        # Standard convolution
+        x = tf.keras.layers.Conv1D(model_width * multiplier, kernel, padding='same', kernel_initializer="he_normal")(inputs)
+    
     x = tf.keras.layers.BatchNormalization()(x)
     x = tf.keras.layers.Activation('relu')(x)
 
@@ -58,7 +67,7 @@ def Attention_Block(skip_connection, gating_signal, num_filters, multiplier):
     conv1_2 = tf.keras.layers.BatchNormalization()(conv1_2)
     conv1_2 = tf.keras.layers.Activation('sigmoid')(conv1_2)
     resampler = upConv_Block(conv1_2)
-    out = skip_connection*resampler
+    out = skip_connection * resampler
 
     return out
 

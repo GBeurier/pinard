@@ -3,9 +3,18 @@ import numpy as np
 import tensorflow as tf
 
 
-def Conv_Block(inputs, model_width, kernel, multiplier):
+def Conv_Block(inputs, model_width, kernel, multiplier, bottleneck=False):
     # 1D Convolutional Block
-    x = tf.keras.layers.Conv1D(model_width * multiplier, kernel, padding='same')(inputs)
+    if bottleneck:
+        # Bottleneck design: use 1x1 conv to reduce channels before kernel-sized conv
+        x = tf.keras.layers.Conv1D(model_width * multiplier // 4, 1, padding='same')(inputs)
+        x = tf.keras.layers.BatchNormalization()(x)
+        x = tf.keras.layers.Activation('relu')(x)
+        x = tf.keras.layers.Conv1D(model_width * multiplier, kernel, padding='same')(x)
+    else:
+        # Standard convolution
+        x = tf.keras.layers.Conv1D(model_width * multiplier, kernel, padding='same')(inputs)
+    
     x = tf.keras.layers.BatchNormalization()(x)
     x = tf.keras.layers.Activation('relu')(x)
 
@@ -50,7 +59,8 @@ def Feature_Extraction_Block(inputs, model_width, feature_number):
 
 def dense_block(x, num_filters, num_layers, bottleneck=True):
     for i in range(num_layers):
-        cb = Conv_Block(x, num_filters, bottleneck=bottleneck)
+        # Use kernel size 3 by default for Conv_Block with bottleneck parameter
+        cb = Conv_Block(x, num_filters, 3, multiplier=1, bottleneck=bottleneck)
         x = tf.keras.layers.concatenate([x, cb], axis=-1)
 
     return x
@@ -58,9 +68,9 @@ def dense_block(x, num_filters, num_layers, bottleneck=True):
 
 def Attention_Block(skip_connection, gating_signal, num_filters, multiplier):
     # Attention Block
-    conv1x1_1 = tf.keras.layers.Conv1D(num_filters*multiplier, 1, strides=2)(skip_connection)
+    conv1x1_1 = tf.keras.layers.Conv1D(num_filters * multiplier, 1, strides=2)(skip_connection)
     conv1x1_1 = tf.keras.layers.BatchNormalization()(conv1x1_1)
-    conv1x1_2 = tf.keras.layers.Conv1D(num_filters*multiplier, 1, strides=1)(gating_signal)
+    conv1x1_2 = tf.keras.layers.Conv1D(num_filters * multiplier, 1, strides=1)(gating_signal)
     conv1x1_2 = tf.keras.layers.BatchNormalization()(conv1x1_2)
     conv1_2 = tf.keras.layers.add([conv1x1_1, conv1x1_2])
     conv1_2 = tf.keras.layers.Activation('relu')(conv1_2)
@@ -149,7 +159,8 @@ class UNet:
                 x1 = tf.keras.layers.Reshape(target_shape=(1, np.int32(self.length / 2 ** (self.model_depth - j - 1)), np.int32(self.model_width * (2 ** (self.model_depth - j - 1)))))(skip_connection)
                 x2 = tf.keras.layers.Reshape(target_shape=(1, np.int32(self.length / 2 ** (self.model_depth - j - 1)), np.int32(self.model_width * (2 ** (self.model_depth - j - 1)))))(deconv)
                 merge = tf.keras.layers.concatenate([x1, x2], axis=-1)
-                deconv = tf.keras.layers.ConvLSTM1D(filters=np.int32(self.model_width * (2 ** (self.model_depth - j - 2))), kernel_size=3, padding='same', return_sequences=False, go_backwards=True, kernel_initializer='he_normal')(merge)
+                deconv = tf.keras.layers.ConvLSTM1D(filters=np.int32(self.model_width * (2 ** (self.model_depth - j - 2))), kernel_size=3, padding='same', 
+                                                    return_sequences=False, go_backwards=True, kernel_initializer='he_normal')(merge)
             elif self.LSTM == 0:
                 deconv = Concat_Block(deconv, skip_connection)
             deconv = Conv_Block(deconv, self.model_width, self.kernel_size, 2 ** (self.model_depth - j - 1))
@@ -184,9 +195,9 @@ if __name__ == '__main__':
     A_E = 0  # Turn on AutoEncoder Mode for Feature Extraction
     A_G = 1  # Turn on for Guided Attention (Creates 'Attention Guided UNet')
     LSTM = 1  # Turn on for LSTM (Creates BCD-UNet)
-    problem_type = 'Regression' # Regression or Classification (Commonly Regression)
+    problem_type = 'Regression'  # Regression or Classification (Commonly Regression)
     output_nums = 1  # Number of Classes for Classification Problems, always '1' for Regression Problems
-    is_transconv = True # True: Transposed Convolution, False: UpSampling
+    is_transconv = True  # True: Transposed Convolution, False: UpSampling
     alpha = 1
     '''Only required if the AutoEncoder Mode is turned on'''
     feature_number = 1024  # Number of Features to be Extracted
