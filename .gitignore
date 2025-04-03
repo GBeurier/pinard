@@ -24,13 +24,8 @@ docs/build/html/_static/
 docs/build/
 build/
 .gitignore.orig
-tests/tester.ipynb
-tests/test.ipynb
-bak/
-examples/FOOD_CHEM/
-examples/FOOD_CHEM_lost/
-/examples/results
-/examples/sample_data
-examples/example.csv
 examples/example1.csv
 /results/
+/trash/
+/test_experiment_manager/
+/examples/results/

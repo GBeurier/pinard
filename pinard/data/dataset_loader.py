@@ -6,8 +6,6 @@ import json
 from .data_config_parser import parse_config
 from .dataset import Dataset
 from .csv_loader import load_csv
-import numpy as np
-
 
 def _merge_params(local_params, handler_params, global_params):
     """
@@ -51,7 +49,6 @@ def load_XY(x_path, x_filter, x_params, y_path, y_filter, y_params):
         raise ValueError("Invalid x definition: x_path is None")
 
     x, report = load_csv(x_path, **x_params)
-    print(report)
 
     if "error" in report and report["error"] is not None:
         raise ValueError(f"Invalid data: x contains errors: {report['error']}")
@@ -79,7 +76,7 @@ def load_XY(x_path, x_filter, x_params, y_path, y_filter, y_params):
     else:
         # Y is in a separate file
         y, report = load_csv(y_path, na_policy=y_params.get('na_policy', 'auto'), type="y", **y_params)
-        
+
         if "error" in report and report["error"] is not None:
             raise ValueError(f"Invalid data: y contains errors: {report['error']}")
 
@@ -143,7 +140,6 @@ def handle_data(config, t_set):
                    config.get(f'{t_set}_y'), config.get(f'{t_set}_y_filter'), y_params)
     return x, y
 
-
 def get_dataset(data_config):
     """
     Load dataset based on the data configuration.
@@ -155,30 +151,17 @@ def get_dataset(data_config):
     - Dataset: Dataset object with loaded data IDs.
     """
     config = parse_config(data_config)
-    x_train, y_train = handle_data(config, "train")
-    x_test, y_test = handle_data(config, "test")
     dataset = Dataset()
-    dataset.x_train = x_train
-    dataset.y_train_init = y_train
-    dataset.x_test = x_test
-    dataset.y_test_init = y_test
-    
-
-    # Handle training data
-    # x_train_id, y_train_id = handle_data(config, "train")
-    # if x_train_id is None:
-        # raise ValueError("Invalid data: train_x is None")
-
-    # Handle validation/test data
-    # x_test_id, y_test_id = handle_data(config, "valid")  # TODO: Uniformize test/valid on files
-
-    # datatuple = DataTuple(
-    #     x_train_id=x_train_id,
-    #     y_train_id=y_train_id,
-    #     x_test_id=x_test_id,
-    #     y_test_id=y_test_id,
-    # )
-    # dataset.set_data_tuple("raw", datatuple)
+    try:
+        x_train, y_train = handle_data(config, "train")
+        x_test, y_test = handle_data(config, "test")
+        dataset.x_train = x_train
+        dataset.y_train_init = y_train
+        dataset.x_test = x_test
+        dataset.y_test_init = y_test
+    except Exception as e:
+        print("Error loading test data:", e)
+        raise
     
     return dataset
 

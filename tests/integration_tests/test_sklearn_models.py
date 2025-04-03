@@ -71,12 +71,12 @@ def test_sklearn_regression():
     
     start = time.time()
     runner = ExperimentRunner([config], resume_mode="restart")
-    dataset, model_manager = runner.run()
+    datasets, predictions, scores, best_params = runner.run()
     end = time.time()
     
+    # Since we're using a list of configs, get the first dataset
+    dataset = datasets[0]
     assert dataset is not None, "Dataset should not be None"
-    assert model_manager is not None, "Model manager should not be None"
-    assert hasattr(model_manager, "models"), "Model manager should have models attribute"
     print(f"Time elapsed: {end-start} seconds")
 
 
@@ -87,12 +87,12 @@ def test_sklearn_rf_regression():
     
     start = time.time()
     runner = ExperimentRunner([config], resume_mode="restart")
-    dataset, model_manager = runner.run()
+    datasets, predictions, scores, best_params = runner.run()
     end = time.time()
     
+    # Since we're using a list of configs, get the first dataset
+    dataset = datasets[0]
     assert dataset is not None, "Dataset should not be None"
-    assert model_manager is not None, "Model manager should not be None"
-    assert hasattr(model_manager, "models"), "Model manager should have models attribute"
     print(f"Time elapsed: {end-start} seconds")
 
 
@@ -104,10 +104,10 @@ def test_sklearn_classification():
     
     start = time.time()
     runner = ExperimentRunner([config], resume_mode="restart")
-    dataset, model_manager = runner.run()
+    datasets, predictions, scores, best_params = runner.run()
     end = time.time()
     
+    # Since we're using a list of configs, get the first dataset
+    dataset = datasets[0]
     assert dataset is not None, "Dataset should not be None"
-    assert model_manager is not None, "Model ma-nager should not be None"
-    assert hasattr(model_manager, "models"), "Model manager should have models attribute"
     print(f"Time elapsed: {end-start} seconds")

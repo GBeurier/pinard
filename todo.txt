@@ -1,4 +1,17 @@
-- provide cross_val score in score.json
+-------------------
+NIRS4ALL
+-------------------
+
+- dataset signature (add x_train, X_train aliases for 2d dataset, clean signatures)
+- run() output should consider multiple or simple config
+
+
+
+==========================================================================================
+==========================================================================================
+==========================================================================================
+pinard_todo
+
 
 - remover augmenter.py, keep as sklearn transformers.
 - parametric augmentation {"samples":[], "target":"per_sample", "balance":"y", "balance_transformation":"bins"}

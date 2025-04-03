@@ -103,13 +103,13 @@ def test_tensorflow_regression():
         config = Config("sample_data/WhiskyConcentration", x_pipeline, y_pipeline, model, train_params, seed)
         start = time.time()
         runner = ExperimentRunner([config], resume_mode="restart")
-        dataset, model_manager = runner.run()
+        datasets, predictions, scores, best_params = runner.run()
         end = time.time()
         print(f"Time elapsed: {end-start} seconds")
         
+        # Since we're using a list of configs, get the first dataset
+        dataset = datasets[0]
         assert dataset is not None, "Dataset should not be None"
-        assert model_manager is not None, "Model manager should not be None"
-        assert len(model_manager.models) > 0, "Model manager should have trained models"
 
 
 @pytest.mark.tensorflow
@@ -125,10 +125,10 @@ def test_tensorflow_classification():
         config = Config("sample_data/Malaria2024", x_pipeline, None, model_config, class_train_params, seed)
         start = time.time()
         runner = ExperimentRunner([config], resume_mode="restart")
-        dataset, model_manager = runner.run()
+        datasets, predictions, scores, best_params = runner.run()
         end = time.time()
         print(f"Time elapsed: {end-start} seconds")
         
+        # Since we're using a list of configs, get the first dataset
+        dataset = datasets[0]
         assert dataset is not None, "Dataset should not be None"
-        assert model_manager is not None, "Model manager should not be None"
-        assert len(model_manager.models) > 0, "Model manager should have trained models"

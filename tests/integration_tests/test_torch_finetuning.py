@@ -126,12 +126,15 @@
         
 #         start = time.time()
 #         runner = ExperimentRunner([config], resume_mode="restart")
-#         dataset, model_manager = runner.run()
+#         datasets, predictions, scores, best_params = runner.run()
 #         end = time.time()
         
+#         # Since we're using a list of configs, get the first dataset and best_params
+#         dataset = datasets[0]
+#         best_params_first = best_params[0]
+        
 #         assert dataset is not None, "Dataset should not be None"
-#         assert model_manager is not None, "Model manager should not be None"
-#         assert hasattr(model_manager, "best_params"), "Model manager should have best_params attribute"
+#         assert best_params_first is not None, "Best parameters should not be None"
 #         print(f"Time elapsed: {end-start} seconds")
 #     except ImportError:
 #         pytest.skip("PyTorch not available")
@@ -149,12 +152,15 @@
         
 #         start = time.time()
 #         runner = ExperimentRunner([config], resume_mode="restart")
-#         dataset, model_manager = runner.run()
+#         datasets, predictions, scores, best_params = runner.run()
 #         end = time.time()
         
+#         # Since we're using a list of configs, get the first dataset and best_params
+#         dataset = datasets[0]
+#         best_params_first = best_params[0]
+        
 #         assert dataset is not None, "Dataset should not be None"
-#         assert model_manager is not None, "Model manager should not be None"
-#         assert hasattr(model_manager, "best_params"), "Model manager should have best_params attribute"
+#         assert best_params_first is not None, "Best parameters should not be None"
 #         print(f"Time elapsed: {end-start} seconds")
 #     except ImportError:
 #         pytest.skip("PyTorch not available")

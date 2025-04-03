@@ -61,10 +61,12 @@ def test_processing_pipeline():
     
     start = time.time()
     runner = ExperimentRunner([config], resume_mode="restart")
-    dataset, _ = runner.run()
+    datasets, predictions, scores, best_params = runner.run()
     end = time.time()
     print(f"Time elapsed: {end-start} seconds")
     
+    # Since we're using a list of configs, get the first dataset
+    dataset = datasets[0]
     assert dataset is not None, "Dataset should not be None"
     x_train = dataset.x_train
     y_train = dataset.y_train
@@ -84,10 +86,12 @@ def test_basic_processing_pipeline():
     
     start = time.time()
     runner = ExperimentRunner([config], resume_mode="restart")
-    dataset, _ = runner.run()
+    datasets, predictions, scores, best_params = runner.run()
     end = time.time()
     print(f"Time elapsed: {end-start} seconds")
     
+    # Since we're using a list of configs, get the first dataset
+    dataset = datasets[0]
     assert dataset is not None, "Dataset should not be None"
     x_train = dataset.x_train
     y_train = dataset.y_train

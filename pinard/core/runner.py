@@ -20,117 +20,66 @@ class ExperimentRunner:
         self.results_dir = results_dir
         self.cache = {}
 
-    def _prepare_experiment(self, config, dataset):
-        experiment_config = config.experiment or {}
-        finetune_params = experiment_config.get('finetune_params', {})
-        training_params = experiment_config.get('training_params', {})
-        action = experiment_config.get('action', 'train')
-        
-        task = experiment_config.get('task', None)
-        metrics = experiment_config.get('metrics', None)
-        loss = training_params.get('loss', None)
-        classification_losses = {'binary_crossentropy', 'categorical_crossentropy', 'sparse_categorical_crossentropy'}
-        classification_metrics = {'accuracy', 'acc', 'precision', 'recall', 'f1', 'auc'}
-        
-        if task is None:
-            if loss is not None:
-                if loss in classification_losses:
-                    task = 'classification'
-                    if metrics is None:
-                        metrics = ['accuracy']
-                else:
-                    task = 'regression'
-                    if metrics is None:
-                        metrics = ['mse', 'mae']
-            elif metrics is not None:
-                if any(metric in classification_metrics for metric in metrics):
-                    task = 'classification'
-                    if dataset.num_classes is None:
-                        raise ValueError("Number of classes is not defined in dataset. Please specify the number of classes in the dataset config.")
-                    elif dataset.num_classes == 2:
-                        training_params['loss'] = 'binary_crossentropy'
-                    else:
-                        training_params['loss'] = 'sparse_categorical_crossentropy'
-                else:
-                    task = 'regression'
-                    training_params['loss'] = 'mse'
-            else:
-                task = 'regression'
-                if metrics is None:
-                    metrics = ['mse', 'mae']
-        else:
-            if task == 'classification' and metrics is None:
-                metrics = ['accuracy']
-            elif task == 'regression' and metrics is None:
-                metrics = ['mse', 'mae']
-                
-            if task == 'classification' and 'loss' not in training_params:
-                if dataset.num_classes == 2:
-                    training_params['loss'] = 'binary_crossentropy'
-                else:
-                    training_params['loss'] = 'sparse_categorical_crossentropy'
-            elif task == 'regression' and 'loss' not in training_params:
-                training_params['loss'] = 'mse'
-            
-        experiment_config['metrics'] = metrics
-        experiment_config['task'] = task
-        if task == 'classification':
-            experiment_config['num_classes'] = dataset.num_classes
-        config.experiment = experiment_config
-        
-        return config, action, metrics, training_params, finetune_params, task
 
-    def run(self):
-        if not isinstance(self.configs, list):
-            self.configs = [self.configs]
-
-        for config in self.configs:
-            self.cache = {}
-            self.logger.info("=" * 80)
-            self.logger.info("### PREPARING DATA ###")
-            dataset = self._prepare_data(config)
-            
-            config, action, metrics, training_params, finetune_params, task = self._prepare_experiment(config, dataset)
-            
-            self.logger.info("### PREPARING MODEL ###")
-            model_manager = None
-            model_config = config.model
-            if model_config is not None:
-                model_manager = ModelManagerFactory.get_model_manager(model_config, dataset, task)
-            
-            self.logger.info("Running config > %s", self.manager.make_config_serializable(config))
-            self.manager.prepare_experiment(config)
-            
-            if dataset is None or model_manager is None:
-                continue
-
-            if action == 'predict':
-                self._predict(model_manager, dataset, metrics, task)
-            elif action == 'train':
-                self._train(model_manager, dataset, training_params, metrics, task)
-            elif action == 'finetune':
-                self._fine_tune(model_manager, dataset, finetune_params, training_params, metrics, task)
-
-        self.logger.info("All experiments completed.")
-        return dataset, model_manager
-    
-    def _prepare_data(self, config):
-        dataset_config = config.dataset
-        x_pipeline_config = config.x_pipeline
-        y_pipeline_config = config.y_pipeline
-
+    def _run_config(self, config):
+        self.cache = {}
+        self.logger.info("=" * 80)
         self.logger.info("### LOADING DATASET ###")
-        dataset = get_dataset(dataset_config)
+        dataset = get_dataset(config.dataset)
         self.logger.info(dataset)
 
         self.logger.info("### PROCESSING DATASET ###")
-        dataset = run_pipeline(dataset, x_pipeline_config, y_pipeline_config, self.logger, self.cache)
+        dataset = run_pipeline(dataset, config.x_pipeline, config.y_pipeline, self.logger, self.cache)
         self.logger.info(dataset)
         
         ## len of unique classes for y_train merged with y_test
         dataset.num_classes = len(np.unique(np.concatenate([dataset.y_train_init, dataset.y_test_init])))
         
-        return dataset
+        action, metrics, training_params, finetune_params, task = config.validate(dataset)
+        
+        self.logger.info("### PREPARING MODEL ###")
+        model_manager = None
+        model_config = config.model
+        if model_config is not None:
+            model_manager = ModelManagerFactory.get_model_manager(model_config, dataset, task)
+        
+        self.logger.info("Running config > %s", self.manager.make_config_serializable(config))
+        self.manager.prepare_experiment(config)
+        
+        preds, scores, best_params = None, None, None
+        if model_manager is None:
+            self.logger.warning("No model manager found. Skipping training/prediction.")
+            return dataset, preds, scores, best_params
+
+        if action == 'predict':
+            preds, scores, best_params = self._predict(model_manager, dataset, metrics, task)
+        elif action == 'train':
+            preds, scores, best_params = self._train(model_manager, dataset, training_params, metrics, task)
+        elif action == 'finetune':
+            preds, scores, best_params = self._fine_tune(model_manager, dataset, finetune_params, training_params, metrics, task)
+    
+        return dataset, preds, scores, best_params
+
+
+    def run(self):
+        if not isinstance(self.configs, list):
+            self.configs = [self.configs]
+
+        datasets, predictions, scores, best_params = [], [], [], []
+
+        for config in self.configs:
+            self.logger.info("=" * 80)
+            self.logger.info("Running config: %s", config)
+            dataset_, preds_, scores_, best_params_ = self._run_config(config)
+
+            datasets.append(dataset_)
+            predictions.append(preds_)
+            scores.append(scores_)
+            best_params.append(best_params_)
+
+        self.logger.info("All experiments completed.")
+        return datasets, predictions, scores, best_params
+    
     
     def _evaluate_and_save_results(self, model_manager, dataset, metrics, best_params=None, task=None):
         # Request raw outputs for classification if averaging across folds
@@ -287,6 +236,8 @@ class ExperimentRunner:
 
             # Save all results
             self.manager.save_results(model_manager, all_preds, y_true, metrics, best_params, all_scores)
+
+            return all_preds, all_scores, best_params
         else:
             # Handle single prediction case
             if task == 'classification':
@@ -304,20 +255,18 @@ class ExperimentRunner:
                 y_pred_inverse = dataset.inverse_transform(y_pred)
             scores = model_manager.evaluate(y_true, y_pred_inverse, metrics)
             self.manager.save_results(model_manager, y_pred_inverse, y_true, metrics, best_params, [scores])
-
-
-
+            return y_pred_inverse, [scores], best_params
 
     def _train(self, model_manager, dataset, training_params, metrics, task):
         self.logger.info("Training the model")
         model_manager.train(dataset, training_params=training_params, metrics=metrics)
         model_manager.save_model(os.path.join(self.manager.experiment_path, "model"))
         self.logger.info("Saved model to %s", self.manager.experiment_path)
-        self._evaluate_and_save_results(model_manager, dataset, metrics, task=task)
+        return self._evaluate_and_save_results(model_manager, dataset, metrics, task=task)
 
     def _predict(self, model_manager, dataset, metrics, task):
         self.logger.info("Predicting using the model")
-        self._evaluate_and_save_results(model_manager, dataset, metrics, task=task)
+        return self._evaluate_and_save_results(model_manager, dataset, metrics, task=task)
 
     def _fine_tune(self, model_manager, dataset, finetune_params, training_params, metrics, task):
         self.logger.info("Finetuning the model")
@@ -325,4 +274,4 @@ class ExperimentRunner:
         finetuner = FineTunerFactory.get_fine_tuner(finetuner_type, model_manager)
         best_params = finetuner.finetune(dataset, finetune_params, training_params, metrics=metrics, task=task)
         model_manager.save_model(os.path.join(self.manager.experiment_path, "model"))
-        self._evaluate_and_save_results(model_manager, dataset, metrics, best_params, task=task)
+        return self._evaluate_and_save_results(model_manager, dataset, metrics, best_params, task=task)

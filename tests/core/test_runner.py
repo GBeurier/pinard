@@ -31,85 +31,7 @@ class TestExperimentRunner:
         import shutil
         if os.path.exists(self.results_dir):
             shutil.rmtree(self.results_dir)
-    
-    @patch("pinard.core.runner.get_dataset")
-    @patch("pinard.core.runner.run_pipeline")
-    @patch("pinard.core.runner.ModelManagerFactory")
-    @patch("pinard.core.runner.ExperimentManager")
-    def test_prepare_data(self, mock_experiment_manager, mock_model_manager_factory, 
-                        mock_run_pipeline, mock_get_dataset):
-        """Test de la préparation des données."""
-        # Configurer les mocks
-        mock_dataset = MagicMock()
-        mock_dataset.y_train_init = np.array([0, 1, 2])
-        mock_dataset.y_test_init = np.array([0, 1])
-        mock_get_dataset.return_value = mock_dataset
-        mock_run_pipeline.return_value = mock_dataset
         
-        # Créer le mock pour ExperimentManager
-        mock_manager = MagicMock()
-        mock_experiment_manager.return_value = mock_manager
-        
-        # Initialiser ExperimentRunner et appeler _prepare_data
-        runner = ExperimentRunner([self.config], self.results_dir)
-        dataset = runner._prepare_data(self.config)
-        
-        # Vérifier que les mocks sont appelés correctement
-        mock_get_dataset.assert_called_once_with(self.config.dataset)
-        mock_run_pipeline.assert_called_once()
-        
-        # Vérifier que num_classes est correctement défini
-        assert dataset.num_classes == 3  # Unique values: 0, 1, 2
-        
-    @patch("pinard.core.runner.get_dataset")
-    @patch("pinard.core.runner.run_pipeline")
-    @patch("pinard.core.runner.ModelManagerFactory")
-    @patch("pinard.core.runner.ExperimentManager")
-    def test_prepare_experiment(self, mock_experiment_manager, mock_model_manager_factory, 
-                              mock_run_pipeline, mock_get_dataset):
-        """Test de la préparation d'une expérience."""
-        # Configurer les mocks
-        mock_dataset = MagicMock()
-        mock_dataset.num_classes = 3
-        
-        # Initialiser ExperimentRunner
-        mock_manager = MagicMock()
-        mock_experiment_manager.return_value = mock_manager
-        runner = ExperimentRunner([self.config], self.results_dir)
-        
-        # Appeler _prepare_experiment avec une config de régression
-        config_reg, action, metrics, training_params, finetune_params, task = runner._prepare_experiment(
-            self.config, mock_dataset
-        )
-        
-        # Vérifier les résultats pour la régression
-        assert task == "regression"
-        assert action == "train"
-        assert metrics == ["mse", "r2"]
-        assert "loss" in training_params
-        assert training_params["loss"] == "mse"
-        
-        # Tester avec une configuration de classification
-        config_class = Config(
-            dataset="mock_dataset",
-            experiment={
-                "metrics": ["accuracy"],
-                "task": "classification",
-                "action": "train",
-            }
-        )
-        
-        # Appeler _prepare_experiment avec une config de classification
-        config_class, action, metrics, training_params, finetune_params, task = runner._prepare_experiment(
-            config_class, mock_dataset
-        )
-        
-        # Vérifier les résultats pour la classification
-        assert task == "classification"
-        assert metrics == ["accuracy"]
-        assert "loss" in training_params
-        assert training_params["loss"] == "sparse_categorical_crossentropy"  # Car num_classes > 2
-    
     @patch("pinard.core.runner.get_dataset")
     @patch("pinard.core.runner.run_pipeline")
     @patch("pinard.core.runner.ModelManagerFactory")
@@ -290,18 +212,14 @@ class TestExperimentRunner:
         
         # Patch les méthodes d'ExperimentRunner
         with patch.object(ExperimentRunner, "_train") as mock_train:
-            with patch.object(ExperimentRunner, "_prepare_experiment") as mock_prepare_experiment:
-                mock_prepare_experiment.return_value = (
-                    config, "train", ["accuracy"], 
-                    {"loss": "binary_crossentropy", "epochs": 1}, {}, "classification"
-                )
-                
-                # Exécuter run
-                runner = ExperimentRunner([config], self.results_dir)
-                runner.run()
-                
-                # Vérifier que les méthodes appropriées sont appelées
-                mock_get_dataset.assert_called_once()
-                mock_run_pipeline.assert_called_once()
-                mock_model_manager_factory.get_model_manager.assert_called_once()
-                mock_train.assert_called_once()
+            mock_train.return_value = (None, ["accuracy"], None)  # Updated return value
+                            
+            # Exécuter run
+            runner = ExperimentRunner([config], self.results_dir)
+            runner.run()
+            
+            # Vérifier que les méthodes appropriées sont appelées
+            mock_get_dataset.assert_called_once()
+            mock_run_pipeline.assert_called_once()
+            mock_model_manager_factory.get_model_manager.assert_called_once()
+            mock_train.assert_called_once()

@@ -89,12 +89,17 @@ def test_sklearn_regression_finetuning():
     
     start = time.time()
     runner = ExperimentRunner([config], resume_mode="restart")
-    dataset, model_manager = runner.run()
+    datasets, predictions, scores, best_params = runner.run()
     end = time.time()
     print(f"Time elapsed: {end-start} seconds")
     
+    # Since we're using a list of configs, get the first dataset
+    dataset = datasets[0]
     assert dataset is not None, "Dataset should not be None"
-    assert model_manager is not None, "Model manager should not be None"
+    
+    # Get best parameters from finetuning
+    best_params_first = best_params[0]
+    assert best_params_first is not None, "Best parameters should not be None"
 
 
 @pytest.mark.sklearn
@@ -106,9 +111,14 @@ def test_sklearn_classification_finetuning():
     
     start = time.time()
     runner = ExperimentRunner([config], resume_mode="restart")
-    dataset, model_manager = runner.run()
+    datasets, predictions, scores, best_params = runner.run()
     end = time.time()
     print(f"Time elapsed: {end-start} seconds")
     
+    # Since we're using a list of configs, get the first dataset
+    dataset = datasets[0]
     assert dataset is not None, "Dataset should not be None"
-    assert model_manager is not None, "Model manager should not be None"
+    
+    # Get best parameters from finetuning
+    best_params_first = best_params[0]
+    assert best_params_first is not None, "Best parameters should not be None"
