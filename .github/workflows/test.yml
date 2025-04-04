@@ -2,7 +2,7 @@ name: Run Tests with All ML Backends
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, nirs4all ]
   pull_request:
     branches: [ main, master ]
 
