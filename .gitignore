@@ -26,3 +26,6 @@ build/
 .gitignore.orig
 tests/tester.ipynb
 tests/test.ipynb
+/results/
+/trash/
+/examples/results/
