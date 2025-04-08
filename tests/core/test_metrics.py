@@ -70,9 +70,11 @@ class TestMetrics:
     def test_get_metric_with_class_instance(self):
         """Teste l'utilisation de get_metric avec une classe directement."""
         # Si on passe une classe directement, elle devrait être renvoyée telle quelle
-        from sklearn.metrics import accuracy_score
-        metric = get_metric(accuracy_score)
-        assert metric == accuracy_score
+        class DummyMetric:
+            pass
+        
+        metric = get_metric(DummyMetric)
+        assert metric == DummyMetric
         
     def test_metric_mappings_content(self):
         """Vérifie le contenu de la liste des mappings de métriques."""

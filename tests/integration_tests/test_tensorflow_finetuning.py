@@ -157,7 +157,7 @@ def test_tensorflow_regression_finetuning():
     try:
         import tensorflow as tf
         
-        config1 = Config("sample_data/WhiskyConcentration", x_pipeline, y_pipeline, nicon, nicon_finetune, seed)
+        config1 = Config("sample_data/regression", x_pipeline, y_pipeline, nicon, nicon_finetune, seed)
         
         start = time.time()
         runner = ExperimentRunner([config1], resume_mode="restart")
@@ -184,7 +184,34 @@ def test_tensorflow_classification_finetuning():
     try:
         import tensorflow as tf
         
-        config = Config("sample_data/Malaria2024", x_pipeline, None, nicon_classification, nicon_finetune_classif, seed)
+        config = Config("sample_data/classification", x_pipeline, None, nicon_classification, nicon_finetune_classif, seed)
+        
+        start = time.time()
+        runner = ExperimentRunner([config], resume_mode="restart")
+        datasets, predictions, scores, best_params = runner.run()
+        end = time.time()
+        print(f"Time elapsed: {end-start} seconds")
+        
+        # Since we're using a list of configs, get the first dataset
+        dataset = datasets[0]
+        assert dataset is not None, "Dataset should not be None"
+        
+        # Check best parameters from finetuning
+        best_params_first = best_params[0]
+        assert best_params_first is not None, "Best parameters should not be None"
+    except (ImportError, ModuleNotFoundError):
+        pytest.skip("TensorFlow not available")
+
+
+@pytest.mark.tensorflow
+@pytest.mark.finetune
+@pytest.mark.classification
+def test_tensorflow_binary_finetuning():
+    """Test finetuning a TensorFlow classification model."""
+    try:
+        import tensorflow as tf
+        
+        config = Config("sample_data/binary", x_pipeline, None, nicon_classification, nicon_finetune_classif, seed)
         
         start = time.time()
         runner = ExperimentRunner([config], resume_mode="restart")
@@ -210,7 +237,7 @@ def test_custom_tf_regression_finetuning():
     try:
         import tensorflow as tf
         
-        config = Config("sample_data/WhiskyConcentration", x_pipeline, y_pipeline, custom_tf_regression, custom_tf_finetune_regression, seed)
+        config = Config("sample_data/regression", x_pipeline, y_pipeline, custom_tf_regression, custom_tf_finetune_regression, seed)
         
         start = time.time()
         runner = ExperimentRunner([config], resume_mode="restart")
@@ -237,7 +264,34 @@ def test_custom_tf_classification_finetuning():
     try:
         import tensorflow as tf
         
-        config = Config("sample_data/Malaria2024", x_pipeline, None, custom_tf_classification, custom_tf_finetune_classification, seed)
+        config = Config("sample_data/classification", x_pipeline, None, custom_tf_classification, custom_tf_finetune_classification, seed)
+        
+        start = time.time()
+        runner = ExperimentRunner([config], resume_mode="restart")
+        datasets, predictions, scores, best_params = runner.run()
+        end = time.time()
+        print(f"Time elapsed: {end-start} seconds")
+        
+        # Since we're using a list of configs, get the first dataset
+        dataset = datasets[0]
+        assert dataset is not None, "Dataset should not be None"
+        
+        # Check best parameters from finetuning
+        best_params_first = best_params[0]
+        assert best_params_first is not None, "Best parameters should not be None"
+    except (ImportError, ModuleNotFoundError):
+        pytest.skip("TensorFlow not available")
+
+
+@pytest.mark.tensorflow
+@pytest.mark.finetune
+@pytest.mark.classification
+def test_custom_tf_binary_finetuning():
+    """Test finetuning a custom TensorFlow classification model."""
+    try:
+        import tensorflow as tf
+        
+        config = Config("sample_data/binary", x_pipeline, None, custom_tf_classification, custom_tf_finetune_classification, seed)
         
         start = time.time()
         runner = ExperimentRunner([config], resume_mode="restart")

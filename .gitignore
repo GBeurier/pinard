@@ -15,17 +15,16 @@ __pycache__/
 *.egg-info
 dist/
 
+# Folders
+/.vscode/
+/bench/
+build/
+results/
+trash/
+
 # Testing
 .pytest_cache/
+test_experiment_manager/
 .coverage
-.vscode/settings.json
-/generator.ipynb
-docs/build/html/_static/
-docs/build/
-build/
-.gitignore.orig
-examples/example1.csv
-/results/
-/trash/
-/test_experiment_manager/
-/examples/results/
+.coveragerc
+.coverage.*

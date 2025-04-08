@@ -67,7 +67,7 @@ y_pipeline = MinMaxScaler()
 @pytest.mark.sklearn
 def test_sklearn_regression():
     """Test running a scikit-learn regression model."""
-    config = Config("sample_data/WhiskyConcentration", x_pipeline, y_pipeline, sklearn_reg_model, None, seed)
+    config = Config("sample_data/regression", x_pipeline, y_pipeline, sklearn_reg_model, None, seed)
     
     start = time.time()
     runner = ExperimentRunner([config], resume_mode="restart")
@@ -83,7 +83,7 @@ def test_sklearn_regression():
 @pytest.mark.sklearn
 def test_sklearn_rf_regression():
     """Test running a scikit-learn RandomForestRegressor model."""
-    config = Config("sample_data/WhiskyConcentration", x_pipeline, y_pipeline, sklearn_rf_reg_model, None, seed)
+    config = Config("sample_data/regression", x_pipeline, y_pipeline, sklearn_rf_reg_model, None, seed)
     
     start = time.time()
     runner = ExperimentRunner([config], resume_mode="restart")
@@ -100,7 +100,24 @@ def test_sklearn_rf_regression():
 @pytest.mark.classification
 def test_sklearn_classification():
     """Test running a scikit-learn classification model."""
-    config = Config("sample_data/Malaria2024", x_pipeline, None, sklearn_class_model, {"task": "classification"}, seed)
+    config = Config("sample_data/classification", x_pipeline, None, sklearn_class_model, {"task": "classification"}, seed)
+    
+    start = time.time()
+    runner = ExperimentRunner([config], resume_mode="restart")
+    datasets, predictions, scores, best_params = runner.run()
+    end = time.time()
+    
+    # Since we're using a list of configs, get the first dataset
+    dataset = datasets[0]
+    assert dataset is not None, "Dataset should not be None"
+    print(f"Time elapsed: {end-start} seconds")
+
+
+@pytest.mark.sklearn
+@pytest.mark.classification
+def test_sklearn_binary():
+    """Test running a scikit-learn classification model."""
+    config = Config("sample_data/binary", x_pipeline, None, sklearn_class_model, {"task": "classification"}, seed)
     
     start = time.time()
     runner = ExperimentRunner([config], resume_mode="restart")

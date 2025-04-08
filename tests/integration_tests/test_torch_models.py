@@ -94,7 +94,7 @@
 #     try:
 #         import torch
         
-#         config = Config("sample_data/WhiskyConcentration", x_pipeline, y_pipeline, torch_reg_model, train_params, seed)
+#         config = Config("sample_data/regression", x_pipeline, y_pipeline, torch_reg_model, train_params, seed)
         
 #         start = time.time()
 #         runner = ExperimentRunner([config], resume_mode="restart")

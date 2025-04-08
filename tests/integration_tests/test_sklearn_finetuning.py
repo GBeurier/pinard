@@ -85,7 +85,7 @@ y_pipeline = MinMaxScaler()
 @pytest.mark.finetune
 def test_sklearn_regression_finetuning():
     """Test finetuning a scikit-learn regression model."""
-    config = Config("sample_data/WhiskyConcentration", x_pipeline, y_pipeline, sklearn_reg_model, finetune_reg_params, seed)
+    config = Config("sample_data/regression", x_pipeline, y_pipeline, sklearn_reg_model, finetune_reg_params, seed)
     
     start = time.time()
     runner = ExperimentRunner([config], resume_mode="restart")
@@ -107,7 +107,29 @@ def test_sklearn_regression_finetuning():
 @pytest.mark.classification
 def test_sklearn_classification_finetuning():
     """Test finetuning a scikit-learn classification model."""
-    config = Config("sample_data/Malaria2024", x_pipeline, None, sklearn_class_model, finetune_class_params, seed)
+    config = Config("sample_data/classification", x_pipeline, None, sklearn_class_model, finetune_class_params, seed)
+    
+    start = time.time()
+    runner = ExperimentRunner([config], resume_mode="restart")
+    datasets, predictions, scores, best_params = runner.run()
+    end = time.time()
+    print(f"Time elapsed: {end-start} seconds")
+    
+    # Since we're using a list of configs, get the first dataset
+    dataset = datasets[0]
+    assert dataset is not None, "Dataset should not be None"
+    
+    # Get best parameters from finetuning
+    best_params_first = best_params[0]
+    assert best_params_first is not None, "Best parameters should not be None"
+
+
+@pytest.mark.sklearn
+@pytest.mark.finetune
+@pytest.mark.classification
+def test_sklearn_binary_finetuning():
+    """Test finetuning a scikit-learn classification model."""
+    config = Config("sample_data/binary", x_pipeline, None, sklearn_class_model, finetune_class_params, seed)
     
     start = time.time()
     runner = ExperimentRunner([config], resume_mode="restart")

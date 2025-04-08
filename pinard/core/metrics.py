@@ -30,8 +30,6 @@ metric_mappings = [
     ("average_precision", None, None, None, sklearn_metrics.average_precision_score),
     ("neg_log_loss", None, None, None, sklearn_metrics.log_loss),
     ("neg_brier_score", None, None, None, sklearn_metrics.brier_score_loss),
-    ("positive_likelihood_ratio", None, "pos_like", None, sklearn_metrics.positive_likelihood),
-    ("neg_negative_likelihood_ratio", None, None, None, sklearn_metrics.negative_likelihood),
     ("adjusted_rand_score", None, None, None, sklearn_metrics.adjusted_rand_score),
     ("rand_score", None, None, None, sklearn_metrics.rand_score),
     ("homogeneity_score", None, None, None, sklearn_metrics.homogeneity_score),

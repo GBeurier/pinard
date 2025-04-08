@@ -8,6 +8,7 @@ import os
 import sys
 import time
 import warnings
+import numpy as np
 from sklearn.exceptions import ConvergenceWarning
 
 try:
@@ -57,7 +58,7 @@ seed = 123459456
 @pytest.mark.preprocessing
 def test_processing_pipeline():
     """Test data processing pipeline without model training."""
-    config = Config("sample_data/WhiskyConcentration", x_pipeline_full, y_pipeline, None, None, seed)
+    config = Config("sample_data/binary", x_pipeline_full, y_pipeline, None, None, seed)
     
     start = time.time()
     runner = ExperimentRunner([config], resume_mode="restart")
@@ -82,7 +83,7 @@ def test_processing_pipeline():
 @pytest.mark.preprocessing
 def test_basic_processing_pipeline():
     """Test basic processing pipeline without model training."""
-    config = Config("sample_data/WhiskyConcentration", x_pipeline_with_augmentation, y_pipeline, None, None, seed)
+    config = Config("sample_data/classification", x_pipeline_with_augmentation, y_pipeline, None, None, seed)
     
     start = time.time()
     runner = ExperimentRunner([config], resume_mode="restart")

@@ -46,30 +46,64 @@ def test_finetuner_factory_invalid():
         FineTunerFactory.get_fine_tuner('invalid', model_manager)
 
 
-@patch('pinard.core.finetuner.ModelManagerFactory')
+@patch('pinard.core.model.model_builder_factory.importlib.import_module')
+@patch('pinard.core.finetuner.ModelBuilderFactory.build_models')
+@patch('pinard.core.finetuner.ModelBuilderFactory.build_single_model')
+@patch('pinard.core.finetuner.ModelManagerFactory.get_model_manager')
 @patch('pinard.core.finetuner.optuna.create_study')
-def test_optuna_finetuner_finetune(mock_create_study, mock_model_manager_factory):
-    # Configure le mock ModelManagerFactory
+def test_optuna_finetuner_finetune(mock_create_study, mock_get_model_manager, 
+                                mock_build_single, mock_build_models, mock_import_module):
+    # Configure import_module mock to avoid ModuleNotFoundError
+    mock_module = MagicMock()
+    mock_import_module.return_value = mock_module
+    
+    # Configure mocks for study
+    mock_study = MagicMock()
+    mock_create_study.return_value = mock_study
+    mock_study.best_params = {'param1': 'value1'}
+    
+    # Configure mock for ModelBuilderFactory methods
+    mock_model = MagicMock()
+    mock_build_single.return_value = mock_model
+    mock_build_models.return_value = ([mock_model], None)
+    
+    # Configure model manager mock
     mock_model_manager = MagicMock()
-    mock_model_manager_factory.get_model_manager.return_value = mock_model_manager
+    mock_get_model_manager.return_value = mock_model_manager
     
-    # Prépare le model_manager original
+    # Prepare the original model_manager
     model_manager = MagicMock()
-    model_manager.task = "regression"
+    model_manager.model_config = {
+        'class': 'pinard.models.SomeModel',
+        'model_params': {'param1': 'value1'}
+    }
     
-    # Crée le finetunner avec le mock
+    # Create the finetuner
     finetuner = OptunaFineTuner(model_manager)
     
-    # Prépare les données de test
+    # Prepare test data
     dataset = MagicMock()
-    finetune_params = {'model_params': {}, 'training_params': {}}
+    dataset.x_test = np.ones((10, 5))
+    dataset.y_test = np.ones(10)
+    dataset.num_classes = 2
     
-    # Appelle la méthode à tester
-    finetuner.finetune(dataset, finetune_params)
+    finetune_params = {
+        'model_params': {'param1': ['value1', 'value2']},
+        'training_params': {'epochs': ['10', '20']},
+        'n_trials': 5
+    }
     
-    # Vérifie que les mocks ont été appelés correctement
+    # Call the method
+    result = finetuner.finetune(dataset, finetune_params, task="classification")
+    
+    # Assertions
     mock_create_study.assert_called_once()
-    mock_model_manager_factory.get_model_manager.assert_called_once()
+    mock_build_single.assert_called()
+    mock_get_model_manager.assert_called_once()
+    mock_build_models.assert_called_once()
+    
+    # Assert the return value
+    assert result == mock_study.best_params
 
 
 @patch('pinard.core.finetuner.ModelManagerFactory')
@@ -100,8 +134,6 @@ def test_sklearn_finetuner_finetune(mock_grid_search_cv, mock_model_manager_fact
     
     # Crée le finetunner avec le mock
     finetuner = SklearnFineTuner(model_manager)
-    
-    # Mock any internal methods that may be called
     finetuner.finetune = MagicMock()
     
     # Prépare les données de test

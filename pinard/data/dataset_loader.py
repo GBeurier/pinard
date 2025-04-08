@@ -75,7 +75,10 @@ def load_XY(x_path, x_filter, x_params, y_path, y_filter, y_params):
 
     else:
         # Y is in a separate file
-        y, report = load_csv(y_path, na_policy=y_params.get('na_policy', 'auto'), type="y", **y_params)
+        # Remove the 'na_policy' from y_params as we're passing it explicitly
+        y_params_copy = y_params.copy()
+        na_policy = y_params_copy.pop('na_policy', 'auto')
+        y, report = load_csv(y_path, na_policy=na_policy, **y_params_copy)
 
         if "error" in report and report["error"] is not None:
             raise ValueError(f"Invalid data: y contains errors: {report['error']}")
@@ -134,11 +137,15 @@ def handle_data(config, t_set):
     Returns:
     - tuple: (x_id, y_id) cache IDs for X and Y data.
     """
+    if config is None:
+        raise ValueError(f"Configuration for {t_set} dataset is None")
+
     x_params = _merge_params(config.get(f'{t_set}_x_params'), config.get(f'{t_set}_params'), config.get('global_params'))
     y_params = _merge_params(config.get(f'{t_set}_y_params'), config.get(f'{t_set}_params'), config.get('global_params'))
     x, y = load_XY(config.get(f'{t_set}_x'), config.get(f'{t_set}_x_filter'), x_params,
                    config.get(f'{t_set}_y'), config.get(f'{t_set}_y_filter'), y_params)
     return x, y
+
 
 def get_dataset(data_config):
     """
@@ -151,6 +158,9 @@ def get_dataset(data_config):
     - Dataset: Dataset object with loaded data IDs.
     """
     config = parse_config(data_config)
+    if config is None:
+        raise ValueError("Dataset configuration is None")
+
     dataset = Dataset()
     try:
         x_train, y_train = handle_data(config, "train")
@@ -162,6 +172,6 @@ def get_dataset(data_config):
     except Exception as e:
         print("Error loading test data:", e)
         raise
-    
+
     return dataset
 

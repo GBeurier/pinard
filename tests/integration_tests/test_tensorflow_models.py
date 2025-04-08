@@ -100,7 +100,7 @@ def test_tensorflow_regression():
     
     # Test with preset model (nicon)
     for model in [nicon, custom_tf_regression]:
-        config = Config("sample_data/WhiskyConcentration", x_pipeline, y_pipeline, model, train_params, seed)
+        config = Config("sample_data/regression", x_pipeline, y_pipeline, model, train_params, seed)
         start = time.time()
         runner = ExperimentRunner([config], resume_mode="restart")
         datasets, predictions, scores, best_params = runner.run()
@@ -122,7 +122,29 @@ def test_tensorflow_classification():
         pytest.skip("TensorFlow not available")
     
     for model_config in [nicon_classification, custom_tf_classification]:
-        config = Config("sample_data/Malaria2024", x_pipeline, None, model_config, class_train_params, seed)
+        config = Config("sample_data/classification", x_pipeline, None, model_config, class_train_params, seed)
+        start = time.time()
+        runner = ExperimentRunner([config], resume_mode="restart")
+        datasets, predictions, scores, best_params = runner.run()
+        end = time.time()
+        print(f"Time elapsed: {end-start} seconds")
+        
+        # Since we're using a list of configs, get the first dataset
+        dataset = datasets[0]
+        assert dataset is not None, "Dataset should not be None"
+
+
+@pytest.mark.tensorflow
+@pytest.mark.classification
+def test_tensorflow_binary():
+    """Test running a TensorFlow classification model using both preset and custom model."""
+    try:
+        import tensorflow as tf
+    except (ImportError, ModuleNotFoundError):
+        pytest.skip("TensorFlow not available")
+    
+    for model_config in [nicon_classification, custom_tf_classification]:
+        config = Config("sample_data/binary", x_pipeline, None, model_config, class_train_params, seed)
         start = time.time()
         runner = ExperimentRunner([config], resume_mode="restart")
         datasets, predictions, scores, best_params = runner.run()

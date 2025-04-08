@@ -175,11 +175,22 @@ class ExperimentManager:
         self.logger.info("Archived experiment to %s", archived_experiment_path)
 
     def is_experiment_completed(self, experiment_path: str) -> bool:
-        """Check if the experiment is completed by verifying the presence of model and metrics."""
-        model_exists = os.path.exists(os.path.join(experiment_path, 'model'))
-        metrics_exists = os.path.exists(os.path.join(experiment_path, 'metrics.json'))
-        return model_exists and metrics_exists
+        """Check if the experiment is completed by verifying the presence and validity of model and metrics."""
+        model_path = os.path.join(experiment_path, 'model')
+        metrics_path = os.path.join(experiment_path, 'metrics.json')
 
+        if not os.path.exists(model_path) or not os.path.exists(metrics_path):
+            return False
+
+        try:
+            with open(metrics_path, 'r', encoding='utf-8') as f:
+                metrics = json.load(f)
+            if not metrics:  # Ensure metrics file is not empty
+                return False
+        except (json.JSONDecodeError, IOError):
+            return False
+
+        return True
 
     def save_results(self, model_manager: Any, y_pred: Union[np.ndarray, List[np.ndarray]], y_true: np.ndarray, metrics: list, best_params: dict = None, fold_scores: List[dict] = None) -> None:
         if not self.experiment_path:

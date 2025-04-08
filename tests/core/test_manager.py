@@ -135,9 +135,9 @@ class TestExperimentManager:
         os.makedirs(os.path.join(experiment_path, "model"), exist_ok=True)
         assert not self.manager.is_experiment_completed(experiment_path)
         
-        # Cas 3: expérience complète (les deux fichiers existent)
+        # Cas 3: expérience complète (les deux fichiers existent et metrics.json n'est pas vide)
         with open(os.path.join(experiment_path, "metrics.json"), "w") as f:
-            f.write("{}")
+            json.dump({"weighted": {"mse": 0.1, "r2": 0.9}}, f)
         assert self.manager.is_experiment_completed(experiment_path)
         
     def test_save_results(self):

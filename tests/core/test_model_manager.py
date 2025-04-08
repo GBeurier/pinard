@@ -3,7 +3,7 @@ import numpy as np
 from unittest.mock import MagicMock, patch
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
-from pinard.core.model_manager import (
+from pinard.core.model.model_manager import (
     BaseModelManager,
     SklearnModelManager,
     ModelManagerFactory,
@@ -236,7 +236,7 @@ class TestTFModelManager:
         self.model_config = {'type': 'TensorFlowModel'}
         
         # Importer et créer le manager
-        from pinard.core.model_manager import TFModelManager
+        from pinard.core.model.model_manager import TFModelManager
         self.manager = TFModelManager(self.models, self.model_config)
         
     def test_initialization(self):
@@ -346,7 +346,7 @@ class TestModelManagerFactory:
     def test_get_model_manager_tensorflow(self):
         """Test de la création d'un manager pour TensorFlow."""
         # Patch pour ModelBuilderFactory.build_models
-        with patch("pinard.core.model_manager.ModelBuilderFactory.build_models") as mock_build_models:
+        with patch("pinard.core.model.model_manager.ModelBuilderFactory.build_models") as mock_build_models:
             import tensorflow as tf
             
             # Configurer le mock pour retourner un modèle TensorFlow
@@ -362,13 +362,13 @@ class TestModelManagerFactory:
             manager = ModelManagerFactory.get_model_manager(model_config, dataset, 'regression')
             
             # Vérifier que le bon type de manager est retourné
-            from pinard.core.model_manager import TFModelManager
+            from pinard.core.model.model_manager import TFModelManager
             assert isinstance(manager, TFModelManager)
             
     def test_get_model_manager_sklearn(self):
         """Test de la création d'un manager pour scikit-learn."""
         # Patch pour ModelBuilderFactory.build_models
-        with patch("pinard.core.model_manager.ModelBuilderFactory.build_models") as mock_build_models:
+        with patch("pinard.core.model.model_manager.ModelBuilderFactory.build_models") as mock_build_models:
             # Configurer le mock pour retourner un modèle scikit-learn
             model = LinearRegression()
             mock_build_models.return_value = ([model], "sklearn")
@@ -384,7 +384,7 @@ class TestModelManagerFactory:
     def test_get_model_manager_unsupported(self):
         """Test de la gestion des frameworks non supportés."""
         # Patch pour ModelBuilderFactory.build_models
-        with patch("pinard.core.model_manager.ModelBuilderFactory.build_models") as mock_build_models:
+        with patch("pinard.core.model.model_manager.ModelBuilderFactory.build_models") as mock_build_models:
             # Configurer le mock pour retourner un framework non supporté
             mock_build_models.return_value = (["dummy_model"], "unsupported_framework")
             
