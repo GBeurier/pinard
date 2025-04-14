@@ -454,3 +454,63 @@ def apply_step_x(
 def hash_data_crc32(data):
     return zlib.crc32(data) & 0xffffffff  # Mask to ensure 32-bit output
 
+
+class Processor:
+    """
+    Data processor class that handles the entire data pipeline.
+    """
+    
+    def __init__(self, config=None, logger=None):
+        """
+        Initialize the processor with configuration.
+        
+        Args:
+            config (dict): Configuration for the processor.
+            logger: Logger instance.
+        """
+        self.config = config or {}
+        self.logger = logger
+        self.cache = {}
+    
+    def process_dataset(self, dataset):
+        """
+        Process the dataset through the pipeline.
+        
+        Args:
+            dataset (Dataset): The dataset to process.
+            
+        Returns:
+            Dataset: The processed dataset.
+        """
+        x_pipeline = self.config.get('x_pipeline')
+        y_pipeline = self.config.get('y_pipeline')
+        
+        # Save categorical information before processing
+        y_train_categorical_info = dataset.y_train_categorical_info
+        y_test_categorical_info = dataset.y_test_categorical_info
+        
+        # Process data through pipeline
+        processed_dataset = run_pipeline(dataset, x_pipeline, y_pipeline, self.logger, self.cache)
+        
+        # Restore categorical information after processing
+        if y_train_categorical_info:
+            processed_dataset.y_train_categorical_info = y_train_categorical_info
+            
+        if y_test_categorical_info:
+            processed_dataset.y_test_categorical_info = y_test_categorical_info
+            
+        return processed_dataset
+    
+    def inverse_transform_predictions(self, y_pred, dataset):
+        """
+        Convert predictions back to original format, including categorical.
+        
+        Args:
+            y_pred (numpy.ndarray): Predictions to transform
+            dataset (Dataset): Dataset with transformation information
+            
+        Returns:
+            numpy.ndarray: Transformed predictions
+        """
+        return dataset.inverse_transform(y_pred)
+

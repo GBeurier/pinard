@@ -176,8 +176,12 @@ def parse_config(data_config):
 
     if isinstance(data_config, str):
         return browse_folder(data_config)
+    elif isinstance(data_config, dict):
+        # If it's already a dictionary, assume it's the parsed config
+        # TODO: Add validation or more robust parsing if needed later
+        return data_config
 
-    # elif isinstance(data_config, dict):
+    # elif isinstance(data_config, dict): # Keep original commented logic for reference
     #     if "path" in data_config:
     #         return browse_folder(data_config["path"], data_config.get("params"))
     #     elif "train" in data_config:

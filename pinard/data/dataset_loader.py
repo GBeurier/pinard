@@ -40,7 +40,7 @@ def load_XY(x_path, x_filter, x_params, y_path, y_filter, y_params):
     - y_params (dict): Parameters for loading Y data.
 
     Returns:
-    - tuple: (x, y) where x and y are numpy arrays.
+    - tuple: (x, y, x_report, y_report) where x and y are numpy arrays and reports contain metadata.
 
     Raises:
     - ValueError: If data is invalid or if there are inconsistencies.
@@ -48,16 +48,24 @@ def load_XY(x_path, x_filter, x_params, y_path, y_filter, y_params):
     if x_path is None:
         raise ValueError("Invalid x definition: x_path is None")
 
-    x, report = load_csv(x_path, **x_params)
+    # Default to 'auto' for categorical detection if not specified
+    if 'categorical_mode' not in x_params:
+        x_params['categorical_mode'] = 'auto'
+    if 'data_type' not in x_params:
+        x_params['data_type'] = 'x'
 
-    if "error" in report and report["error"] is not None:
-        raise ValueError(f"Invalid data: x contains errors: {report['error']}")
+    x, x_report = load_csv(x_path, **x_params)
+
+    if "error" in x_report and x_report["error"] is not None:
+        raise ValueError(f"Invalid data: x contains errors: {x_report['error']}")
 
     if x is None:
         raise ValueError("Invalid data: x is None")
 
     if x_filter is not None:
         raise NotImplementedError("Auto-filtering not implemented yet")
+        
+    y_report = {"error": None, "categorical_info": {}, "warnings": []}
 
     if y_path is None:
         # Y is a subset of X
@@ -72,19 +80,34 @@ def load_XY(x_path, x_filter, x_params, y_path, y_filter, y_params):
 
         y = x[:, y_filter]
         x = x[:, [i for i in range(x.shape[1]) if i not in y_filter]]
+        
+        # Handle categorical columns if present in extracted y
+        # Not implemented for this case yet as it would require tracking column names
 
     else:
         # Y is in a separate file
         # Remove the 'na_policy' from y_params as we're passing it explicitly
         y_params_copy = y_params.copy()
         na_policy = y_params_copy.pop('na_policy', 'auto')
-        y, report = load_csv(y_path, na_policy=na_policy, **y_params_copy)
+        
+        # Set categorical mode and data type for y file
+        if 'categorical_mode' not in y_params_copy:
+            y_params_copy['categorical_mode'] = 'auto'
+        if 'data_type' not in y_params_copy:
+            y_params_copy['data_type'] = 'y'
+            
+        y, y_report = load_csv(y_path, na_policy=na_policy, **y_params_copy)
 
-        if "error" in report and report["error"] is not None:
-            raise ValueError(f"Invalid data: y contains errors: {report['error']}")
+        if "error" in y_report and y_report["error"] is not None:
+            raise ValueError(f"Invalid data: y contains errors: {y_report['error']}")
 
         if y is None:
             raise ValueError("Invalid data: y is None")
+
+        # Print warnings about categorical columns if any were detected
+        if y_report.get("warnings"):
+            for warning in y_report["warnings"]:
+                print(f"Warning: {warning}")
 
         if y_filter is not None:
             raise NotImplementedError("Auto-filtering not implemented yet")
@@ -92,7 +115,7 @@ def load_XY(x_path, x_filter, x_params, y_path, y_filter, y_params):
     if x.shape[0] != y.shape[0]:
         raise ValueError(f"Invalid data: x and y have different number of rows ({x.shape[0]} != {y.shape[0]})")
 
-    return x, y
+    return x, y, x_report, y_report
 
 
 def id_config(config, t_set, subset, params):
@@ -129,33 +152,33 @@ def id_config(config, t_set, subset, params):
 def handle_data(config, t_set):
     """
     Handle data loading and caching for a given dataset type (train, test).
-
+    
     Parameters:
     - config (dict): Data configuration dictionary.
     - t_set (str): The dataset type ('train', 'test').
-
+    
     Returns:
-    - tuple: (x_id, y_id) cache IDs for X and Y data.
+    - tuple: (x, y, x_report, y_report) data and metadata reports
     """
     if config is None:
         raise ValueError(f"Configuration for {t_set} dataset is None")
 
     x_params = _merge_params(config.get(f'{t_set}_x_params'), config.get(f'{t_set}_params'), config.get('global_params'))
     y_params = _merge_params(config.get(f'{t_set}_y_params'), config.get(f'{t_set}_params'), config.get('global_params'))
-    x, y = load_XY(config.get(f'{t_set}_x'), config.get(f'{t_set}_x_filter'), x_params,
-                   config.get(f'{t_set}_y'), config.get(f'{t_set}_y_filter'), y_params)
-    return x, y
+    x, y, x_report, y_report = load_XY(config.get(f'{t_set}_x'), config.get(f'{t_set}_x_filter'), x_params,
+                       config.get(f'{t_set}_y'), config.get(f'{t_set}_y_filter'), y_params)
+    return x, y, x_report, y_report
 
 
 def get_dataset(data_config):
     """
     Load dataset based on the data configuration.
-
+    
     Parameters:
     - data_config: Data configuration (can be a dict or a path to a config file).
-
+    
     Returns:
-    - Dataset: Dataset object with loaded data IDs.
+    - Dataset: Dataset object with loaded data and metadata.
     """
     config = parse_config(data_config)
     if config is None:
@@ -163,14 +186,23 @@ def get_dataset(data_config):
 
     dataset = Dataset()
     try:
-        x_train, y_train = handle_data(config, "train")
-        x_test, y_test = handle_data(config, "test")
+        x_train, y_train, x_train_report, y_train_report = handle_data(config, "train")
+        x_test, y_test, x_test_report, y_test_report = handle_data(config, "test")
+        
         dataset.x_train = x_train
         dataset.y_train_init = y_train
         dataset.x_test = x_test
         dataset.y_test_init = y_test
+        
+        # Store categorical information if present
+        if y_train_report and y_train_report.get("categorical_info"):
+            dataset.y_train_categorical_info = y_train_report["categorical_info"]
+            
+        if y_test_report and y_test_report.get("categorical_info"):
+            dataset.y_test_categorical_info = y_test_report["categorical_info"]
+            
     except Exception as e:
-        print("Error loading test data:", e)
+        print("Error loading data:", e)
         raise
 
     return dataset

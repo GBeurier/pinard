@@ -197,3 +197,103 @@ def test_dataset_invalid_y_test_shape():
     y_test = np.random.rand(49, 1)
     with pytest.raises(ValueError):
         dataset.y_test = y_test
+
+
+def test_dataset_with_encoded_categorical_y():
+    """Test that the dataset can handle encoded categorical y data."""
+    dataset = Dataset()
+    x_train = np.random.rand(1, 5, 1, 10)
+    dataset._x_train = x_train
+    
+    # Simulate already-encoded categorical data (as if processed from a CSV with strings)
+    y_encoded = np.array([0, 1, 2, 0, 1]).reshape(-1, 1)
+    
+    # Set the encoded data
+    dataset.y_train = y_encoded
+    
+    # Verify it was correctly set
+    assert dataset._y_train.shape == (5, 1)
+    assert np.array_equal(dataset._y_train, y_encoded)
+
+
+def test_dataset_categorical_y_transformer():
+    """Test using a categorical encoder as y_transformer."""
+    dataset = Dataset()
+    from sklearn.preprocessing import LabelEncoder
+    
+    # Create a class to wrap LabelEncoder to have transform and inverse_transform methods
+    class LabelEncoderWrapper:
+        def __init__(self, categories):
+            self.encoder = LabelEncoder()
+            self.encoder.fit(categories)
+            self.classes_ = self.encoder.classes_
+            
+        def transform(self, y):
+            return self.encoder.transform(y.flatten()).reshape(-1, 1)
+            
+        def inverse_transform(self, y):
+            return self.encoder.inverse_transform(y.flatten()).reshape(-1, 1)
+    
+    # Set up the dataset
+    x_train = np.random.rand(1, 5, 1, 10)
+    dataset._x_train = x_train
+    
+    # Original categorical data
+    categories = np.array(['cat', 'dog', 'bird', 'cat', 'dog'])
+    
+    # Create and set the transformer
+    encoder_wrapper = LabelEncoderWrapper(categories)
+    dataset.y_transformer = encoder_wrapper
+    
+    # Set encoded y_train
+    y_encoded = encoder_wrapper.transform(categories)
+    dataset._y_train = y_encoded
+    
+    # Test inverse transform
+    y_pred = np.array([[0], [1], [2]])  # Encoded predictions
+    y_inverse = dataset.inverse_transform(y_pred)
+    
+    # Check that it correctly maps back to original categories based on LabelEncoder's sorted classes
+    assert y_inverse[0, 0] == 'bird' # 0 corresponds to 'bird'
+    assert y_inverse[1, 0] == 'cat'  # 1 corresponds to 'cat'
+    assert y_inverse[2, 0] == 'dog'   # 2 corresponds to 'dog'
+
+
+def test_dataset_categorical_y_multiple_columns():
+    """Test handling multiple categorical columns using OneHotEncoder."""
+    dataset = Dataset()
+    from sklearn.preprocessing import OneHotEncoder
+    import pandas as pd
+    
+    # Set up the dataset
+    x_train = np.random.rand(1, 4, 1, 10)
+    dataset._x_train = x_train
+    
+    # Create multi-column categorical data (as would come from a CSV)
+    categories = pd.DataFrame({
+        'color': ['red', 'blue', 'green', 'red'],
+        'size': ['small', 'medium', 'large', 'small']
+    })
+      # Create a transformer for multiple categorical columns
+    encoder = OneHotEncoder(sparse_output=False)
+    encoded_array = encoder.fit_transform(categories)
+    
+    # Set transformed y_train (now one-hot encoded)
+    dataset.y_train = encoded_array
+
+    # Verify shape (4 samples, 6 features from one-hot encoding: 3 for color, 3 for size)
+    assert dataset._y_train.shape == (4, 6)
+
+    # Set the encoder as transformer
+    dataset.y_transformer = encoder
+
+    # Test with new encoded data
+    # Example encoding for ['blue', 'medium'] -> [1, 0, 0] for color, [0, 1, 0] for size
+    # Assuming OneHotEncoder order: blue, green, red | large, medium, small
+    new_encoded = np.array([[1, 0, 0, 0, 1, 0]]) # Shape (1, 6)
+    y_inverse = dataset.inverse_transform(new_encoded)
+
+    # Check it returns something with correct shape and values
+    assert y_inverse.shape == (1, 2) # Should return 2 columns
+    assert y_inverse[0, 0] == 'blue'
+    assert y_inverse[0, 1] == 'medium'

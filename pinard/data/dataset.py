@@ -26,22 +26,93 @@ class Dataset:
     y_transformer: Optional[Any] = None
     num_classes = 0
     
+    # Categorical data handling
+    y_train_categorical_info: Optional[dict] = None  # Store categorical info for y_train
+    y_test_categorical_info: Optional[dict] = None   # Store categorical info for y_test
+    
+    def has_categorical_columns(self) -> bool:
+        """Check if the dataset contains categorical columns."""
+        return (self.y_train_categorical_info is not None and 
+                len(self.y_train_categorical_info) > 0)
+    
+    def inverse_transform_categorical(self, y_pred: np.ndarray, target: str = 'train') -> np.ndarray:
+        """
+        Convert numerical predictions back to original categorical string values.
+        
+        Parameters:
+            y_pred: Numerical predictions array
+            target: Which categorical info to use ('train' or 'test')
+            
+        Returns:
+            Array with original categorical string values
+        """
+        if not self.has_categorical_columns():
+            return y_pred
+            
+        categorical_info = self.y_train_categorical_info if target == 'train' else self.y_test_categorical_info
+        if not categorical_info:
+            return y_pred
+            
+        # Make a copy to avoid modifying the input
+        result = y_pred.copy()
+        
+        # Handle single column case
+        if len(y_pred.shape) == 1 or y_pred.shape[1] == 1:
+            col_info = list(categorical_info.values())[0]
+            categories = col_info['categories']
+            
+            # Convert 1D array to original categorical values
+            if len(y_pred.shape) == 1:
+                return np.array([
+                    categories[int(i)] if 0 <= int(i) < len(categories) else None 
+                    for i in y_pred
+                ])
+            else:
+                return np.array([
+                    categories[int(i)] if 0 <= int(i) < len(categories) else None 
+                    for i in y_pred[:, 0]
+                ]).reshape(-1, 1)
+        
+        # Handle multi-column case
+        for col_idx, (col_name, info) in enumerate(categorical_info.items()):
+            if col_idx >= y_pred.shape[1]:
+                continue
+                
+            categories = info['categories']
+            result[:, col_idx] = np.array([
+                categories[int(i)] if 0 <= int(i) < len(categories) else None 
+                for i in y_pred[:, col_idx]
+            ])
+            
+        return result
+    
     def inverse_transform(self, y_pred: np.ndarray) -> np.ndarray:
+        """
+        Apply all inverse transformations to predictions:
+        1. First apply any numerical transformer (e.g., StandardScaler)
+        2. Then convert categorical codes back to original string values
+        
+        Parameters:
+            y_pred: Predictions to transform
+            
+        Returns:
+            Transformed predictions
+        """
+        # First apply any existing transformer
+        result = y_pred
         if self.y_transformer is not None:
             if len(y_pred.shape) == 1:
-                return self.y_transformer.inverse_transform(y_pred[:, np.newaxis])[:, 0]
+                result = self.y_transformer.inverse_transform(y_pred[:, np.newaxis])[:, 0]
             elif len(y_pred.shape) == 2:
-                return self.y_transformer.inverse_transform(y_pred)
-            # elif len(y_pred.shape) == 3:
-            #     # check if last dim is 1 and remove it
-            #     if y_pred.shape[-1] == 1:
-            #         y_pred = y_pred.reshape(-1, y_pred.shape[-2])
-            #         return self.y_transformer.inverse_transform(y_pred)
+                result = self.y_transformer.inverse_transform(y_pred)
             else:
-                raise ValueError(f"Invalid y_pred shape: {y_pred.shape}. Expected 2D or 3D array.")
-                # return y_pred.reshape(-1, self.num_classes)
-            # return self.y_transformer.inverse_transform(y_pred)
-        return y_pred
+                raise ValueError(f"Invalid y_pred shape: {y_pred.shape}. Expected 1D or 2D array.")
+                
+        # Then apply categorical transformation if needed
+        if self.has_categorical_columns():
+            result = self.inverse_transform_categorical(result)
+            
+        return result
     
     def filter_x(self, data, union_type='concat', indices=None, disable_augmentation=False):
         n_augmentations, n_samples, n_transformations, n_features = data.shape

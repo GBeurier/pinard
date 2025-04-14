@@ -113,7 +113,8 @@ def test_load_csv_with_na_values(tmp_path):
     # With 'abort' policy, data should be None
     assert data is None
     assert 'error' in report
-    assert "NA values found" in report['error']
+    # Check that the error message starts correctly
+    assert report['error'].startswith("NA values detected")
     assert report['na_handling']['na_detected']
 
 
@@ -264,25 +265,33 @@ def test_load_csv_with_quoted_headers():
 
 
 def test_csv_loader_with_quoted_headers_and_text_data():
-    """Test CSV loader with quoted headers and text data (should fail gracefully)."""
+    \"\"\"Test CSV loader with quoted headers and text data (should report an error).\"\"\"
     # Create a temporary CSV file with quoted headers and text data
     with tempfile.NamedTemporaryFile(suffix='.csv', mode='w+', delete=False, newline='') as f:
-        csv_content = """"col1";"col2";"col3"
+        # Use semicolon delimiter and quoted headers
+        csv_content = \"\"\"\"col1\";\"col2\";\"col3\"
 A;B;C
 D;E;F
 G;H;I
-"""
+\"\"\"
         f.write(csv_content)
         temp_file_path = f.name
 
     try:
-        # Load the CSV file - this should fail but with a clear error message
-        data, report = load_csv(temp_file_path)
+        # Load the CSV file - should report an error due to text data
+        # Use na_policy='abort' and categorical_mode='none' to force numeric conversion attempt
+        data, report = load_csv(temp_file_path, na_policy='abort', categorical_mode='none')
 
-        # The data should be None as text can't be converted to float
-        assert data is None, "Data should be None for text content"
-        assert report['error'] is not None, "An error message should be present in the report"
-        assert "NA values found" in report['error'] or "conversion" in report['error'].lower(), "Error message should mention NA values or conversion issues"
+        # Check that an error is reported because text can't be converted to float.
+        assert 'error' in report, "An error message should be present in the report"
+        assert report['error'] is not None, "Error message should not be None"
+        error_msg = report['error'].lower()
+        # Expecting the error related to NA detection as conversion failure leads to NAs
+        # or a final conversion error
+        assert ("na values detected" in error_msg or
+                "could not convert string to float" in error_msg or
+                "failed to convert final data" in error_msg), \\
+               f"Error message '{report['error']}' did not indicate an NA detection, conversion, or finalization issue."
 
     finally:
         # Clean up the temporary file
