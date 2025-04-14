@@ -265,15 +265,11 @@ def test_load_csv_with_quoted_headers():
 
 
 def test_csv_loader_with_quoted_headers_and_text_data():
-    \"\"\"Test CSV loader with quoted headers and text data (should report an error).\"\"\"
+    """Test CSV loader with quoted headers and text data (should report an error)."""
     # Create a temporary CSV file with quoted headers and text data
     with tempfile.NamedTemporaryFile(suffix='.csv', mode='w+', delete=False, newline='') as f:
         # Use semicolon delimiter and quoted headers
-        csv_content = \"\"\"\"col1\";\"col2\";\"col3\"
-A;B;C
-D;E;F
-G;H;I
-\"\"\"
+        csv_content = '"col1";"col2";"col3"\nA;B;C\nD;E;F\nG;H;I'
         f.write(csv_content)
         temp_file_path = f.name
 
@@ -288,10 +284,11 @@ G;H;I
         error_msg = report['error'].lower()
         # Expecting the error related to NA detection as conversion failure leads to NAs
         # or a final conversion error
-        assert ("na values detected" in error_msg or
-                "could not convert string to float" in error_msg or
-                "failed to convert final data" in error_msg), \\
-               f"Error message '{report['error']}' did not indicate an NA detection, conversion, or finalization issue."
+        assert (
+            "na values detected" in error_msg or
+            "could not convert string to float" in error_msg or
+            "failed to convert final data" in error_msg
+        ), f"Error message '{report['error']}' did not indicate an NA detection, conversion, or finalization issue."
 
     finally:
         # Clean up the temporary file

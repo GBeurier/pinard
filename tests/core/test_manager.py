@@ -52,6 +52,12 @@ class TestExperimentManager:
         
     def teardown_method(self):
         """Nettoyage après les tests."""
+        # Close logger handlers to release the log file
+        if hasattr(self.manager, 'logger') and self.manager.logger:
+            for handler in self.manager.logger.handlers[:]:
+                handler.close()
+                self.manager.logger.removeHandler(handler)
+                
         # Supprimer le répertoire temporaire
         if os.path.exists(self.results_dir):
             shutil.rmtree(self.results_dir)
