@@ -1,6 +1,5 @@
 # dataset_loader.py
 
-from pathlib import Path
 import hashlib
 import json
 import numpy as np
@@ -404,4 +403,3 @@ def get_dataset(data_config):
         raise
 
     return dataset
-

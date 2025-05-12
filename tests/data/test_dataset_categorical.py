@@ -81,7 +81,7 @@ def test_dataset_loader_with_categorical():
             'train_y_params': {'categorical_mode': 'auto'},
             'test_y_params': {'categorical_mode': 'auto'},
             # Add global_params, assuming headers exist
-            'global_params': {'has_header': True}
+            'global_params': {'has_header': True, 'delimiter': ','},
         }
 
         # Add assertion to verify config type before passing

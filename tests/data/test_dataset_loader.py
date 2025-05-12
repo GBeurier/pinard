@@ -46,7 +46,7 @@ def test_load_XY(tmp_path):
     y_file = tmp_path / "y.csv"
     x_file.write_text(x_content)
     y_file.write_text(y_content)
-    x_params = {'categorical_mode': 'auto', 'data_type': 'x'}
+    x_params = {'categorical_mode': 'auto', 'data_type': 'x', 'delimiter': ','}
     y_params = {}
     # Unpack all four return values
     x, y, _, _ = load_XY(str(x_file), None, x_params, str(y_file), None, y_params)  # Ignore reports
@@ -91,7 +91,7 @@ def test_load_XY_y_from_x(tmp_path):
 9,10,50"""
     x_file = tmp_path / "x.csv"
     x_file.write_text(x_content)
-    x_params = {'categorical_mode': 'auto', 'data_type': 'x'}
+    x_params = {'categorical_mode': 'auto', 'data_type': 'x', 'delimiter': ','}
     y_params = {}
     # Correct y_filter to match expected_x and expected_y
     y_filter = [2]  # Select only the 'label' column (index 2) as y
@@ -106,12 +106,12 @@ def test_load_XY_y_from_x(tmp_path):
 
 
 def test_load_XY_invalid_y_filter(tmp_path):
-    x_content = """col1,col2,label
-1,2,10
-3,4,20
-5,6,30
-7,8,40
-9,10,50"""
+    x_content = """col1;col2;label
+1;2;10
+3;4;20
+5;6;30
+7;8;40
+9;10;50"""
     x_file = tmp_path / "x.csv"
     x_file.write_text(x_content)
     x_params = {}
@@ -122,12 +122,12 @@ def test_load_XY_invalid_y_filter(tmp_path):
 
 
 def test_load_XY_y_filter_out_of_bounds(tmp_path):
-    x_content = """col1,col2,label
-1,2,10
-3,4,20
-5,6,30
-7,8,40
-9,10,50"""
+    x_content = """col1;col2;label
+1;2;10
+3;4;20
+5;6;30
+7;8;40
+9;10;50"""
     x_file = tmp_path / "x.csv"
     x_file.write_text(x_content)
     x_params = {}
@@ -161,7 +161,7 @@ def test_handle_data(tmp_path):
         'train_y': str(y_file),
         'train_x_params': x_params,  # Corrected trailing whitespace
         'train_y_params': y_params,  # Corrected trailing whitespace
-        'global_params': {'has_header': True}
+        'global_params': {'delimiter': ','}
     }
     # Unpack all four return values
     x, y, _, _ = handle_data(config, 'train')  # Ignore reports
@@ -190,7 +190,7 @@ def test_handle_data_with_params(tmp_path):
     config = {
         'train_x': str(x_file),
         'train_y': str(y_file),
-        'global_params': {'na_policy': 'remove', 'has_header': True}
+        'global_params': {'na_policy': 'remove', 'has_header': True, 'delimiter': ','},
     }
     # Unpack all four return values
     x, y, _, _ = handle_data(config, 'train')  # Ignore reports
@@ -212,12 +212,12 @@ def test_get_dataset(tmp_path):
     ds_loader.parse_config = mock_parse_config
     
     try:
-        x_content = """col1,col2
-1,2
-3,4
-5,6
-7,8
-9,10"""
+        x_content = """col1;col2
+1;2
+3;4
+5;6
+7;8
+9;10"""
         y_content = """label
 10
 20

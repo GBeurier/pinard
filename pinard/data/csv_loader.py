@@ -1,11 +1,10 @@
 import csv
 import io
-import numpy as np
 import pandas as pd
 import gzip
 import zipfile
 from pathlib import Path
-import re
+import numpy as np
 
 
 # =============================================================================
@@ -87,7 +86,7 @@ def _detect_delimiter(lines, possible_delimiters=None):
                 if most_frequent_cols > most_cols_at_max_consistency:
                     most_cols_at_max_consistency = most_frequent_cols
                     best_delim = delim_candidate
-        except Exception:
+        except (csv.Error, ValueError):
             continue  # ignore parse errors with this candidate
 
     return best_delim
@@ -125,13 +124,13 @@ def _detect_decimal_and_header(parsed_rows, data_type='x'):
                 data_rows = parsed_rows[first_data_row_index:]
                 numeric_cells = 0
                 total_cells = 0
-               
+        
                 for row in data_rows:
                     # We only consider rows with at least close to the expected columns
                     if abs(len(row) - num_cols) <= 1:
                         for val in row:
                             total_cells += 1
-                            if _can_be_float(val, decimal_sep): # This would call the commented out function
+                            if _can_be_float(val, decimal_sep):  # This would call the commented out function
                                 numeric_cells += 1
 
                 current_score = numeric_cells / total_cells if total_cells else 0.0
@@ -141,7 +140,7 @@ def _detect_decimal_and_header(parsed_rows, data_type='x'):
             if has_header_option and parsed_rows:
                 header_row = parsed_rows[0]
                 if len(header_row) == num_cols:
-                    header_numeric_cells = sum(_can_be_float(cell, decimal_sep) for cell in header_row) # This would call the commented out function
+                    header_numeric_cells = sum(_can_be_float(cell, decimal_sep) for cell in header_row)  # This would call the commented out function
                     header_score = header_numeric_cells / len(header_row) if header_row else 0.0
                     if current_score > 0.5 and header_score >= current_score:
                         current_score *= 0.5
@@ -178,10 +177,9 @@ def _determine_csv_parameters(csv_content: str,  # csv_content is not used anymo
         user_params = {}
 
     # Default parameters
-    delimiter = user_params.get('delimiter', ',')  # Changed default from ';' to ','
+    delimiter = user_params.get('delimiter', ';')
     decimal_sep = user_params.get('decimal_separator', '.')
     has_header = user_params.get('has_header', True)
-
 
     if not bypass_auto_detection:
         lines = []
@@ -204,11 +202,10 @@ def _determine_csv_parameters(csv_content: str,  # csv_content is not used anymo
         if 'delimiter' in user_params:
             delimiter = user_params['delimiter']
         else:
-            # delimiter = _detect_delimiter(lines)  # Auto-detection commented out
-            delimiter = ';'  # Default
+            delimiter = _detect_delimiter(lines)  # Auto-detection commented out
+            # delimiter = ';'  # Default
         
         if not delimiter:
-            # fallback
             delimiter = ';'  # Default
         
         # 2) Parse a small sample using the chosen delimiter to create parsed_rows
@@ -220,14 +217,14 @@ def _determine_csv_parameters(csv_content: str,  # csv_content is not used anymo
         if 'decimal_separator' in user_params:
             decimal_sep = user_params['decimal_separator']
         else:
-            # decimal_sep, _ = _detect_decimal_and_header(parsed_rows, data_type=data_type)  # Auto-detection commented out
-            decimal_sep = '.'  # Default
+            decimal_sep, _ = _detect_decimal_and_header(parsed_rows, data_type=data_type)  # Auto-detection commented out
+            # decimal_sep = '.'  # Default
         
         if 'has_header' in user_params:
             has_header = user_params['has_header']
         else:
-            # _, has_header = _detect_decimal_and_header(parsed_rows, data_type=data_type)  # Auto-detection commented out
-            has_header = True  # Default
+            _, has_header = _detect_decimal_and_header(parsed_rows, data_type=data_type)  # Auto-detection commented out
+            # has_header = True  # Default
 
     return {
         'delimiter': delimiter,
@@ -247,21 +244,21 @@ def load_csv(path, na_policy='auto', data_type='x', categorical_mode='auto', **u
     Args:
         path (str or Path): Path to the CSV file (.csv, .gz, .zip).
         na_policy (str): 'remove' or 'abort' (or 'auto' which acts like 'remove').
-                         This policy applies to row removal if NAs are found.
+            This policy applies to row removal if NAs are found.
         data_type (str): 'x' or 'y'. Influences type conversion.
         categorical_mode (str): How to handle string columns in 'y' data:
             - 'auto': Convert string columns to numerical categories.
             - 'preserve': Keep string columns (will become NaN if not convertible by final astype).
             - 'none': Treat all columns as potentially numeric.
         **user_params: CSV parsing parameters (delimiter, decimal_separator, has_header)
-                     and other pandas.read_csv arguments.
+            and other pandas.read_csv arguments.
 
     Returns:
         (pandas.DataFrame | None, dict, pandas.Series | None):
             - DataFrame with processed data (before NA row removal).
             - Report dictionary.
             - Boolean Series indicating rows with NAs (aligned with the returned DataFrame).
-              None if an error occurs before this stage.
+            None if an error occurs before this stage.
     """
     if na_policy == 'auto':
         na_policy = 'remove'
@@ -379,13 +376,6 @@ def load_csv(path, na_policy='auto', data_type='x', categorical_mode='auto', **u
         # ---> FIX: Ensure column names are strings <--- 
         data.columns = data.columns.astype(str)
 
-        # --- NEW: Remove columns where all values are NA ---
-        cols_before_na_drop = data.columns.tolist()
-        data.dropna(axis=1, how='all', inplace=True)
-        cols_after_na_drop = data.columns.tolist()
-        removed_all_na_cols = [col for col in cols_before_na_drop if col not in cols_after_na_drop]
-        if removed_all_na_cols:
-            report['warnings'].append(f"Removed columns with all NA values: {removed_all_na_cols}")
         report['shape_after_all_na_col_removal'] = data.shape
         
         if data.empty:  # If all columns were NA or file was effectively empty after header
@@ -394,108 +384,103 @@ def load_csv(path, na_policy='auto', data_type='x', categorical_mode='auto', **u
             return pd.DataFrame(), report, pd.Series(dtype=bool)
 
         # --- 5) Handle type conversion based on data_type ---
-        categorical_mappings = {}
-        report['categorical_info'] = {}
+        # Ensure categorical_info is reset for this run, it's part of the main report dict.
+        report['categorical_info'] = {} 
+        _local_categorical_mappings = {} # Use a local temporary dict for populating
 
-        if data_type == 'x':
+        if data_type == 'y':
+            for col in data.columns:
+                _original_col_series = data[col].copy() # Keep original for astype(str) and original NaN count
+                _numeric_representation = pd.to_numeric(data[col], errors='coerce') # For NaN comparison and default conversion
+                
+                _original_is_object = pd.api.types.is_object_dtype(data[col].dtype)
+                _original_is_numeric = pd.api.types.is_numeric_dtype(data[col].dtype)
+
+                if categorical_mode == 'auto':
+                    should_treat_as_categorical = False
+                    if _original_is_object:
+                        should_treat_as_categorical = True
+                    elif not _original_is_numeric:  # Catches mixed types, booleans etc.
+                        # Heuristic: if to_numeric creates more NaNs than original, or low cardinality
+                        if _numeric_representation.isna().sum() > _original_col_series.isna().sum() or \
+                           (_original_col_series.nunique() < len(_original_col_series) * 0.8 and _original_col_series.nunique() < 50):
+                            should_treat_as_categorical = True
+
+                    if should_treat_as_categorical:
+                        # Warning for ambiguous numeric-like headers
+                        # Check if column name is purely numeric or float-like (one dot)
+                        if col.isdigit() or (col.count('.') == 1 and col.replace('.', '', 1).isdigit()):
+                            report['warnings'].append(f"Column '{col}' detected as categorical but has a numeric header")
+                        
+                        # Factorize using the original data treated as strings to ensure correct categories
+                        _codes, _categories = pd.factorize(_original_col_series.astype(str))
+                        data[col] = _codes
+                        _local_categorical_mappings[col] = {'categories': _categories.tolist()}
+                    else:
+                        # Not deemed categorical by 'auto' logic, so make it numeric
+                        data[col] = _numeric_representation
+                
+                elif categorical_mode == 'preserve':
+                    # In 'preserve' mode, all columns are converted to numeric.
+                    # String values will become NaN. Numerics stay. No factorization.
+                    data[col] = _numeric_representation 
+                    # _local_categorical_mappings remains empty for 'preserve'
+
+                elif categorical_mode == 'none':
+                    # In 'none' mode, all columns are converted to numeric.
+                    # String values will become NaN. No factorization.
+                    data[col] = _numeric_representation
+                    # _local_categorical_mappings remains empty for 'none'
+            
+            report['categorical_info'] = _local_categorical_mappings # Assign collected mappings to report
+
+        elif data_type == 'x':
             # For X data, all columns are converted to numeric, coercing errors
             for col in data.columns:
                 data[col] = pd.to_numeric(data[col], errors='coerce')
-        elif data_type == 'y':
-            # For Y data, detect string columns for categorical conversion
-            for col in data.columns:
-                # Attempt numeric conversion first
-                numeric_col = pd.to_numeric(data[col], errors='coerce')
-                
-                # Heuristic to decide if a column should be treated as categorical:
-                # 1. Original dtype is object (likely string).
-                # 2. Or, if numeric conversion results in *more* NaNs than original (and original wasn't already fully numeric),
-                #    it suggests strings were present that couldn't be converted.
-                #    (Ensure original is not already a clear numeric type that just happens to have NaNs)
-                original_is_object = pd.api.types.is_object_dtype(data[col].dtype)
-                original_is_numeric = pd.api.types.is_numeric_dtype(data[col].dtype)
-                # Check if conversion to numeric introduced new NaNs or if it was an object type
-                # and categorical_mode is 'auto'
-                treat_as_categorical = False
-                if categorical_mode == 'auto':
-                    if original_is_object:
-                        treat_as_categorical = True
-                        # Add warning if column name looks numeric but data is string (ambiguous detection)
-                        if col.isdigit() or col.replace('.', '', 1).isdigit():
-                            report['warnings'].append(f"Column '{col}' detected as categorical but has a numeric header")
-                    elif not original_is_numeric:  # If not originally numeric (e.g. bool, or mixed that pandas read as object)
-                        # If to_numeric created NaNs where there weren't any, or significantly more
-                        # This condition helps catch columns that might be mixed but intended as categorical
-                        if numeric_col.isna().sum() > data[col].isna().sum() or \
-                           (data[col].nunique() < len(data[col]) * 0.8 and data[col].nunique() < 50):  # Heuristic for cardinality
-                            treat_as_categorical = True
-                            # Add warning if column name looks numeric but data is mixed (ambiguous detection)
-                            if col.isdigit() or col.replace('.', '', 1).isdigit():
-                                report['warnings'].append(f"Column '{col}' detected as categorical but has a numeric header")
-                    elif categorical_mode == 'preserve' and original_is_object:
-                        # In preserve mode, strings will become NaN when we try to convert to numeric later
-                        # This behavior is expected for test_categorical_mode_options
-                        numeric_col = pd.to_numeric(data[col], errors='coerce')
-                    data[col] = numeric_col  # This will make all strings NaN
-                
-                if treat_as_categorical and categorical_mode == 'auto':
-                    data[col] = data[col].astype(str)  # Ensure all are strings before factorizing
-                    codes, categories = pd.factorize(data[col])
-                    data[col] = codes
-                    categorical_mappings[col] = {'categories': categories.tolist()}
-                else:  # Treat as numeric (or preserve if already numeric)
-                    data[col] = numeric_col
-            report['categorical_info'] = categorical_mappings
-        
-        # --- 6) Identify rows with NA values (but do not remove them here) ---
-        # This mask is created AFTER type conversions.
-        na_row_mask = data.isna().any(axis=1)
-        report['na_handling']['na_detected_in_rows'] = bool(na_row_mask.any())  # New report field
-        
-        # Remove NA rows if in preserve mode and NA values are detected
-        if categorical_mode == 'preserve' and report['na_handling']['na_detected_in_rows']:
-            data = data[~na_row_mask]
-            # Update report for NA row removal
-            report['na_handling']['nb_removed_rows'] = int(na_row_mask.sum())
-            report['na_handling']['removed_rows_indices'] = list(na_row_mask[na_row_mask].index)
+            # report['categorical_info'] remains empty for data_type 'x' as it was cleared/initialized above
 
-        # The actual removal of rows based on na_row_mask and na_policy ('abort' or 'remove')
-        # will be handled by the calling function (e.g., in dataset_loader.py)
-        # to allow for synchronization between X and Y.
-        # However, if na_policy is 'abort' and NAs are present, we should error out here.
-        if na_policy == 'abort' and report['na_handling']['na_detected_in_rows']:
-            first_na_row_idx = na_row_mask[na_row_mask].index[0]
-            # Find the first column with NA in that row
-            first_na_col = data.loc[first_na_row_idx].isna().idxmax()
-            error_msg = (f"NA values detected after processing and na_policy is 'abort'. "
-                         f"First NA found in column '{first_na_col}' at original index {first_na_row_idx} "
-                         f"in file {path}.")
-            report['error'] = error_msg
-            return None, report, None  # Return None for DataFrame and na_row_mask
+        # --- 6) Identify rows with NA values (POST type conversion) ---
+        # This mask reflects NAs *after* all above conversions.
+        # This is the mask that should be returned as the third element for potential synchronization by the caller.
+        na_mask_after_conversions = data.isna().any(axis=1)
+        report['na_handling']['na_detected_in_rows'] = bool(na_mask_after_conversions.any())
 
-        # Remove original NA handling section that modified `data` DataFrame directly
-        # report['na_handling']['na_detected'] = bool(rows_with_na.any()) # Ensure boolean type
-        # rows_to_keep = pd.Series([True] * data.shape[0], index=data.index)
-        # if report['na_handling']['na_detected']:
-        #     if na_policy == 'abort':
-        #         # ... (error logic already handled above)
-        #     elif na_policy == 'remove':
-        #         rows_to_keep = ~rows_with_na
-        #         report['na_handling']['nb_removed_rows'] = int(rows_with_na.sum()) # Ensure int type
-        #         report['na_handling']['removed_rows_indices'] = data.index[rows_with_na].tolist()
+        # --- Handle NA policy internally for load_csv ---
+        # This affects the 'data' DataFrame that will be returned by this function.
+        if report['na_handling']['na_detected_in_rows']: # Check if there are any NAs to handle
+            if na_policy == 'abort':
+                # Find first NA for error reporting
+                first_na_row_label_in_current_data = data.index[na_mask_after_conversions][0]
+                first_na_col_name = data.loc[first_na_row_label_in_current_data].isna().idxmax()
+                error_msg = (f"NA values detected after processing and na_policy is 'abort'. "
+                            f"First NA found in column '{first_na_col_name}' (row label: {first_na_row_label_in_current_data}) "
+                            f"in file {path}.")
+                report['error'] = error_msg
+                report['na_handling']['na_detected'] = True
+                # Return None for data, and the na_mask_after_conversions (though caller might not use if error)
+                return None, report, na_mask_after_conversions 
+
+            elif na_policy == 'remove':
+                # Update report fields about the rows that are about to be removed
+                report['na_handling']['na_detected'] = True  # NAs were found and are being handled by removal
+                report['na_handling']['nb_removed_rows'] = int(na_mask_after_conversions.sum())
+                report['na_handling']['removed_rows_indices'] = data.index[na_mask_after_conversions].tolist()
+                
+                # Actually modify the 'data' DataFrame
+                data = data[~na_mask_after_conversions].copy() # Use .copy() to avoid SettingWithCopyWarning
+        
+        # If na_policy == 'remove' but no NAs were detected, report fields remain at their initialized values (0, [], False)
 
         # --- 7) Final preparation of return values ---
-        # The DataFrame `data` is returned as is (before NA row removal).
-        # The `na_row_mask` is returned for the caller to use.
-        # The final conversion to numpy array is also deferred to the caller.
-
-        report['final_shape_before_na_row_removal'] = data.shape  # New report field
-        report['final_column_names'] = data.columns.tolist()  # Store final column names
-        
-        # Remove final conversion to numpy array here, it will be done in dataset_loader
-        # result_array = final_data.astype(np.float32).values
+        # 'final_shape' should reflect the shape of the data being returned.
+        report['final_shape'] = data.shape 
+        report['final_column_names'] = data.columns.tolist()
             
-        return data, report, na_row_mask  # Return DataFrame, report, and NA mask
+        # Return the 'data' (possibly with rows removed by this function if na_policy='remove')
+        # and 'na_mask_after_conversions' (which is the mask *before* this function's internal NA removal).
+        # data_array = data.to_numpy().astype(np.float32)
+        return data, report, na_mask_after_conversions
 
     except FileNotFoundError as e:
         report['error'] = str(e)

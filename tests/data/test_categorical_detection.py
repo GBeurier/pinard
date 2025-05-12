@@ -12,8 +12,8 @@ def temp_csv_file():
     try:
         # Create the file path using mkstemp for better control
         fd, temp_path = tempfile.mkstemp(suffix='.csv')
-        os.close(fd) # Close the file descriptor immediately
-        yield temp_path # Provide the path to the test
+        os.close(fd)  # Close the file descriptor immediately
+        yield temp_path  # Provide the path to the test
     finally:
         # Clean up
         if temp_path and os.path.exists(temp_path):
@@ -22,22 +22,22 @@ def temp_csv_file():
             except PermissionError:
                 print(f"Warning: Could not remove temp file {temp_path} due to PermissionError.")
             except Exception as e:
-                 print(f"Warning: Error removing temp file {temp_path}: {e}")
+                print(f"Warning: Error removing temp file {temp_path}: {e}")
 
 
 def test_basic_categorical_detection(temp_csv_file):
     """Test that string columns are automatically detected as categorical."""
-    temp_path = temp_csv_file # Get path from fixture
+    temp_path = temp_csv_file  # Get path from fixture
 
     # Create test data with categorical column
     df = pd.DataFrame({
         'num_col': [1.0, 2.0, 3.0, 4.0, 5.0],
         'cat_col': ['red', 'green', 'blue', 'red', 'green']
     })
-    df.to_csv(temp_path, index=False) # Write to the path
+    df.to_csv(temp_path, index=False)  # Write to the path
 
     # Load with automatic categorical detection, explicitly stating header exists
-    data, report = load_csv(temp_path, categorical_mode='auto', has_header=True)
+    data, report, _ = load_csv(temp_path, categorical_mode='auto', delimiter=",", data_type='y')
 
     assert data is not None, f"Report: {report}"
     assert data.shape == (5, 2), f"Report: {report}"
@@ -52,10 +52,8 @@ def test_basic_categorical_detection(temp_csv_file):
     actual_categories = report['categorical_info']['cat_col']['categories']
     mapping = {cat: i for i, cat in enumerate(actual_categories)}
     expected_codes = df['cat_col'].map(mapping).values
-    np.testing.assert_array_equal(data[:, 0], expected_codes.astype(np.float32))
-
-    # Verify numeric column (now index 1) is preserved
-    np.testing.assert_array_equal(data[:, 1], df['num_col'].values.astype(np.float32))
+    np.testing.assert_array_equal(data.iloc[:, 1].values, expected_codes.astype(np.float32))
+    np.testing.assert_array_equal(data.iloc[:, 0].values, df['num_col'].values.astype(np.float32))
 
 
 def test_categorical_mode_options(temp_csv_file):
@@ -70,7 +68,7 @@ def test_categorical_mode_options(temp_csv_file):
     df.to_csv(temp_path, index=False)
 
     # Test mode='preserve' - should not convert to categorical codes, keep column as NaN
-    data_preserve, report_preserve = load_csv(temp_path, categorical_mode='preserve')
+    data_preserve, report_preserve, _ = load_csv(temp_path, categorical_mode='preserve', delimiter=",", data_type='y')
     assert data_preserve is not None, f"Report: {report_preserve}"
     assert 'cat_col' not in report_preserve['categorical_info']
     # With categorical_mode='preserve' and na_policy='remove' (default),
@@ -78,7 +76,7 @@ def test_categorical_mode_options(temp_csv_file):
     assert data_preserve.shape == (0, 2), f"Expected shape (0, 2), got {data_preserve.shape}. Report: {report_preserve}"
 
     # Test mode='none' - should not detect categorical, treat as numeric (will become NaN)
-    data_none, report_none = load_csv(temp_path, categorical_mode='none')
+    data_none, report_none, _ = load_csv(temp_path, categorical_mode='none', delimiter=",", data_type='y')
     assert data_none is not None, f"Report: {report_none}"
     assert len(report_none['categorical_info']) == 0
     # With mode='none' and na_policy='remove', string columns become NaN and rows are removed.
@@ -99,7 +97,7 @@ def test_warning_for_ambiguous_detection(temp_csv_file):
     df.to_csv(temp_path, index=False)
 
     # Load with automatic categorical detection, specifying header exists
-    data, report = load_csv(temp_path, categorical_mode='auto', has_header=True)
+    data, report, _ = load_csv(temp_path, categorical_mode='auto', has_header=True, delimiter=",", data_type='y')
 
     assert data is not None, f"Report: {report}"
     assert data.shape == (5, 2), f"Report: {report}"
@@ -115,10 +113,12 @@ def test_warning_for_ambiguous_detection(temp_csv_file):
     actual_categories_col2 = report['categorical_info']['2']['categories']
     mapping_col2 = {cat: i for i, cat in enumerate(actual_categories_col2)}
     expected_codes_col2 = df['2'].map(mapping_col2).values
-    np.testing.assert_array_equal(data[:, 0], expected_codes_col2.astype(np.float32))
+    # np.testing.assert_array_equal(data[:, 0], expected_codes_col2.astype(np.float32))
+    np.testing.assert_array_equal(data.iloc[:, 1].values, expected_codes_col2.astype(np.float32))
 
     # Verify column '1' (numeric, now index 1) was treated as numeric
     assert '1' not in report['categorical_info']
-    np.testing.assert_array_equal(data[:, 1], df['1'].values.astype(np.float32))
+    # np.testing.assert_array_equal(data[:, 1], df['1'].values.astype(np.float32))
+    np.testing.assert_array_equal(data.iloc[:, 0].values, df['1'].values.astype(np.float32))
 
 # Add more tests as needed, e.g., for mixed types, different NA policies, etc.

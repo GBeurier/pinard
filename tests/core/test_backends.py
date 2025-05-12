@@ -58,15 +58,13 @@ def test_jax_function():
 @pytest.mark.gpu
 def test_gpu_availability():
     """Test qui s'exécute uniquement si un GPU est disponible."""
-    # Ce test sera automatiquement sauté si aucun GPU n'est disponible
-    # grâce au marqueur et à notre configuration dans conftest.py
-    
-    if is_tensorflow_available():
-        import tensorflow as tf
-        assert len(tf.config.list_physical_devices('GPU')) > 0
-    elif is_torch_available():
+
+    if is_torch_available():
         import torch
         assert torch.cuda.is_available()
+    elif is_tensorflow_available():  
+        import tensorflow as tf
+        assert len(tf.config.list_physical_devices('GPU')) > 0
     elif is_jax_available():
         import jax
         assert jax.default_backend() == 'gpu'
