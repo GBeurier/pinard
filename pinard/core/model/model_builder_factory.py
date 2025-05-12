@@ -229,9 +229,9 @@ class ModelBuilderFactory:
         if framework == 'tensorflow':
             input_dim = dataset.x_train_('union').shape[1:]
         elif framework == 'sklearn':
-            # input_dim = dataset.x_train.shape[1:]
-        # elif framework == 'pytorch':
             input_dim = dataset.x_train.shape[1:]
+        # elif framework == 'pytorch':
+            # input_dim = dataset.x_train.shape[1:]
         else:
             raise ValueError("Unknown framework.")
         return input_dim

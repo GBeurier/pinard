@@ -20,7 +20,6 @@ class ExperimentRunner:
         self.results_dir = results_dir
         self.cache = {}
 
-
     def _run_config(self, config):
         self.cache = {}
         self.logger.info("=" * 80)
@@ -32,7 +31,7 @@ class ExperimentRunner:
         dataset = run_pipeline(dataset, config.x_pipeline, config.y_pipeline, self.logger, self.cache)
         self.logger.info(dataset)
         
-        ## len of unique classes for y_train merged with y_test
+        # len of unique classes for y_train merged with y_test
         dataset.num_classes = len(np.unique(np.concatenate([dataset.y_train_init, dataset.y_test_init])))
         
         action, metrics, training_params, finetune_params, task = config.validate(dataset)
@@ -60,7 +59,6 @@ class ExperimentRunner:
     
         return dataset, preds, scores, best_params
 
-
     def run(self):
         if not isinstance(self.configs, list):
             self.configs = [self.configs]
@@ -79,7 +77,6 @@ class ExperimentRunner:
 
         self.logger.info("All experiments completed.")
         return datasets, predictions, scores, best_params
-    
     
     def _evaluate_and_save_results(self, model_manager, dataset, metrics, best_params=None, task=None):
         # Request raw outputs for classification if averaging across folds

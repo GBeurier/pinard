@@ -133,7 +133,7 @@ class TestModelBuilderFactory:
         # Patcher la méthode import_class pour qu'elle retourne la classe RandomForestRegressor
         with patch.object(ModelBuilderFactory, 'import_class', return_value=RandomForestRegressor):
             built_model = ModelBuilderFactory.build_single_model(model_config, self.dataset, "regression", 
-                                                               force_params=force_params)
+                                                                 force_params=force_params)
             
             assert isinstance(built_model, RandomForestRegressor)
             assert built_model.n_estimators == 20  # Devrait utiliser la valeur forcée

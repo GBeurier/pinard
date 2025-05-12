@@ -223,3 +223,49 @@ class TestExperimentRunner:
             mock_run_pipeline.assert_called_once()
             mock_model_manager_factory.get_model_manager.assert_called_once()
             mock_train.assert_called_once()
+    
+    @patch("pinard.core.runner.get_dataset")
+    @patch("pinard.core.runner.run_pipeline")
+    @patch("pinard.core.runner.ModelManagerFactory")
+    @patch("pinard.core.runner.ExperimentManager")
+    def test_train_then_predict(
+        self, mock_experiment_manager, mock_model_manager_factory, 
+        mock_run_pipeline, mock_get_dataset
+    ):
+        """Test end-to-end: train a model, save it, then predict using the saved model."""
+        # Configurer les mocks
+        mock_model_manager = MagicMock()
+        mock_dataset = MagicMock()
+        mock_dataset.y_test_init = np.array([1, 2, 3])
+        mock_dataset.inverse_transform = lambda x: x
+        mock_model_manager.predict.return_value = np.array([1.1, 2.1, 2.9])
+        mock_model_manager.evaluate.return_value = {"mse": 0.01, "r2": 0.98}
+
+        # Initialiser ExperimentRunner
+        mock_manager = MagicMock()
+        mock_experiment_manager.return_value = mock_manager
+        runner = ExperimentRunner([self.config], self.results_dir)
+
+        # TRAIN
+        metrics = ["mse", "r2"]
+        training_params = {"loss": "mse", "epochs": 5}
+        runner._evaluate_and_save_results = MagicMock(return_value=(mock_model_manager.predict.return_value, [mock_model_manager.evaluate.return_value], None))
+        runner._train(mock_model_manager, mock_dataset, training_params, metrics, "regression")
+        mock_model_manager.train.assert_called_once_with(
+            mock_dataset, training_params=training_params, metrics=metrics
+        )
+        mock_model_manager.save_model.assert_called_once()
+        runner._evaluate_and_save_results.assert_called_with(
+            mock_model_manager, mock_dataset, metrics, task="regression"
+        )
+
+        # RESET for predict
+        runner._evaluate_and_save_results.reset_mock()
+        mock_model_manager.train.reset_mock()
+        mock_model_manager.save_model.reset_mock()
+
+        # PREDICT
+        runner._predict(mock_model_manager, mock_dataset, metrics, "regression")
+        runner._evaluate_and_save_results.assert_called_once_with(
+            mock_model_manager, mock_dataset, metrics, task="regression"
+        )

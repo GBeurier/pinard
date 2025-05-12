@@ -107,8 +107,9 @@ def prepare_y(y_train, y_val, model, framework, loss, task):
 
         # Framework-specific processing
         if framework == 'tensorflow':
-            from tensorflow.keras.layers import Dense
-            from tensorflow.keras.utils import to_categorical
+            import tensorflow as tf
+            from tf.keras.layers import Dense
+            from tf.keras.utils import to_categorical
 
             if loss == 'sparse_categorical_crossentropy':
                 # Labels must be integer-encoded
@@ -120,7 +121,7 @@ def prepare_y(y_train, y_val, model, framework, loss, task):
                     raise ValueError(f"Labels must be in the range [0, {num_classes - 1}] for sparse_categorical_crossentropy.")
 
                 # Adjust model's last layer
-                from tensorflow.keras.layers import Dense
+                from tf.keras.layers import Dense
                 last_layer = model.layers[-1]
                 if last_layer.units != num_classes or last_layer.activation.__name__ != 'softmax':
                     model.pop()
@@ -229,14 +230,12 @@ def prepare_y(y_train, y_val, model, framework, loss, task):
     return y_train, y_val, model, num_classes
 
 
-
 class BaseModelManager(ABC):
 
     def __init__(self, models=None, model_config=None):
         self.models = models
         self.model_config = model_config
         self.framework = 'framework undefined'
-
 
     @staticmethod
     def evaluate(y_true, y_pred, metrics):
@@ -290,8 +289,6 @@ class BaseModelManager(ABC):
 
         return scores
 
-
-
     # def evaluate(self, y_true, y_pred, metrics=['mse', 'r2']):
     #     for metric in metrics:
     #         if isinstance(metric, str):
@@ -301,9 +298,6 @@ class BaseModelManager(ABC):
     #             else:
     #                 raise ValueError(f"Metric {metric} not found in sklearn.metrics module")
     #         elif inspect.isfunction(metric):
-                
-            
-            
     #     return {"mse": float(mse), "r2": float(r2)}
 
     def save_model(self, path):
