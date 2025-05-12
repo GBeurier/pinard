@@ -177,15 +177,20 @@ class ModelBuilderFactory:
             params['input_shape'] = input_dim
         if 'input_dim' in sig.parameters:
             params['input_dim'] = input_dim
-        # Set num_classes and loss for tensorflow classification
+        # Only set num_classes and loss for tensorflow classification
+        task = getattr(dataset, 'task', None)
         if framework == 'tensorflow' and hasattr(dataset, 'num_classes'):
-            num_classes = dataset.num_classes
-            params['num_classes'] = num_classes
-            # Always override loss for tensorflow classification
-            if num_classes == 2:
-                params['loss'] = 'binary_crossentropy'
-            else:
-                params['loss'] = 'sparse_categorical_crossentropy'
+            # Try to infer task from dataset or force_params
+            if (task is None and force_params is not None and 'task' in force_params):
+                task = force_params['task']
+            if task == 'classification':
+                num_classes = dataset.num_classes
+                params['num_classes'] = num_classes
+                # Always override loss for tensorflow classification
+                if num_classes == 2:
+                    params['loss'] = 'binary_crossentropy'
+                else:
+                    params['loss'] = 'sparse_categorical_crossentropy'
         model = ModelBuilderFactory.prepare_and_call(model_callable, params, force_params)
         return model
 
