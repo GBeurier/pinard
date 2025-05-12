@@ -1,4 +1,3 @@
-import re
 from pathlib import Path
 
 def _s_(path: str) -> str:
@@ -85,7 +84,7 @@ def browse_folder(folder_path, global_params=None):
 
 # def parse_file_or_selector(file):
 #     if isinstance(file, str):
-#         if bool(re.match("^(\s*-?\d+\s*)?(:\s*-?\d+\s*)?(:\s*-?\d+\s*)?$", file)):
+#         if bool(re.match("^(\s*-?\d+\s*)?(:\s*-?\d+\\s*)?(:\s*-?\d+\s*)?$", file)):
 #             return parse_selector(file)
 #         else:
 #             return parse_file(file)
@@ -173,76 +172,20 @@ def browse_folder(folder_path, global_params=None):
 
 
 def parse_config(data_config):
-
     if isinstance(data_config, str):
         return browse_folder(data_config)
     elif isinstance(data_config, dict):
-        # If it's already a dictionary, assume it's the parsed config
-        # TODO: Add validation or more robust parsing if needed later
-        return data_config
-
-    # elif isinstance(data_config, dict): # Keep original commented logic for reference
-    #     if "path" in data_config:
-    #         return browse_folder(data_config["path"], data_config.get("params"))
-    #     elif "train" in data_config:
-    #         return format_config(train_XY=data_config.get("train"), valid_XY=data_config.get("valid"), test_XY=data_config.get("test"), global_params=data_config.get("params"))
-    #     else:
-    #         print("CONFIG ERROR _ obj >>", data_config)
-    #         return None
-
-    # elif isinstance(data_config, list) or isinstance(data_config, tuple):
-    #     if len(data_config) > 2 or len(data_config) == 1:
-    #         if len(data_config) == 1:
-    #             return format_config(train_XY=data_config[0])
-    #         elif len(data_config) == 3:
-    #             return format_config(train_XY=data_config[0], valid_XY=data_config[1], test_XY=data_config[2])
-    #         elif len(data_config) == 4:
-    #             return format_config(train_x=data_config[0], train_y=data_config[1], test_x=data_config[2], test_y=data_config[3])
-    #         elif len(data_config) == 6:
-    #             return format_config(train_x=data_config[0], train_y=data_config[1], test_x=data_config[2], test_y=data_config[3], valid_x=data_config[4], valid_y=data_config[5])
-    #     else:
-    #         if isinstance(data_config[0], str):
-    #             file_pattern = r'^[^*?"<>|]+[/\\]?[^/\\]+\.[^/\\]+$'
-    #             if not bool(re.match(file_pattern, data_config[0])):
-    #                 return browse_folder(data_config[0], data_config[1])
-    #             else:
-    #                 return format_config(train_x=data_config[0], train_y=data_config[1])
-
-    #         elif isinstance(data_config[0], dict):
-    #             if "X" in data_config[0]:
-    #                 return format_config(train_XY=data_config[0], test_XY=data_config[1])
-    #             elif "path" in data_config[0]:
-    #                 return format_config(train_x=data_config[0], train_y=data_config[1])
-
-    #         elif isinstance(data_config[0], list) or isinstance(data_config[0], tuple):
-    #             if len(data_config[0]) == 2:
-    #                 if len(data_config[1]) == 1 or isinstance(data_config[1], str) or len(data_config[1]) == 3:
-    #                     return format_config(train_x=data_config[0], train_y=data_config[1])
-    #                 else:
-    #                     if isinstance(data_config[1], dict):
-    #                         if "from" in data_config[1] or "to" in data_config[1] or "path" in data_config[1]:
-    #                             return format_config(train_x=data_config[0], train_y=data_config[1])
-    #                         elif len(data_config[1].keys()) == 0:
-    #                             return format_config(train_XY=data_config)
-    #                         else:
-    #                             print("Should not happen #1>> Here either XY or X&Y", data_config)
-    #                             return None
-    #                     elif isinstance(data_config[1], list) or isinstance(data_config[1], tuple):
-    #                         # if contains only integers load data
-    #                         if all(isinstance(i, int) for i in data_config[1]):
-    #                             return format_config(train_x=data_config[0], train_y=data_config[1])
-    #                         elif isinstance(data_config[1][1], dict) and "filter" in data_config[1][1]:
-    #                             return format_config(train_x=data_config[0], train_y=data_config[1])
-    #                         else:
-    #                             print("Should not happen #2>> Here either XY or X&Y", data_config)
-    #                             return None
-    #                     else:
-    #                         print("Should not happen #3>> Here either XY or X&Y", data_config)
-    #                         print(format_config(train_x=data_config[0], train_y=data_config[1]))
-    #                         return None
-    #             elif len(data_config[0]) == 3:
-    #                 return format_config(train_x=data_config[0], train_y=data_config[1])
-    #             else:
-    #                 print("CONFIG ERROR _ list >>", data_config)
-
+        if "path" in data_config:  # If path is present, browse folder
+            return browse_folder(data_config["path"], data_config.get("params"))
+        else:  # Otherwise, assume it's an already parsed config dictionary
+            # TODO: Add more robust validation here if needed in the future
+            # For now, if it's a dict without 'path', assume it's usable by get_dataset
+            required_keys_pattern = ['train_x', 'test_x']  # Basic check
+            if all(key in data_config for key in required_keys_pattern):
+                return data_config
+            else:
+                print(f"CONFIG ERROR _ obj >> Missing one of {required_keys_pattern} in dict: {data_config}")
+                return None
+    # If data_config is not a string or a recognized dictionary structure, return None
+    print(f"CONFIG ERROR _ unsupported type or structure >> {type(data_config)}: {data_config}")
     return None
