@@ -207,23 +207,14 @@ def test_tensorflow_classification_finetuning():
 @pytest.mark.finetune
 @pytest.mark.classification
 def test_tensorflow_binary_finetuning():
-    """Test finetuning a TensorFlow classification model."""
+    """Test finetuning a TensorFlow binary classification model using preset model."""
     try:
         import tensorflow as tf
-        
         config = Config("sample_data/binary", x_pipeline, None, nicon_classification, nicon_finetune_classif, seed)
-        
-        start = time.time()
         runner = ExperimentRunner([config], resume_mode="restart")
-        datasets, predictions, scores, best_params = runner.run()
-        end = time.time()
-        print(f"Time elapsed: {end-start} seconds")
-        
-        # Since we're using a list of configs, get the first dataset
+        datasets, _, _, best_params = runner.run()
         dataset = datasets[0]
         assert dataset is not None, "Dataset should not be None"
-        
-        # Check best parameters from finetuning
         best_params_first = best_params[0]
         assert best_params_first is not None, "Best parameters should not be None"
     except (ImportError, ModuleNotFoundError):
@@ -287,23 +278,14 @@ def test_custom_tf_classification_finetuning():
 @pytest.mark.finetune
 @pytest.mark.classification
 def test_custom_tf_binary_finetuning():
-    """Test finetuning a custom TensorFlow classification model."""
+    """Test finetuning a TensorFlow binary classification model using custom model."""
     try:
         import tensorflow as tf
-        
         config = Config("sample_data/binary", x_pipeline, None, custom_tf_classification, custom_tf_finetune_classification, seed)
-        
-        start = time.time()
         runner = ExperimentRunner([config], resume_mode="restart")
-        datasets, predictions, scores, best_params = runner.run()
-        end = time.time()
-        print(f"Time elapsed: {end-start} seconds")
-        
-        # Since we're using a list of configs, get the first dataset
+        datasets, _, _, best_params = runner.run()
         dataset = datasets[0]
         assert dataset is not None, "Dataset should not be None"
-        
-        # Check best parameters from finetuning
         best_params_first = best_params[0]
         assert best_params_first is not None, "Best parameters should not be None"
     except (ImportError, ModuleNotFoundError):

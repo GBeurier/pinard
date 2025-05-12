@@ -120,7 +120,8 @@ class OptunaFineTuner(BaseFineTuner):
                 if key not in best_training_params:
                     best_training_params[key] = value
 
-        self.model_manager.train(dataset, training_params=best_training_params)
+        # Retrain best model using original metrics
+        self.model_manager.train(dataset, training_params=best_training_params, metrics=metrics)
 
         return best_params
 

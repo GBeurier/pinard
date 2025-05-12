@@ -108,7 +108,18 @@ class ModelBuilderFactory:
             class_path = model_dict['class']
             params = model_dict.get('params', {})
             cls = ModelBuilderFactory.import_class(class_path)
-            model = ModelBuilderFactory.prepare_and_call(cls, params, force_params)
+            # Filter params for sklearn models
+            framework = None
+            try:
+                framework = ModelBuilderFactory.detect_framework(cls)
+            except Exception:
+                pass
+            if framework == 'sklearn':
+                all_params = {**params, **(force_params or {})}
+                filtered_params = ModelBuilderFactory._filter_params(cls, all_params)
+                model = ModelBuilderFactory.prepare_and_call(cls, filtered_params)
+            else:
+                model = ModelBuilderFactory.prepare_and_call(cls, params, force_params)
             return model
 
         elif 'import' in model_dict:
@@ -127,21 +138,26 @@ class ModelBuilderFactory:
 
         elif 'function' in model_dict:
             callable_model = model_dict['function']
-            params = model_dict.get('params', {})
+            params = model_dict.get('params', {}).copy()  # copy to avoid mutating input
             framework = model_dict.get('framework', None)
             if framework is None:
                 framework = getattr(callable_model, 'framework', None)
-            
             if framework is None:
                 raise ValueError("Cannot determine framework from callable model_config. Please set 'experiments.utils.framework' decorator on the function or add 'framework' key to the config.")
-            
             input_dim = ModelBuilderFactory._get_input_dim(framework, dataset)
             params['input_dim'] = input_dim
             params['input_shape'] = input_dim
-            
+            # Set num_classes and loss for tensorflow classification
+            if framework == 'tensorflow' and hasattr(dataset, 'num_classes'):
+                num_classes = dataset.num_classes
+                params['num_classes'] = num_classes
+                # Always override loss for tensorflow classification
+                if num_classes == 2:
+                    params['loss'] = 'binary_crossentropy'
+                else:
+                    params['loss'] = 'sparse_categorical_crossentropy'
             model = ModelBuilderFactory.prepare_and_call(callable_model, params, force_params)
             return model
-
         else:
             raise ValueError("Dict model_config must contain 'class', 'path', or 'callable' with 'framework' key.")
 
@@ -152,12 +168,24 @@ class ModelBuilderFactory:
             framework = ModelBuilderFactory.detect_framework(model_callable)
         elif inspect.isfunction(model_callable):
             framework = getattr(model_callable, 'framework', None)
-        
         if framework is None:
             raise ValueError("Cannot determine framework from callable model_config. Please set 'experiments.utils.framework' decorator on the callable.")
         input_dim = ModelBuilderFactory._get_input_dim(framework, dataset)
-        params = {"input_dim": input_dim, "input_shape": input_dim}
-        
+        sig = inspect.signature(model_callable)
+        params = {}
+        if 'input_shape' in sig.parameters:
+            params['input_shape'] = input_dim
+        if 'input_dim' in sig.parameters:
+            params['input_dim'] = input_dim
+        # Set num_classes and loss for tensorflow classification
+        if framework == 'tensorflow' and hasattr(dataset, 'num_classes'):
+            num_classes = dataset.num_classes
+            params['num_classes'] = num_classes
+            # Always override loss for tensorflow classification
+            if num_classes == 2:
+                params['loss'] = 'binary_crossentropy'
+            else:
+                params['loss'] = 'sparse_categorical_crossentropy'
         model = ModelBuilderFactory.prepare_and_call(model_callable, params, force_params)
         return model
 
@@ -274,54 +302,52 @@ class ModelBuilderFactory:
             return model
 
     @staticmethod
-    def prepare_and_call(callable_obj, params=None, force_params=None):
-        """
-        Prepare parameters for the callable and invoke it. Parameters are chosen from `force_params` first, 
-        then from `params`. If a required parameter is missing, an exception is raised.
+    def prepare_and_call(callable_obj, params_from_caller=None, force_params_from_caller=None):
+        if params_from_caller is None:
+            params_from_caller = {}
+        if force_params_from_caller is None:
+            force_params_from_caller = {}
 
-        Parameters:
-        - callable_obj: The callable (function or class) to be invoked.
-        - params: A dictionary of default parameters (can be None).
-        - force_params: A dictionary of parameters that override `params` (can be None).
+        all_available_args_from_caller = {**params_from_caller, **force_params_from_caller}
 
-        Returns:
-        - The result of calling `callable_obj` with the prepared parameters.
-        
-        Raises:
-        - TypeError: If a required parameter is missing.
-        """
-        if params is None:
-            params = {}
-        if force_params is None:
-            force_params = {}
-            
-        merged_params = {**params, **force_params}
-
-        # Get the signature of the callable
         signature = inspect.signature(callable_obj)
+        sig_params_spec = signature.parameters 
 
-        # Dictionary to hold the final arguments
-        final_args = {}
+        final_named_args = {} 
+        remaining_args_for_bundle_or_kwargs = {}
 
-        # Iterate over the parameters of the callable
-        for name, param in signature.parameters.items():
-            if name == 'self':  # Skip 'self' for instance methods or constructors
-                continue
-
-            if name in force_params:
-                final_args[name] = force_params[name]
-            elif name in params:
-                final_args[name] = params[name]
-            elif param.default is not inspect.Parameter.empty:
-                final_args[name] = param.default
-            elif name == "params" or name == "force_params":
-                final_args[name] = merged_params
+        has_params_bundle_arg = 'params' in sig_params_spec and \
+                                sig_params_spec['params'].kind == inspect.Parameter.POSITIONAL_OR_KEYWORD
+        
+        for name, value in all_available_args_from_caller.items():
+            if name in sig_params_spec and (name != 'params' or not has_params_bundle_arg):
+                final_named_args[name] = value
             else:
-                # If the parameter is required and not provided, raise an exception
-                raise TypeError(f"Missing required parameter: '{name}'")
+                remaining_args_for_bundle_or_kwargs[name] = value
+        
+        if has_params_bundle_arg:
+            params_bundle_dict = {}
+            if 'params' in remaining_args_for_bundle_or_kwargs and \
+               isinstance(remaining_args_for_bundle_or_kwargs['params'], dict):
+                params_bundle_dict = remaining_args_for_bundle_or_kwargs.pop('params')
+            
+            params_bundle_dict.update(remaining_args_for_bundle_or_kwargs)
+            final_named_args['params'] = params_bundle_dict
+        else: 
+            final_named_args.update(remaining_args_for_bundle_or_kwargs)
 
-        # Call the callable with the prepared arguments
-        return callable_obj(**final_args)
+        try:
+            bound_args = signature.bind(**final_named_args)
+        except TypeError as e:
+            detailed_error_message = (
+                f"Error binding arguments for callable '{getattr(callable_obj, '__name__', str(callable_obj))}': {e}.\n"
+                f"  Attempted to call with (processed arguments): {final_named_args}\n"
+                f"  Original available arguments from caller: {all_available_args_from_caller}\n"
+                f"  Callable signature: {signature}"
+            )
+            raise TypeError(detailed_error_message) from e
+
+        return callable_obj(*bound_args.args, **bound_args.kwargs)
 
     @staticmethod
     def reconstruct_object(obj, params=None, force_params=None):

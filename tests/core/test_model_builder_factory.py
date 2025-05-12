@@ -6,7 +6,7 @@ from sklearn.preprocessing import StandardScaler
 from pinard.core.model.model_builder_factory import ModelBuilderFactory
 from pinard.utils.backend_utils import is_tensorflow_available, is_torch_available
 from unittest.mock import MagicMock, patch
-
+from pinard.core.utils import framework
 
 class DummyDataset:
     """Classe simulant un dataset pour les tests."""
@@ -98,6 +98,7 @@ class TestModelBuilderFactory:
             
         import tensorflow as tf
         
+        @framework('tensorflow')
         def create_simple_tf_model(input_shape=(5,)):
             model = tf.keras.Sequential([
                 tf.keras.layers.Dense(10, activation='relu', input_shape=input_shape),

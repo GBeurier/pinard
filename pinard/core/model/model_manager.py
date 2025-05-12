@@ -398,28 +398,42 @@ if TF_AVAILABLE:
         def train(self, dataset, training_params, input_dim=None, metrics=None, no_folds=False):
             # models = [self.model]
             models = [self.models[0]] if no_folds else self.models
-            
             for (x_train, y_train, x_val, y_val), model in zip(dataset.fold_data('union', no_folds), models):
-                print(f"Training fold with shapes:", x_train.shape, y_train.shape, x_val.shape, y_val.shape)
+                print(f"Training fold with shapes: {x_train.shape}, {y_train.shape}, {x_val.shape}, {y_val.shape}")
                 loss = training_params.get('loss', 'mse')
-                
+
+                # --- ENFORCE CORRECT LOSS FOR TENSORFLOW CLASSIFICATION ---
+                # Detect task and num_classes using prepare_y logic
+                # (We need to know if this is classification and how many classes)
+                task = training_params.get('task', None)
+                # If not explicitly set, try to infer from loss/metrics
+                if task is None:
+                    task = detect_task_type(loss, metrics or [])
+                # Use the same logic as prepare_y to count classes
+                num_classes = len(np.unique(y_train)) if task == 'classification' else None
+                # Only override for TensorFlow classification
+                if task == 'classification':
+                    if num_classes == 2:
+                        enforced_loss = 'binary_crossentropy'
+                    else:
+                        enforced_loss = 'sparse_categorical_crossentropy'
+                    if loss != enforced_loss:
+                        print(f"[INFO] Overriding loss '{loss}' with '{enforced_loss}' for TensorFlow classification (num_classes={num_classes})")
+                    loss = enforced_loss
+
                 # Reshape labels for sparse categorical cross-entropy
                 if loss == 'sparse_categorical_crossentropy':
                     y_train = y_train.reshape(-1)  # Flatten to (n_samples,)
                     y_val = y_val.reshape(-1)
                     y_train, y_val = np.array(y_train, dtype=np.int32), np.array(y_val, dtype=np.int32)
-                
+
                 print(loss, metrics)
-                
+
                 x_train = tf.convert_to_tensor(x_train)
                 y_train = tf.convert_to_tensor(y_train)
                 x_val = tf.convert_to_tensor(x_val)
                 y_val = tf.convert_to_tensor(y_val)
-                
-                # print(np.unique(y_train))
-                # print("----")
-                # print(np.unique(y_val))
-                
+
                 print("Training with shapes:", x_train.shape, y_train.shape, x_val.shape, y_val.shape)
                 model.compile(optimizer=training_params.get('optimizer', 'adam'),
                               loss=loss,
@@ -444,9 +458,9 @@ if TF_AVAILABLE:
 
                 # Add BestModelMemory callback to keep best weights in memory
                 callbacks.append(BestModelMemory())
-                
+
                 # model.summary()
-                
+
                 model.fit(x_train, y_train,
                           validation_data=(x_val, y_val),
                           epochs=training_params.get('epochs', 100),
