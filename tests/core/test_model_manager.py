@@ -42,16 +42,16 @@ class TestModelManagerUtils:
     @pytest.mark.skipif(not is_tensorflow_available(), reason="TensorFlow n'est pas disponible")
     def test_prepare_y_classification_tensorflow(self):
         """Test de la préparation des étiquettes pour la classification avec TensorFlow."""
-        import tensorflow as tf
+        import tensorflow
         
         # Préparer des données simples
         y_train = np.array([0, 1, 2, 0, 1])
         y_val = np.array([2, 0, 1, 2, 0])
         
         # Créer un modèle TF de base
-        model = tf.keras.Sequential([
-            tf.keras.layers.Dense(10, activation='relu', input_shape=(5,)),
-            tf.keras.layers.Dense(3, activation='softmax')  # 3 classes
+        model = tensorflow.keras.models.Sequential([
+            tensorflow.keras.layers.Dense(10, activation='relu', input_shape=(5,)),
+            tensorflow.keras.layers.Dense(3, activation='softmax')  # 3 classes
         ])
         
         # Appliquer la fonction prepare_y avec sparse_categorical_crossentropy
