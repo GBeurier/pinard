@@ -65,7 +65,7 @@ def custom_tf_classification(input_shape, num_classes=2, params={}):
 nicon_finetune = {
     "action": "finetune",
     "finetune_params": {
-        "n_trials": 5,
+        "n_trials": 3,
         "model_params": {
             "filters_1": [8, 16, 32, 64],
             "filters_2": [8, 16, 32, 64],
@@ -73,15 +73,15 @@ nicon_finetune = {
         }
     },
     "training_params": {
-        "epochs": 10,
-        "verbose":0
+        "epochs": 3,
+        "verbose": 0
     }
 }
 
 custom_tf_finetune_regression = {
     "action": "finetune",
     "finetune_params": {
-        "n_trials": 5,
+        "n_trials": 3,
         "model_params": {
             "units1": [16, 32, 64, 128],
             "units2": [32, 64, 128, 256],
@@ -94,7 +94,7 @@ custom_tf_finetune_regression = {
         }
     },
     "training_params": {
-        "epochs": 10,
+        "epochs": 3,
         "verbose": 0
     }
 }
@@ -103,7 +103,7 @@ custom_tf_finetune_classification = {
     "action": "finetune",
     "task": "classification",
     "finetune_params": {
-        "n_trials": 5,
+        "n_trials": 3,
         "model_params": {
             "units1": [16, 32, 64, 128],
             "units2": [32, 64, 128, 256],
@@ -116,7 +116,7 @@ custom_tf_finetune_classification = {
         }
     },
     "training_params": {
-        "epochs": 5,
+        "epochs": 3,
         "verbose": 0
     }
 }
@@ -125,7 +125,7 @@ nicon_finetune_classif = {
     "action": "finetune",
     "task": "classification",
     "finetune_params": {
-        "n_trials": 5,
+        "n_trials": 3,
         "model_params": {
             "filters_1": [8, 16, 32, 64],
             "filters_2": [8, 16, 32, 64],
@@ -133,7 +133,7 @@ nicon_finetune_classif = {
         }
     },
     "training_params": {
-        "epochs": 5,
+        "epochs": 3,
         "verbose":0
     }
 }

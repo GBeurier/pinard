@@ -107,9 +107,9 @@ def prepare_y(y_train, y_val, model, framework, loss, task):
 
         # Framework-specific processing
         if framework == 'tensorflow':
-            import tensorflow as tf
-            from tf.keras.layers import Dense
-            from tf.keras.utils import to_categorical
+            import tensorflow
+            from tensorflow.keras.layers import Dense
+            from tensorflow.keras.utils import to_categorical
 
             if loss == 'sparse_categorical_crossentropy':
                 # Labels must be integer-encoded
@@ -121,7 +121,7 @@ def prepare_y(y_train, y_val, model, framework, loss, task):
                     raise ValueError(f"Labels must be in the range [0, {num_classes - 1}] for sparse_categorical_crossentropy.")
 
                 # Adjust model's last layer
-                from tf.keras.layers import Dense
+                from tensorflow.keras.layers import Dense
                 last_layer = model.layers[-1]
                 if last_layer.units != num_classes or last_layer.activation.__name__ != 'softmax':
                     model.pop()
