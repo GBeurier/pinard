@@ -1,8 +1,8 @@
 # tests/test_folder.py
 
 import pytest
-from pinard.data_splitters._folder import get_splitter
-from pinard.data_splitters._splitter import (
+from nirs4all.data_splitters._folder import get_splitter
+from nirs4all.data_splitters._splitter import (
     SystematicCircularSplitter,
 )
 from sklearn.model_selection import KFold

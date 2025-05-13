@@ -2,75 +2,75 @@ Simple pipeline
 ===============
 
 You can execute this notebook at:
-`Google collab notebook <https://colab.research.google.com/github/GBeurier/pinard/blob/main/examples/simple_pipelines.ipynb>`_
+`Google collab notebook <https://colab.research.google.com/github/GBeurier/nirs4all/blob/main/examples/simple_pipelines.ipynb>`_
 
 
 .. container:: cell code
 
    .. code:: python
 
-      !pip install pinard
+      !pip install nirs4all
       !pip install scikeras
 
    .. container:: output stream stdout
 
       ::
 
-         Collecting pinard
-           Downloading pinard-0.9.5-py3-none-any.whl (38 kB)
-         Requirement already satisfied: pandas in c:\workspace\ml\pynirs_env\lib\site-packages (from pinard) (1.3.5)
-         Requirement already satisfied: scipy in c:\workspace\ml\pynirs_env\lib\site-packages (from pinard) (1.7.3)
-         Requirement already satisfied: tensorflow in c:\workspace\ml\pynirs_env\lib\site-packages (from pinard) (2.8.0)
-         Requirement already satisfied: PyWavelets in c:\workspace\ml\pynirs_env\lib\site-packages (from pinard) (1.3.0)
-         Requirement already satisfied: scikit-learn in c:\workspace\ml\pynirs_env\lib\site-packages (from pinard) (1.0.2)
-         Requirement already satisfied: numpy in c:\workspace\ml\pynirs_env\lib\site-packages (from pinard) (1.21.6)
-         Requirement already satisfied: pytz>=2017.3 in c:\workspace\ml\pynirs_env\lib\site-packages (from pandas->pinard) (2022.1)
-         Requirement already satisfied: python-dateutil>=2.7.3 in c:\workspace\ml\pynirs_env\lib\site-packages (from pandas->pinard) (2.8.2)
-         Requirement already satisfied: joblib>=0.11 in c:\workspace\ml\pynirs_env\lib\site-packages (from scikit-learn->pinard) (1.1.0)
-         Requirement already satisfied: threadpoolctl>=2.0.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from scikit-learn->pinard) (3.1.0)
-         Requirement already satisfied: absl-py>=0.4.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (1.0.0)
-         Requirement already satisfied: keras<2.9,>=2.8.0rc0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (2.8.0)
-         Requirement already satisfied: tensorflow-io-gcs-filesystem>=0.23.1 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (0.24.0)
-         Requirement already satisfied: gast>=0.2.1 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (0.5.3)
-         Requirement already satisfied: termcolor>=1.1.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (1.1.0)
-         Requirement already satisfied: tf-estimator-nightly==2.8.0.dev2021122109 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (2.8.0.dev2021122109)
-         Requirement already satisfied: h5py>=2.9.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (3.6.0)
-         Requirement already satisfied: flatbuffers>=1.12 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (2.0)
-         Requirement already satisfied: google-pasta>=0.1.1 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (0.2.0)
-         Requirement already satisfied: protobuf>=3.9.2 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (3.20.0)
-         Requirement already satisfied: tensorboard<2.9,>=2.8 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (2.8.0)
-         Requirement already satisfied: setuptools in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (65.5.0)
-         Requirement already satisfied: typing-extensions>=3.6.6 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (4.1.1)
-         Requirement already satisfied: libclang>=9.0.1 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (13.0.0)
-         Requirement already satisfied: six>=1.12.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (1.16.0)
-         Requirement already satisfied: keras-preprocessing>=1.1.1 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (1.1.2)
-         Requirement already satisfied: opt-einsum>=2.3.2 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (3.3.0)
-         Requirement already satisfied: astunparse>=1.6.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (1.6.3)
-         Requirement already satisfied: wrapt>=1.11.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (1.14.0)
-         Requirement already satisfied: grpcio<2.0,>=1.24.3 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->pinard) (1.44.0)
-         Requirement already satisfied: wheel<1.0,>=0.23.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from astunparse>=1.6.0->tensorflow->pinard) (0.37.1)
-         Requirement already satisfied: cached-property in c:\workspace\ml\pynirs_env\lib\site-packages (from h5py>=2.9.0->tensorflow->pinard) (1.5.2)
-         Requirement already satisfied: google-auth-oauthlib<0.5,>=0.4.1 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorboard<2.9,>=2.8->tensorflow->pinard) (0.4.6)
-         Requirement already satisfied: tensorboard-data-server<0.7.0,>=0.6.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorboard<2.9,>=2.8->tensorflow->pinard) (0.6.1)
-         Requirement already satisfied: tensorboard-plugin-wit>=1.6.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorboard<2.9,>=2.8->tensorflow->pinard) (1.8.1)
-         Requirement already satisfied: werkzeug>=0.11.15 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorboard<2.9,>=2.8->tensorflow->pinard) (2.1.1)
-         Requirement already satisfied: requests<3,>=2.21.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorboard<2.9,>=2.8->tensorflow->pinard) (2.27.1)
-         Requirement already satisfied: google-auth<3,>=1.6.3 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorboard<2.9,>=2.8->tensorflow->pinard) (2.6.4)
-         Requirement already satisfied: markdown>=2.6.8 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorboard<2.9,>=2.8->tensorflow->pinard) (3.3.6)
-         Requirement already satisfied: cachetools<6.0,>=2.0.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from google-auth<3,>=1.6.3->tensorboard<2.9,>=2.8->tensorflow->pinard) (5.0.0)
-         Requirement already satisfied: rsa<5,>=3.1.4 in c:\workspace\ml\pynirs_env\lib\site-packages (from google-auth<3,>=1.6.3->tensorboard<2.9,>=2.8->tensorflow->pinard) (4.8)
-         Requirement already satisfied: pyasn1-modules>=0.2.1 in c:\workspace\ml\pynirs_env\lib\site-packages (from google-auth<3,>=1.6.3->tensorboard<2.9,>=2.8->tensorflow->pinard) (0.2.8)
-         Requirement already satisfied: requests-oauthlib>=0.7.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from google-auth-oauthlib<0.5,>=0.4.1->tensorboard<2.9,>=2.8->tensorflow->pinard) (1.3.1)
-         Requirement already satisfied: importlib-metadata>=4.4 in c:\workspace\ml\pynirs_env\lib\site-packages (from markdown>=2.6.8->tensorboard<2.9,>=2.8->tensorflow->pinard) (4.11.3)
-         Requirement already satisfied: urllib3<1.27,>=1.21.1 in c:\workspace\ml\pynirs_env\lib\site-packages (from requests<3,>=2.21.0->tensorboard<2.9,>=2.8->tensorflow->pinard) (1.26.9)
-         Requirement already satisfied: certifi>=2017.4.17 in c:\workspace\ml\pynirs_env\lib\site-packages (from requests<3,>=2.21.0->tensorboard<2.9,>=2.8->tensorflow->pinard) (2021.10.8)
-         Requirement already satisfied: idna<4,>=2.5 in c:\workspace\ml\pynirs_env\lib\site-packages (from requests<3,>=2.21.0->tensorboard<2.9,>=2.8->tensorflow->pinard) (3.3)
-         Requirement already satisfied: charset-normalizer~=2.0.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from requests<3,>=2.21.0->tensorboard<2.9,>=2.8->tensorflow->pinard) (2.0.12)
-         Requirement already satisfied: zipp>=0.5 in c:\workspace\ml\pynirs_env\lib\site-packages (from importlib-metadata>=4.4->markdown>=2.6.8->tensorboard<2.9,>=2.8->tensorflow->pinard) (3.8.0)
-         Requirement already satisfied: pyasn1<0.5.0,>=0.4.6 in c:\workspace\ml\pynirs_env\lib\site-packages (from pyasn1-modules>=0.2.1->google-auth<3,>=1.6.3->tensorboard<2.9,>=2.8->tensorflow->pinard) (0.4.8)
-         Requirement already satisfied: oauthlib>=3.0.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from requests-oauthlib>=0.7.0->google-auth-oauthlib<0.5,>=0.4.1->tensorboard<2.9,>=2.8->tensorflow->pinard) (3.2.0)
-         Installing collected packages: pinard
-         Successfully installed pinard-0.9.5
+         Collecting nirs4all
+           Downloading nirs4all-0.9.5-py3-none-any.whl (38 kB)
+         Requirement already satisfied: pandas in c:\workspace\ml\pynirs_env\lib\site-packages (from nirs4all) (1.3.5)
+         Requirement already satisfied: scipy in c:\workspace\ml\pynirs_env\lib\site-packages (from nirs4all) (1.7.3)
+         Requirement already satisfied: tensorflow in c:\workspace\ml\pynirs_env\lib\site-packages (from nirs4all) (2.8.0)
+         Requirement already satisfied: PyWavelets in c:\workspace\ml\pynirs_env\lib\site-packages (from nirs4all) (1.3.0)
+         Requirement already satisfied: scikit-learn in c:\workspace\ml\pynirs_env\lib\site-packages (from nirs4all) (1.0.2)
+         Requirement already satisfied: numpy in c:\workspace\ml\pynirs_env\lib\site-packages (from nirs4all) (1.21.6)
+         Requirement already satisfied: pytz>=2017.3 in c:\workspace\ml\pynirs_env\lib\site-packages (from pandas->nirs4all) (2022.1)
+         Requirement already satisfied: python-dateutil>=2.7.3 in c:\workspace\ml\pynirs_env\lib\site-packages (from pandas->nirs4all) (2.8.2)
+         Requirement already satisfied: joblib>=0.11 in c:\workspace\ml\pynirs_env\lib\site-packages (from scikit-learn->nirs4all) (1.1.0)
+         Requirement already satisfied: threadpoolctl>=2.0.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from scikit-learn->nirs4all) (3.1.0)
+         Requirement already satisfied: absl-py>=0.4.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (1.0.0)
+         Requirement already satisfied: keras<2.9,>=2.8.0rc0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (2.8.0)
+         Requirement already satisfied: tensorflow-io-gcs-filesystem>=0.23.1 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (0.24.0)
+         Requirement already satisfied: gast>=0.2.1 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (0.5.3)
+         Requirement already satisfied: termcolor>=1.1.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (1.1.0)
+         Requirement already satisfied: tf-estimator-nightly==2.8.0.dev2021122109 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (2.8.0.dev2021122109)
+         Requirement already satisfied: h5py>=2.9.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (3.6.0)
+         Requirement already satisfied: flatbuffers>=1.12 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (2.0)
+         Requirement already satisfied: google-pasta>=0.1.1 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (0.2.0)
+         Requirement already satisfied: protobuf>=3.9.2 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (3.20.0)
+         Requirement already satisfied: tensorboard<2.9,>=2.8 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (2.8.0)
+         Requirement already satisfied: setuptools in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (65.5.0)
+         Requirement already satisfied: typing-extensions>=3.6.6 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (4.1.1)
+         Requirement already satisfied: libclang>=9.0.1 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (13.0.0)
+         Requirement already satisfied: six>=1.12.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (1.16.0)
+         Requirement already satisfied: keras-preprocessing>=1.1.1 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (1.1.2)
+         Requirement already satisfied: opt-einsum>=2.3.2 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (3.3.0)
+         Requirement already satisfied: astunparse>=1.6.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (1.6.3)
+         Requirement already satisfied: wrapt>=1.11.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (1.14.0)
+         Requirement already satisfied: grpcio<2.0,>=1.24.3 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorflow->nirs4all) (1.44.0)
+         Requirement already satisfied: wheel<1.0,>=0.23.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from astunparse>=1.6.0->tensorflow->nirs4all) (0.37.1)
+         Requirement already satisfied: cached-property in c:\workspace\ml\pynirs_env\lib\site-packages (from h5py>=2.9.0->tensorflow->nirs4all) (1.5.2)
+         Requirement already satisfied: google-auth-oauthlib<0.5,>=0.4.1 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorboard<2.9,>=2.8->tensorflow->nirs4all) (0.4.6)
+         Requirement already satisfied: tensorboard-data-server<0.7.0,>=0.6.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorboard<2.9,>=2.8->tensorflow->nirs4all) (0.6.1)
+         Requirement already satisfied: tensorboard-plugin-wit>=1.6.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorboard<2.9,>=2.8->tensorflow->nirs4all) (1.8.1)
+         Requirement already satisfied: werkzeug>=0.11.15 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorboard<2.9,>=2.8->tensorflow->nirs4all) (2.1.1)
+         Requirement already satisfied: requests<3,>=2.21.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorboard<2.9,>=2.8->tensorflow->nirs4all) (2.27.1)
+         Requirement already satisfied: google-auth<3,>=1.6.3 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorboard<2.9,>=2.8->tensorflow->nirs4all) (2.6.4)
+         Requirement already satisfied: markdown>=2.6.8 in c:\workspace\ml\pynirs_env\lib\site-packages (from tensorboard<2.9,>=2.8->tensorflow->nirs4all) (3.3.6)
+         Requirement already satisfied: cachetools<6.0,>=2.0.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from google-auth<3,>=1.6.3->tensorboard<2.9,>=2.8->tensorflow->nirs4all) (5.0.0)
+         Requirement already satisfied: rsa<5,>=3.1.4 in c:\workspace\ml\pynirs_env\lib\site-packages (from google-auth<3,>=1.6.3->tensorboard<2.9,>=2.8->tensorflow->nirs4all) (4.8)
+         Requirement already satisfied: pyasn1-modules>=0.2.1 in c:\workspace\ml\pynirs_env\lib\site-packages (from google-auth<3,>=1.6.3->tensorboard<2.9,>=2.8->tensorflow->nirs4all) (0.2.8)
+         Requirement already satisfied: requests-oauthlib>=0.7.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from google-auth-oauthlib<0.5,>=0.4.1->tensorboard<2.9,>=2.8->tensorflow->nirs4all) (1.3.1)
+         Requirement already satisfied: importlib-metadata>=4.4 in c:\workspace\ml\pynirs_env\lib\site-packages (from markdown>=2.6.8->tensorboard<2.9,>=2.8->tensorflow->nirs4all) (4.11.3)
+         Requirement already satisfied: urllib3<1.27,>=1.21.1 in c:\workspace\ml\pynirs_env\lib\site-packages (from requests<3,>=2.21.0->tensorboard<2.9,>=2.8->tensorflow->nirs4all) (1.26.9)
+         Requirement already satisfied: certifi>=2017.4.17 in c:\workspace\ml\pynirs_env\lib\site-packages (from requests<3,>=2.21.0->tensorboard<2.9,>=2.8->tensorflow->nirs4all) (2021.10.8)
+         Requirement already satisfied: idna<4,>=2.5 in c:\workspace\ml\pynirs_env\lib\site-packages (from requests<3,>=2.21.0->tensorboard<2.9,>=2.8->tensorflow->nirs4all) (3.3)
+         Requirement already satisfied: charset-normalizer~=2.0.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from requests<3,>=2.21.0->tensorboard<2.9,>=2.8->tensorflow->nirs4all) (2.0.12)
+         Requirement already satisfied: zipp>=0.5 in c:\workspace\ml\pynirs_env\lib\site-packages (from importlib-metadata>=4.4->markdown>=2.6.8->tensorboard<2.9,>=2.8->tensorflow->nirs4all) (3.8.0)
+         Requirement already satisfied: pyasn1<0.5.0,>=0.4.6 in c:\workspace\ml\pynirs_env\lib\site-packages (from pyasn1-modules>=0.2.1->google-auth<3,>=1.6.3->tensorboard<2.9,>=2.8->tensorflow->nirs4all) (0.4.8)
+         Requirement already satisfied: oauthlib>=3.0.0 in c:\workspace\ml\pynirs_env\lib\site-packages (from requests-oauthlib>=0.7.0->google-auth-oauthlib<0.5,>=0.4.1->tensorboard<2.9,>=2.8->tensorflow->nirs4all) (3.2.0)
+         Installing collected packages: nirs4all
+         Successfully installed nirs4all-0.9.5
 
    .. container:: output stream stderr
 
@@ -92,8 +92,8 @@ You can execute this notebook at:
 
    .. code:: python
 
-      from pinard import utils
-      from pinard.model_selection import train_test_split_idx
+      from nirs4all import utils
+      from nirs4all.model_selection import train_test_split_idx
       from sklearn.model_selection import train_test_split
       import numpy as np
 
@@ -101,8 +101,8 @@ You can execute this notebook at:
       rd_seed = 42
       np.random.seed(rd_seed)
 
-      xcal_csv = "https://raw.githubusercontent.com/GBeurier/pinard/main/examples/Xcal.csv"
-      ycal_csv = "https://raw.githubusercontent.com/GBeurier/pinard/main/examples/Ycal.csv"
+      xcal_csv = "https://raw.githubusercontent.com/GBeurier/nirs4all/main/examples/Xcal.csv"
+      ycal_csv = "https://raw.githubusercontent.com/GBeurier/nirs4all/main/examples/Ycal.csv"
 
       # Create a set named data
       x, y = utils.load_csv(xcal_csv, ycal_csv, x_hdr=0, y_hdr=0, remove_na=True)
@@ -128,7 +128,7 @@ You can execute this notebook at:
 
    .. code:: python
 
-      from pinard import preprocessing as pp
+      from nirs4all import preprocessing as pp
       from sklearn.pipeline import Pipeline
 
       ### Declare preprocessing pipeline components
@@ -237,7 +237,7 @@ You can execute this notebook at:
 
    .. code:: python
 
-      from pinard.sklearn import FeatureAugmentation
+      from nirs4all.sklearn import FeatureAugmentation
 
       from tensorflow.keras.models import Sequential
       from tensorflow.keras.layers import Dense, Conv1D, SpatialDropout1D,BatchNormalization,Flatten, Dropout, Input

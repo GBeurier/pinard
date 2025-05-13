@@ -1,5 +1,5 @@
 from sklearn.pipeline import Pipeline
-import pinard.transformations as pp
+import nirs4all.transformations as pp
 
 
 def id_preprocessing():

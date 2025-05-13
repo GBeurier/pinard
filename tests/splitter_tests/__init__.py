@@ -1,3 +1,3 @@
 """
-Test package for Pinard data splitter modules.
+Test package for Nirs4all data splitter modules.
 """

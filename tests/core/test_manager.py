@@ -5,8 +5,8 @@ import shutil
 import numpy as np
 import pandas as pd
 from unittest.mock import MagicMock, patch
-from pinard.core.manager import ExperimentManager, NumpyEncoder, sanitize_folder_name
-from pinard.core.config import Config
+from nirs4all.core.manager import ExperimentManager, NumpyEncoder, sanitize_folder_name
+from nirs4all.core.config import Config
 
 
 class TestManagerUtils:

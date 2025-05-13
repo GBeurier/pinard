@@ -1,3 +1,3 @@
 """
-Test package for Pinard integration tests.
+Test package for Nirs4all integration tests.
 """

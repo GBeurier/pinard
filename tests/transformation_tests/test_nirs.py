@@ -2,7 +2,7 @@
 import numpy as np
 import pytest
 import scipy.sparse
-from pinard.transformations._nirs import (
+from nirs4all.transformations._nirs import (
     wavelet_transform,
     Wavelet,
     Haar,

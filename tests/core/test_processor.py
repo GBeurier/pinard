@@ -1,11 +1,11 @@
 import pytest
 from unittest.mock import MagicMock
-from pinard.core.processor import (
+from nirs4all.core.processor import (
     instantiate_class,
     get_transformer,
     run_pipeline
 )
-from pinard.data.dataset import Dataset
+from nirs4all.data.dataset import Dataset
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 

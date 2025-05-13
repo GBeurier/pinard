@@ -4,7 +4,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 
-from pinard.core.utils import (
+from nirs4all.core.utils import (
     get_full_import_path,
     get_construction_params,
     deserialize_object,

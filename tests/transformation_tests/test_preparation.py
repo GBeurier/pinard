@@ -2,7 +2,7 @@
 
 import numpy as np
 import pytest
-from pinard.transformations._preparation import CropTransformer, ResampleTransformer
+from nirs4all.transformations._preparation import CropTransformer, ResampleTransformer
 
 
 def test_CropTransformer_full_range(random_data):

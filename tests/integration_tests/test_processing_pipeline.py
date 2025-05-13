@@ -19,14 +19,14 @@ except NameError:
 parent_dir = os.path.abspath(os.path.join(script_dir, '../..'))
 sys.path.append(parent_dir)
 
-from pinard.presets.ref_models import decon, nicon, customizable_nicon, nicon_classification
-from pinard.presets.preprocessings import decon_set, nicon_set
-from pinard.data_splitters import KennardStoneSplitter
-from pinard.transformations import StandardNormalVariate as SNV, SavitzkyGolay as SG, Gaussian as GS, Derivate as Dv
-from pinard.transformations import Rotate_Translate as RT, Spline_X_Simplification as SXS, Random_X_Operation as RXO
-from pinard.transformations import CropTransformer
-from pinard.core.runner import ExperimentRunner
-from pinard.core.config import Config
+from nirs4all.presets.ref_models import decon, nicon, customizable_nicon, nicon_classification
+from nirs4all.presets.preprocessings import decon_set, nicon_set
+from nirs4all.data_splitters import KennardStoneSplitter
+from nirs4all.transformations import StandardNormalVariate as SNV, SavitzkyGolay as SG, Gaussian as GS, Derivate as Dv
+from nirs4all.transformations import Rotate_Translate as RT, Spline_X_Simplification as SXS, Random_X_Operation as RXO
+from nirs4all.transformations import CropTransformer
+from nirs4all.core.runner import ExperimentRunner
+from nirs4all.core.config import Config
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import KFold, RepeatedKFold, StratifiedKFold, RepeatedStratifiedKFold, ShuffleSplit, GroupKFold

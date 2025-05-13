@@ -2,10 +2,10 @@
 
 API Reference
 =============
-Pinard 1.0 - 06/2023
+Nirs4all 1.0 - 06/2023
 
 
-.. automodule:: pinard
+.. automodule:: nirs4all
     :members:
     :undoc-members:
     :show-inheritance:
@@ -14,7 +14,7 @@ Pinard 1.0 - 06/2023
 
 Augmentation API
 ----------------
-.. automodule:: pinard.augmentation
+.. automodule:: nirs4all.augmentation
     :members:
     :undoc-members:
     :show-inheritance:
@@ -23,7 +23,7 @@ Augmentation API
 
 Preprocessing API
 -----------------
-.. automodule:: pinard.preprocessing
+.. automodule:: nirs4all.preprocessing
     :members:
     :undoc-members:
     :show-inheritance:
@@ -32,7 +32,7 @@ Preprocessing API
 
 Model Selection API
 -------------------
-.. automodule:: pinard.model_selection
+.. automodule:: nirs4all.model_selection
     :members:
     :undoc-members:
     :show-inheritance:
@@ -41,7 +41,7 @@ Model Selection API
 
 Sci-kit learn API
 -----------------
-.. automodule:: pinard.sklearn
+.. automodule:: nirs4all.sklearn
     :members:
     :undoc-members:
     :show-inheritance:

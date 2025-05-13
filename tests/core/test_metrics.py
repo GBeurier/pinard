@@ -1,8 +1,8 @@
 import pytest
 import numpy as np
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
-from pinard.core.metrics import get_metric, metric_mappings
-from pinard.utils.backend_utils import is_tensorflow_available
+from nirs4all.core.metrics import get_metric, metric_mappings
+from nirs4all.utils.backend_utils import is_tensorflow_available
 
 
 class TestMetrics:

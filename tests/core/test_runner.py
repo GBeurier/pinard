@@ -2,8 +2,8 @@ import pytest
 import os
 import numpy as np
 from unittest.mock import MagicMock, patch
-from pinard.core.runner import ExperimentRunner
-from pinard.core.config import Config
+from nirs4all.core.runner import ExperimentRunner
+from nirs4all.core.config import Config
 
 
 class TestExperimentRunner:
@@ -32,10 +32,10 @@ class TestExperimentRunner:
         if os.path.exists(self.results_dir):
             shutil.rmtree(self.results_dir)
         
-    @patch("pinard.core.runner.get_dataset")
-    @patch("pinard.core.runner.run_pipeline")
-    @patch("pinard.core.runner.ModelManagerFactory")
-    @patch("pinard.core.runner.ExperimentManager")
+    @patch("nirs4all.core.runner.get_dataset")
+    @patch("nirs4all.core.runner.run_pipeline")
+    @patch("nirs4all.core.runner.ModelManagerFactory")
+    @patch("nirs4all.core.runner.ExperimentManager")
     def test_train(self, mock_experiment_manager, mock_model_manager_factory, 
                  mock_run_pipeline, mock_get_dataset):
         """Test de la méthode _train."""
@@ -66,11 +66,11 @@ class TestExperimentRunner:
             mock_model_manager, mock_dataset, metrics, task="regression"
         )
     
-    @patch("pinard.core.runner.get_dataset")
-    @patch("pinard.core.runner.run_pipeline")
-    @patch("pinard.core.runner.ModelManagerFactory")
-    @patch("pinard.core.runner.ExperimentManager")
-    @patch("pinard.core.runner.FineTunerFactory")
+    @patch("nirs4all.core.runner.get_dataset")
+    @patch("nirs4all.core.runner.run_pipeline")
+    @patch("nirs4all.core.runner.ModelManagerFactory")
+    @patch("nirs4all.core.runner.ExperimentManager")
+    @patch("nirs4all.core.runner.FineTunerFactory")
     def test_fine_tune(self, mock_finetuner_factory, mock_experiment_manager, 
                       mock_model_manager_factory, mock_run_pipeline, mock_get_dataset):
         """Test de la méthode _fine_tune."""
@@ -108,10 +108,10 @@ class TestExperimentRunner:
             mock_model_manager, mock_dataset, metrics, best_params, task="regression"
         )
         
-    @patch("pinard.core.runner.get_dataset")
-    @patch("pinard.core.runner.run_pipeline")
-    @patch("pinard.core.runner.ModelManagerFactory")
-    @patch("pinard.core.runner.ExperimentManager")
+    @patch("nirs4all.core.runner.get_dataset")
+    @patch("nirs4all.core.runner.run_pipeline")
+    @patch("nirs4all.core.runner.ModelManagerFactory")
+    @patch("nirs4all.core.runner.ExperimentManager")
     def test_predict(self, mock_experiment_manager, mock_model_manager_factory, 
                    mock_run_pipeline, mock_get_dataset):
         """Test de la méthode _predict."""
@@ -136,10 +136,10 @@ class TestExperimentRunner:
             mock_model_manager, mock_dataset, metrics, task="regression"
         )
     
-    @patch("pinard.core.runner.get_dataset")
-    @patch("pinard.core.runner.run_pipeline")
-    @patch("pinard.core.runner.ModelManagerFactory")
-    @patch("pinard.core.runner.ExperimentManager")
+    @patch("nirs4all.core.runner.get_dataset")
+    @patch("nirs4all.core.runner.run_pipeline")
+    @patch("nirs4all.core.runner.ModelManagerFactory")
+    @patch("nirs4all.core.runner.ExperimentManager")
     def test_evaluate_and_save_results_single_fold(self, mock_experiment_manager, 
                                                  mock_model_manager_factory,
                                                  mock_run_pipeline, mock_get_dataset):
@@ -176,10 +176,10 @@ class TestExperimentRunner:
             mock_model_manager, y_pred, mock_dataset.y_test_init, metrics, None, [scores]
         )
     
-    @patch("pinard.core.runner.get_dataset")
-    @patch("pinard.core.runner.run_pipeline")
-    @patch("pinard.core.runner.ModelManagerFactory")
-    @patch("pinard.core.runner.ExperimentManager")
+    @patch("nirs4all.core.runner.get_dataset")
+    @patch("nirs4all.core.runner.run_pipeline")
+    @patch("nirs4all.core.runner.ModelManagerFactory")
+    @patch("nirs4all.core.runner.ExperimentManager")
     def test_run_with_train_action(self, mock_experiment_manager, mock_model_manager_factory,
                                   mock_run_pipeline, mock_get_dataset):
         """Test de la méthode run avec une action d'entraînement."""
@@ -224,10 +224,10 @@ class TestExperimentRunner:
             mock_model_manager_factory.get_model_manager.assert_called_once()
             mock_train.assert_called_once()
     
-    @patch("pinard.core.runner.get_dataset")
-    @patch("pinard.core.runner.run_pipeline")
-    @patch("pinard.core.runner.ModelManagerFactory")
-    @patch("pinard.core.runner.ExperimentManager")
+    @patch("nirs4all.core.runner.get_dataset")
+    @patch("nirs4all.core.runner.run_pipeline")
+    @patch("nirs4all.core.runner.ModelManagerFactory")
+    @patch("nirs4all.core.runner.ExperimentManager")
     def test_train_then_predict(
         self, mock_experiment_manager, mock_model_manager_factory, 
         mock_run_pipeline, mock_get_dataset

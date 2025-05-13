@@ -2,7 +2,7 @@
 
 import pytest
 import numpy as np
-from pinard.data.dataset import Dataset
+from nirs4all.data.dataset import Dataset
 
 
 def test_dataset_initialization():

@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 import tempfile
 import os
-from pinard.data.dataset import Dataset
-from pinard.data.dataset_loader import get_dataset
+from nirs4all.data.dataset import Dataset
+from nirs4all.data.dataset_loader import get_dataset
 
 def test_dataset_categorical_handling():
     """Test that Dataset properly handles categorical data."""

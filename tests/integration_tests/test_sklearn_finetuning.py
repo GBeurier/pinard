@@ -1,5 +1,5 @@
 """
-Integration tests for scikit-learn model finetuning using Pinard API.
+Integration tests for scikit-learn model finetuning using Nirs4all API.
 """
 
 import pytest
@@ -17,8 +17,8 @@ except NameError:
 parent_dir = os.path.abspath(os.path.join(script_dir, '../..'))
 sys.path.append(parent_dir)
 
-from pinard.core.runner import ExperimentRunner
-from pinard.core.config import Config
+from nirs4all.core.runner import ExperimentRunner
+from nirs4all.core.config import Config
 from sklearn.model_selection import RepeatedKFold
 from sklearn.preprocessing import MinMaxScaler, RobustScaler
 from sklearn.cross_decomposition import PLSRegression

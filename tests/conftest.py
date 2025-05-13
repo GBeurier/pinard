@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from pinard.utils.backend_utils import (
+from nirs4all.utils.backend_utils import (
     is_tensorflow_available, is_torch_available, 
     is_keras_available, is_jax_available, is_gpu_available
 )

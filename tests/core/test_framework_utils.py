@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from pinard.core.utils import framework, TF_AVAILABLE, TORCH_AVAILABLE
+from nirs4all.core.utils import framework, TF_AVAILABLE, TORCH_AVAILABLE
 
 
 class TestFrameworkUtils:

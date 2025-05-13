@@ -10,7 +10,7 @@ NIRS4ALL
 ==========================================================================================
 ==========================================================================================
 ==========================================================================================
-pinard_todo
+nirs4all_todo
 
 
 - remover augmenter.py, keep as sklearn transformers.
@@ -44,7 +44,7 @@ Bug
 ---------------------------------------------------------------------------------------
 # Augmentations
 - Manage apply on global or not as a transformation option
-# Pinard
+# Nirs4all
 - transformermixin have no get_params thus config serialization is wrong
 # model_manager
 - sortir le get metrics et regler/uniformiser nommage abrégés et nommage longs. REVOIR TOUT LE CHARGEMENT DES METRICS
@@ -52,7 +52,7 @@ Bug
 ---------------------------------------------------------------------------------------
 ROADMAP
 ---------------------------------------------------------------------------------------
-Pinard integration
+Nirs4all integration
 Stacking
 Torch / Keras / Jax
 Tests > 95%

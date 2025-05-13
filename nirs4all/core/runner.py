@@ -5,7 +5,7 @@ import numpy as np
 
 from ..data.dataset_loader import get_dataset
 from .processor import run_pipeline
-from pinard.core.finetuner.base_finetuner import FineTunerFactory
+from nirs4all.core.finetuner.base_finetuner import FineTunerFactory
 from .model.model_manager import ModelManagerFactory
 from .manager.experiment_manager import ExperimentManager
 

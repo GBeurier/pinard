@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from pinard.data_splitters._splitter import (
+from nirs4all.data_splitters._splitter import (
     SystematicCircularSplitter,
     KBinsStratifiedSplitter,
     KMeansSplitter,

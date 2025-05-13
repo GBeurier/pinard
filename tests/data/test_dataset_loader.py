@@ -3,7 +3,7 @@
 import pytest
 import numpy as np
 from pathlib import Path
-from pinard.data.dataset_loader import (
+from nirs4all.data.dataset_loader import (
     _merge_params,
     load_XY,
     handle_data,
@@ -201,7 +201,7 @@ def test_handle_data_with_params(tmp_path):
 
 def test_get_dataset(tmp_path):
     # Mock the parse_config function to return a valid configuration
-    import pinard.data.dataset_loader as ds_loader
+    import nirs4all.data.dataset_loader as ds_loader
     original_parse_config = ds_loader.parse_config
     
     def mock_parse_config(config):
@@ -290,7 +290,7 @@ def test_sample_datasets_loading():
     assert base_path.exists(), f"Sample data directory not found at {base_path}"
     
     # Mock the parse_config function to return the configuration directly
-    import pinard.data.dataset_loader as ds_loader
+    import nirs4all.data.dataset_loader as ds_loader
     original_parse_config = ds_loader.parse_config
     ds_loader.parse_config = lambda config: config
     
@@ -369,7 +369,7 @@ def test_sample_datasets_shapes_and_properties():
     base_path = Path(__file__).parent.parent.parent / "sample_data"
     
     # Mock the parse_config function to return the configuration directly
-    import pinard.data.dataset_loader as ds_loader
+    import nirs4all.data.dataset_loader as ds_loader
     original_parse_config = ds_loader.parse_config
     ds_loader.parse_config = lambda config: config
     

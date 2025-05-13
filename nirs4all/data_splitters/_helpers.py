@@ -1,4 +1,4 @@
-# pinard/data_splitters/_helpers.py
+# nirs4all/data_splitters/_helpers.py
 
 import importlib
 from sklearn.utils import indexable

@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 import os
 import tempfile
-from pinard.data.csv_loader import (
+from nirs4all.data.csv_loader import (
     _determine_csv_parameters,
     _can_be_float,
     load_csv,

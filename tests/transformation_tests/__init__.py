@@ -1,3 +1,3 @@
 """
-Test package for Pinard transformation modules.
+Test package for Nirs4all transformation modules.
 """

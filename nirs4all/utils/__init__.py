@@ -1,7 +1,7 @@
 """
-Utility functions for the pinard package.
+Utility functions for the nirs4all package.
 """
 
-from pinard.utils.backend_utils import *
+from nirs4all.utils.backend_utils import *
 
 __all__ = []  # Update this list with actual classes/functions from the module

@@ -1,7 +1,7 @@
 
 import numpy as np
 import pytest
-from pinard.transformations._random_augmentation import Rotate_Translate, Random_X_Operation
+from nirs4all.transformations._random_augmentation import Rotate_Translate, Random_X_Operation
 
 
 def test_Rotate_Translate(random_data):

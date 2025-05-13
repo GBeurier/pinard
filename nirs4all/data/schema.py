@@ -298,7 +298,7 @@ schema = {
 
 def validate_data_config(config_str) -> bool:
     """
-    Validates a data configuration string against the pinard data schema.
+    Validates a data configuration string against the nirs4all data schema.
 
     Parameters
     ----------
@@ -318,6 +318,6 @@ def validate_data_config(config_str) -> bool:
         validate(instance=json.loads(config_str), schema=schema)
         return True
     except ValidationError as e:
-        print(f"The configuration is an invalid pinard data configuration: {e.message}")
+        print(f"The configuration is an invalid nirs4all data configuration: {e.message}")
 
     return False

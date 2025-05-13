@@ -2,7 +2,7 @@ Complex pipeline: stacking
 ==========================
 
 You can execute this notebook at:
-`Google collab notebook <https://colab.research.google.com/github/GBeurier/pinard/blob/main/examples/stacking.ipynb>`_
+`Google collab notebook <https://colab.research.google.com/github/GBeurier/nirs4all/blob/main/examples/stacking.ipynb>`_
 
 
 .. container:: cell markdown
@@ -10,8 +10,8 @@ You can execute this notebook at:
    .. rubric:: Installation
       :name: installation
 
-   The code below is installing the pinard and scikeras packages via
-   pip, the package installer for Python. pinard is a package designed
+   The code below is installing the nirs4all and scikeras packages via
+   pip, the package installer for Python. nirs4all is a package designed
    to perform preprocessing and modeling of spectral data, and scikeras
    is a package that allows to use Keras models in scikit-learn. By
    running these commands, the packages will be installed and can be
@@ -21,69 +21,69 @@ You can execute this notebook at:
 
    .. code:: python
 
-      !pip install pinard
+      !pip install nirs4all
 
    .. container:: output stream stdout
 
       ::
 
          Looking in indexes: https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
-         Collecting pinard
-           Downloading pinard-0.9.7-py3-none-any.whl (37 kB)
-         Requirement already satisfied: pandas in /usr/local/lib/python3.8/dist-packages (from pinard) (1.3.5)
-         Requirement already satisfied: scikit-learn in /usr/local/lib/python3.8/dist-packages (from pinard) (1.0.2)
-         Requirement already satisfied: scipy in /usr/local/lib/python3.8/dist-packages (from pinard) (1.7.3)
-         Requirement already satisfied: PyWavelets in /usr/local/lib/python3.8/dist-packages (from pinard) (1.4.1)
-         Requirement already satisfied: numpy in /usr/local/lib/python3.8/dist-packages (from pinard) (1.21.6)
-         Requirement already satisfied: tensorflow in /usr/local/lib/python3.8/dist-packages (from pinard) (2.9.2)
-         Requirement already satisfied: python-dateutil>=2.7.3 in /usr/local/lib/python3.8/dist-packages (from pandas->pinard) (2.8.2)
-         Requirement already satisfied: pytz>=2017.3 in /usr/local/lib/python3.8/dist-packages (from pandas->pinard) (2022.7)
-         Requirement already satisfied: joblib>=0.11 in /usr/local/lib/python3.8/dist-packages (from scikit-learn->pinard) (1.2.0)
-         Requirement already satisfied: threadpoolctl>=2.0.0 in /usr/local/lib/python3.8/dist-packages (from scikit-learn->pinard) (3.1.0)
-         Requirement already satisfied: h5py>=2.9.0 in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (3.1.0)
-         Requirement already satisfied: tensorboard<2.10,>=2.9 in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (2.9.1)
-         Requirement already satisfied: grpcio<2.0,>=1.24.3 in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (1.51.1)
-         Requirement already satisfied: typing-extensions>=3.6.6 in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (4.4.0)
-         Requirement already satisfied: tensorflow-io-gcs-filesystem>=0.23.1 in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (0.29.0)
-         Requirement already satisfied: packaging in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (21.3)
-         Requirement already satisfied: libclang>=13.0.0 in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (15.0.6.1)
-         Requirement already satisfied: wrapt>=1.11.0 in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (1.14.1)
-         Requirement already satisfied: google-pasta>=0.1.1 in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (0.2.0)
-         Requirement already satisfied: opt-einsum>=2.3.2 in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (3.3.0)
-         Requirement already satisfied: tensorflow-estimator<2.10.0,>=2.9.0rc0 in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (2.9.0)
-         Requirement already satisfied: protobuf<3.20,>=3.9.2 in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (3.19.6)
-         Requirement already satisfied: astunparse>=1.6.0 in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (1.6.3)
-         Requirement already satisfied: flatbuffers<2,>=1.12 in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (1.12)
-         Requirement already satisfied: termcolor>=1.1.0 in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (2.2.0)
-         Requirement already satisfied: keras-preprocessing>=1.1.1 in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (1.1.2)
-         Requirement already satisfied: absl-py>=1.0.0 in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (1.3.0)
-         Requirement already satisfied: gast<=0.4.0,>=0.2.1 in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (0.4.0)
-         Requirement already satisfied: six>=1.12.0 in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (1.15.0)
-         Requirement already satisfied: keras<2.10.0,>=2.9.0rc0 in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (2.9.0)
-         Requirement already satisfied: setuptools in /usr/local/lib/python3.8/dist-packages (from tensorflow->pinard) (57.4.0)
-         Requirement already satisfied: wheel<1.0,>=0.23.0 in /usr/local/lib/python3.8/dist-packages (from astunparse>=1.6.0->tensorflow->pinard) (0.38.4)
-         Requirement already satisfied: tensorboard-data-server<0.7.0,>=0.6.0 in /usr/local/lib/python3.8/dist-packages (from tensorboard<2.10,>=2.9->tensorflow->pinard) (0.6.1)
-         Requirement already satisfied: werkzeug>=1.0.1 in /usr/local/lib/python3.8/dist-packages (from tensorboard<2.10,>=2.9->tensorflow->pinard) (1.0.1)
-         Requirement already satisfied: markdown>=2.6.8 in /usr/local/lib/python3.8/dist-packages (from tensorboard<2.10,>=2.9->tensorflow->pinard) (3.4.1)
-         Requirement already satisfied: tensorboard-plugin-wit>=1.6.0 in /usr/local/lib/python3.8/dist-packages (from tensorboard<2.10,>=2.9->tensorflow->pinard) (1.8.1)
-         Requirement already satisfied: requests<3,>=2.21.0 in /usr/local/lib/python3.8/dist-packages (from tensorboard<2.10,>=2.9->tensorflow->pinard) (2.25.1)
-         Requirement already satisfied: google-auth<3,>=1.6.3 in /usr/local/lib/python3.8/dist-packages (from tensorboard<2.10,>=2.9->tensorflow->pinard) (2.16.0)
-         Requirement already satisfied: google-auth-oauthlib<0.5,>=0.4.1 in /usr/local/lib/python3.8/dist-packages (from tensorboard<2.10,>=2.9->tensorflow->pinard) (0.4.6)
-         Requirement already satisfied: pyparsing!=3.0.5,>=2.0.2 in /usr/local/lib/python3.8/dist-packages (from packaging->tensorflow->pinard) (3.0.9)
-         Requirement already satisfied: pyasn1-modules>=0.2.1 in /usr/local/lib/python3.8/dist-packages (from google-auth<3,>=1.6.3->tensorboard<2.10,>=2.9->tensorflow->pinard) (0.2.8)
-         Requirement already satisfied: cachetools<6.0,>=2.0.0 in /usr/local/lib/python3.8/dist-packages (from google-auth<3,>=1.6.3->tensorboard<2.10,>=2.9->tensorflow->pinard) (5.2.1)
-         Requirement already satisfied: rsa<5,>=3.1.4 in /usr/local/lib/python3.8/dist-packages (from google-auth<3,>=1.6.3->tensorboard<2.10,>=2.9->tensorflow->pinard) (4.9)
-         Requirement already satisfied: requests-oauthlib>=0.7.0 in /usr/local/lib/python3.8/dist-packages (from google-auth-oauthlib<0.5,>=0.4.1->tensorboard<2.10,>=2.9->tensorflow->pinard) (1.3.1)
-         Requirement already satisfied: importlib-metadata>=4.4 in /usr/local/lib/python3.8/dist-packages (from markdown>=2.6.8->tensorboard<2.10,>=2.9->tensorflow->pinard) (6.0.0)
-         Requirement already satisfied: urllib3<1.27,>=1.21.1 in /usr/local/lib/python3.8/dist-packages (from requests<3,>=2.21.0->tensorboard<2.10,>=2.9->tensorflow->pinard) (1.24.3)
-         Requirement already satisfied: idna<3,>=2.5 in /usr/local/lib/python3.8/dist-packages (from requests<3,>=2.21.0->tensorboard<2.10,>=2.9->tensorflow->pinard) (2.10)
-         Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.8/dist-packages (from requests<3,>=2.21.0->tensorboard<2.10,>=2.9->tensorflow->pinard) (2022.12.7)
-         Requirement already satisfied: chardet<5,>=3.0.2 in /usr/local/lib/python3.8/dist-packages (from requests<3,>=2.21.0->tensorboard<2.10,>=2.9->tensorflow->pinard) (4.0.0)
-         Requirement already satisfied: zipp>=0.5 in /usr/local/lib/python3.8/dist-packages (from importlib-metadata>=4.4->markdown>=2.6.8->tensorboard<2.10,>=2.9->tensorflow->pinard) (3.11.0)
-         Requirement already satisfied: pyasn1<0.5.0,>=0.4.6 in /usr/local/lib/python3.8/dist-packages (from pyasn1-modules>=0.2.1->google-auth<3,>=1.6.3->tensorboard<2.10,>=2.9->tensorflow->pinard) (0.4.8)
-         Requirement already satisfied: oauthlib>=3.0.0 in /usr/local/lib/python3.8/dist-packages (from requests-oauthlib>=0.7.0->google-auth-oauthlib<0.5,>=0.4.1->tensorboard<2.10,>=2.9->tensorflow->pinard) (3.2.2)
-         Installing collected packages: pinard
-         Successfully installed pinard-0.9.7
+         Collecting nirs4all
+           Downloading nirs4all-0.9.7-py3-none-any.whl (37 kB)
+         Requirement already satisfied: pandas in /usr/local/lib/python3.8/dist-packages (from nirs4all) (1.3.5)
+         Requirement already satisfied: scikit-learn in /usr/local/lib/python3.8/dist-packages (from nirs4all) (1.0.2)
+         Requirement already satisfied: scipy in /usr/local/lib/python3.8/dist-packages (from nirs4all) (1.7.3)
+         Requirement already satisfied: PyWavelets in /usr/local/lib/python3.8/dist-packages (from nirs4all) (1.4.1)
+         Requirement already satisfied: numpy in /usr/local/lib/python3.8/dist-packages (from nirs4all) (1.21.6)
+         Requirement already satisfied: tensorflow in /usr/local/lib/python3.8/dist-packages (from nirs4all) (2.9.2)
+         Requirement already satisfied: python-dateutil>=2.7.3 in /usr/local/lib/python3.8/dist-packages (from pandas->nirs4all) (2.8.2)
+         Requirement already satisfied: pytz>=2017.3 in /usr/local/lib/python3.8/dist-packages (from pandas->nirs4all) (2022.7)
+         Requirement already satisfied: joblib>=0.11 in /usr/local/lib/python3.8/dist-packages (from scikit-learn->nirs4all) (1.2.0)
+         Requirement already satisfied: threadpoolctl>=2.0.0 in /usr/local/lib/python3.8/dist-packages (from scikit-learn->nirs4all) (3.1.0)
+         Requirement already satisfied: h5py>=2.9.0 in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (3.1.0)
+         Requirement already satisfied: tensorboard<2.10,>=2.9 in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (2.9.1)
+         Requirement already satisfied: grpcio<2.0,>=1.24.3 in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (1.51.1)
+         Requirement already satisfied: typing-extensions>=3.6.6 in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (4.4.0)
+         Requirement already satisfied: tensorflow-io-gcs-filesystem>=0.23.1 in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (0.29.0)
+         Requirement already satisfied: packaging in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (21.3)
+         Requirement already satisfied: libclang>=13.0.0 in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (15.0.6.1)
+         Requirement already satisfied: wrapt>=1.11.0 in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (1.14.1)
+         Requirement already satisfied: google-pasta>=0.1.1 in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (0.2.0)
+         Requirement already satisfied: opt-einsum>=2.3.2 in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (3.3.0)
+         Requirement already satisfied: tensorflow-estimator<2.10.0,>=2.9.0rc0 in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (2.9.0)
+         Requirement already satisfied: protobuf<3.20,>=3.9.2 in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (3.19.6)
+         Requirement already satisfied: astunparse>=1.6.0 in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (1.6.3)
+         Requirement already satisfied: flatbuffers<2,>=1.12 in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (1.12)
+         Requirement already satisfied: termcolor>=1.1.0 in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (2.2.0)
+         Requirement already satisfied: keras-preprocessing>=1.1.1 in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (1.1.2)
+         Requirement already satisfied: absl-py>=1.0.0 in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (1.3.0)
+         Requirement already satisfied: gast<=0.4.0,>=0.2.1 in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (0.4.0)
+         Requirement already satisfied: six>=1.12.0 in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (1.15.0)
+         Requirement already satisfied: keras<2.10.0,>=2.9.0rc0 in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (2.9.0)
+         Requirement already satisfied: setuptools in /usr/local/lib/python3.8/dist-packages (from tensorflow->nirs4all) (57.4.0)
+         Requirement already satisfied: wheel<1.0,>=0.23.0 in /usr/local/lib/python3.8/dist-packages (from astunparse>=1.6.0->tensorflow->nirs4all) (0.38.4)
+         Requirement already satisfied: tensorboard-data-server<0.7.0,>=0.6.0 in /usr/local/lib/python3.8/dist-packages (from tensorboard<2.10,>=2.9->tensorflow->nirs4all) (0.6.1)
+         Requirement already satisfied: werkzeug>=1.0.1 in /usr/local/lib/python3.8/dist-packages (from tensorboard<2.10,>=2.9->tensorflow->nirs4all) (1.0.1)
+         Requirement already satisfied: markdown>=2.6.8 in /usr/local/lib/python3.8/dist-packages (from tensorboard<2.10,>=2.9->tensorflow->nirs4all) (3.4.1)
+         Requirement already satisfied: tensorboard-plugin-wit>=1.6.0 in /usr/local/lib/python3.8/dist-packages (from tensorboard<2.10,>=2.9->tensorflow->nirs4all) (1.8.1)
+         Requirement already satisfied: requests<3,>=2.21.0 in /usr/local/lib/python3.8/dist-packages (from tensorboard<2.10,>=2.9->tensorflow->nirs4all) (2.25.1)
+         Requirement already satisfied: google-auth<3,>=1.6.3 in /usr/local/lib/python3.8/dist-packages (from tensorboard<2.10,>=2.9->tensorflow->nirs4all) (2.16.0)
+         Requirement already satisfied: google-auth-oauthlib<0.5,>=0.4.1 in /usr/local/lib/python3.8/dist-packages (from tensorboard<2.10,>=2.9->tensorflow->nirs4all) (0.4.6)
+         Requirement already satisfied: pyparsing!=3.0.5,>=2.0.2 in /usr/local/lib/python3.8/dist-packages (from packaging->tensorflow->nirs4all) (3.0.9)
+         Requirement already satisfied: pyasn1-modules>=0.2.1 in /usr/local/lib/python3.8/dist-packages (from google-auth<3,>=1.6.3->tensorboard<2.10,>=2.9->tensorflow->nirs4all) (0.2.8)
+         Requirement already satisfied: cachetools<6.0,>=2.0.0 in /usr/local/lib/python3.8/dist-packages (from google-auth<3,>=1.6.3->tensorboard<2.10,>=2.9->tensorflow->nirs4all) (5.2.1)
+         Requirement already satisfied: rsa<5,>=3.1.4 in /usr/local/lib/python3.8/dist-packages (from google-auth<3,>=1.6.3->tensorboard<2.10,>=2.9->tensorflow->nirs4all) (4.9)
+         Requirement already satisfied: requests-oauthlib>=0.7.0 in /usr/local/lib/python3.8/dist-packages (from google-auth-oauthlib<0.5,>=0.4.1->tensorboard<2.10,>=2.9->tensorflow->nirs4all) (1.3.1)
+         Requirement already satisfied: importlib-metadata>=4.4 in /usr/local/lib/python3.8/dist-packages (from markdown>=2.6.8->tensorboard<2.10,>=2.9->tensorflow->nirs4all) (6.0.0)
+         Requirement already satisfied: urllib3<1.27,>=1.21.1 in /usr/local/lib/python3.8/dist-packages (from requests<3,>=2.21.0->tensorboard<2.10,>=2.9->tensorflow->nirs4all) (1.24.3)
+         Requirement already satisfied: idna<3,>=2.5 in /usr/local/lib/python3.8/dist-packages (from requests<3,>=2.21.0->tensorboard<2.10,>=2.9->tensorflow->nirs4all) (2.10)
+         Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.8/dist-packages (from requests<3,>=2.21.0->tensorboard<2.10,>=2.9->tensorflow->nirs4all) (2022.12.7)
+         Requirement already satisfied: chardet<5,>=3.0.2 in /usr/local/lib/python3.8/dist-packages (from requests<3,>=2.21.0->tensorboard<2.10,>=2.9->tensorflow->nirs4all) (4.0.0)
+         Requirement already satisfied: zipp>=0.5 in /usr/local/lib/python3.8/dist-packages (from importlib-metadata>=4.4->markdown>=2.6.8->tensorboard<2.10,>=2.9->tensorflow->nirs4all) (3.11.0)
+         Requirement already satisfied: pyasn1<0.5.0,>=0.4.6 in /usr/local/lib/python3.8/dist-packages (from pyasn1-modules>=0.2.1->google-auth<3,>=1.6.3->tensorboard<2.10,>=2.9->tensorflow->nirs4all) (0.4.8)
+         Requirement already satisfied: oauthlib>=3.0.0 in /usr/local/lib/python3.8/dist-packages (from requests-oauthlib>=0.7.0->google-auth-oauthlib<0.5,>=0.4.1->tensorboard<2.10,>=2.9->tensorflow->nirs4all) (3.2.2)
+         Installing collected packages: nirs4all
+         Successfully installed nirs4all-0.9.7
 
 .. container:: cell markdown
 
@@ -93,7 +93,7 @@ You can execute this notebook at:
    .. rubric:: Loading data
       :name: loading-data
 
-   The code above is using the pinard package to load and preprocess
+   The code above is using the nirs4all package to load and preprocess
    data from the provided CSV files. The data is loaded into the x and y
    variables and then split into training and test sets using the
    train_test_split_idx function. The preprocessing pipeline is then
@@ -115,16 +115,16 @@ You can execute this notebook at:
       import numpy as np
       from sklearn.pipeline import Pipeline
 
-      from pinard import utils
-      from pinard import preprocessing as pp
-      from pinard.model_selection import train_test_split_idx
+      from nirs4all import utils
+      from nirs4all import preprocessing as pp
+      from nirs4all.model_selection import train_test_split_idx
 
       # Init basic random
       rd_seed = 42
       np.random.seed(rd_seed)
 
-      xcal_csv = "https://raw.githubusercontent.com/GBeurier/pinard/main/examples/Xcal.csv"
-      ycal_csv = "https://raw.githubusercontent.com/GBeurier/pinard/main/examples/Ycal.csv"
+      xcal_csv = "https://raw.githubusercontent.com/GBeurier/nirs4all/main/examples/Xcal.csv"
+      ycal_csv = "https://raw.githubusercontent.com/GBeurier/nirs4all/main/examples/Ycal.csv"
 
       # Create a set named data
       x, y = utils.load_csv(xcal_csv, ycal_csv, x_hdr=0, y_hdr=0, remove_na=True)

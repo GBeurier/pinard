@@ -1,5 +1,5 @@
 import numpy as np
-from pinard.transformations import Augmenter, IdentityAugmenter
+from nirs4all.transformations import Augmenter, IdentityAugmenter
 
 
 def test_identity_augmenter(simple_data):

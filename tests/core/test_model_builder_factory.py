@@ -3,10 +3,10 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
-from pinard.core.model.model_builder_factory import ModelBuilderFactory
-from pinard.utils.backend_utils import is_tensorflow_available, is_torch_available
+from nirs4all.core.model.model_builder_factory import ModelBuilderFactory
+from nirs4all.utils.backend_utils import is_tensorflow_available, is_torch_available
 from unittest.mock import MagicMock, patch
-from pinard.core.utils import framework
+from nirs4all.core.utils import framework
 
 class DummyDataset:
     """Classe simulant un dataset pour les tests."""

@@ -1,8 +1,8 @@
 import pytest
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-from pinard.core.processor import Processor
-from pinard.data.dataset import Dataset
+from nirs4all.core.processor import Processor
+from nirs4all.data.dataset import Dataset
 
 def test_processor_preserves_categorical():
     """Test that processor preserves categorical information."""

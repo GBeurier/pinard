@@ -16,7 +16,7 @@ from tensorflow.keras.layers import (
 )
 
 from keras.models import Model, Sequential
-from pinard.core.utils import framework
+from nirs4all.core.utils import framework
 
 
 @framework('tensorflow')

@@ -43,13 +43,13 @@ jobs:
     - name: Debug Python path
       run: |
         python -c "import sys; print('Python path:', sys.path)"
-        python -c "import sys; print('Workspace directory listed in path?', '/home/runner/work/pinard/pinard' in sys.path)"
+        python -c "import sys; print('Workspace directory listed in path?', '/home/runner/work/nirs4all/nirs4all' in sys.path)"
         
     - name: Verify imports
       run: |
         python -c "import numpy; import pandas; import scipy; import sklearn; import pywt; print('Critical imports successful')"
         python -c "import pytest; print('Pytest import successful')"
-        python -c "import pinard; print('Pinard import successful')"
+        python -c "import nirs4all; print('Nirs4all import successful')"
         
     - name: Test with pytest
       run: |
@@ -57,7 +57,7 @@ jobs:
         
     - name: Run coverage tests
       run: |
-        python -m pytest -v tests/ --cov=pinard --cov-report=xml
+        python -m pytest -v tests/ --cov=nirs4all --cov-report=xml
         
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3

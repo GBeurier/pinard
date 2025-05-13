@@ -2,7 +2,7 @@
 
 import numpy as np
 import pytest
-from pinard.transformations._standard import (
+from nirs4all.transformations._standard import (
     Baseline,
     baseline,
     Detrend,

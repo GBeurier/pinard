@@ -15,7 +15,7 @@ Notes
   equivalents implemented here (``DepthwiseConv1d``, ``SeparableConv1d``,
   ``SpatialDropout1d``, ``GlobalAveragePooling1d``).
 * The external architectures referenced from
-  ``pinard.presets.legacy`` (*VGG*, *Inception*, *ResNetv2*, *SEResNet*) are
+  ``nirs4all.presets.legacy`` (*VGG*, *Inception*, *ResNetv2*, *SEResNet*) are
   assumed to have sibling PyTorch ports living at the same import paths.
   If not, you will need to convert those first.
 """
@@ -28,11 +28,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from pinard.core.utils import framework
-from pinard.presets.legacy.Inception_1DCNN import Inception      # assumed PyTorch port
-from pinard.presets.legacy.ResNet_v2_1DCNN import ResNetv2       # assumed PyTorch port
-from pinard.presets.legacy.SE_ResNet_1DCNN import SEResNet       # assumed PyTorch port
-from pinard.presets.legacy.VGG_1DCNN import VGG                  # assumed PyTorch port
+from nirs4all.core.utils import framework
+from nirs4all.presets.legacy.Inception_1DCNN import Inception      # assumed PyTorch port
+from nirs4all.presets.legacy.ResNet_v2_1DCNN import ResNetv2       # assumed PyTorch port
+from nirs4all.presets.legacy.SE_ResNet_1DCNN import SEResNet       # assumed PyTorch port
+from nirs4all.presets.legacy.VGG_1DCNN import VGG                  # assumed PyTorch port
 
 
 # --------------------------------------------------------------------------- #

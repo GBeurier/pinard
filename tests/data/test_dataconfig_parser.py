@@ -1,7 +1,7 @@
 # tests/test_data_config_parser.py
 
 import pytest
-from pinard.data.data_config_parser import parse_config
+from nirs4all.data.data_config_parser import parse_config
 
 
 def test_parse_config_with_folder():

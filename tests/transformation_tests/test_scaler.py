@@ -2,7 +2,7 @@
 
 import numpy as np
 import pytest
-from pinard.transformations._scaler import (
+from nirs4all.transformations._scaler import (
     Normalize,
     norml,
     Derivate,

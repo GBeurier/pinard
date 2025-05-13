@@ -9,7 +9,7 @@ import sys
 import warnings
 import numpy as np
 
-# Add parent directory to sys.path to find the pinard module
+# Add parent directory to sys.path to find the nirs4all module
 try:
     script_dir = os.path.dirname(os.path.abspath(__file__))
 except NameError:
@@ -18,9 +18,9 @@ except NameError:
 parent_dir = os.path.abspath(os.path.join(script_dir, '../..'))
 sys.path.append(parent_dir)
 
-from pinard.core.config import Config
-from pinard.core.runner import ExperimentRunner
-from pinard.data.dataset import Dataset  # Import Dataset for type hinting
+from nirs4all.core.config import Config
+from nirs4all.core.runner import ExperimentRunner
+from nirs4all.data.dataset import Dataset  # Import Dataset for type hinting
 from sklearn.exceptions import ConvergenceWarning
 
 warnings.filterwarnings("ignore", category=ConvergenceWarning)

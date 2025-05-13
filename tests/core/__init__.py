@@ -1,3 +1,3 @@
 """
-Test package for Pinard core modules.
+Test package for Nirs4all core modules.
 """

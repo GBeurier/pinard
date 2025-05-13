@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 from pathlib import Path
 
-from pinard import __version__
+from nirs4all import __version__
 
 this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
@@ -56,10 +56,10 @@ extra_all_frameworks = [
 
 
 setup(
-    name='pinard',
+    name='nirs4all',
     version=__version__,
-    description='Pinard: a Pipeline for Nirs Analysis ReloadeD.',
-    url='https://github.com/gbeurier/pinard',
+    description='Nirs4all: a Pipeline for Nirs Analysis ReloadeD.',
+    url='https://github.com/gbeurier/nirs4all',
     long_description=long_description,
     long_description_content_type='text/markdown',
     author='Gregory Beurier',

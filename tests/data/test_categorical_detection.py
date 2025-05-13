@@ -3,7 +3,7 @@ import tempfile
 import pandas as pd
 import numpy as np
 import pytest
-from pinard.data.csv_loader import load_csv
+from nirs4all.data.csv_loader import load_csv
 
 # Helper function for creating and cleaning up temp files
 @pytest.fixture

@@ -1,3 +1,3 @@
 """
-Test package for Pinard wizard.
+Test package for Nirs4all wizard.
 """

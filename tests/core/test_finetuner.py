@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from unittest.mock import MagicMock, patch
-from pinard.core.finetuner import (
+from nirs4all.core.finetuner import (
     BaseFineTuner,
     OptunaFineTuner,
     SklearnFineTuner,
@@ -46,11 +46,11 @@ def test_finetuner_factory_invalid():
         FineTunerFactory.get_fine_tuner('invalid', model_manager)
 
 
-@patch('pinard.core.model.model_builder_factory.importlib.import_module')
-@patch('pinard.core.finetuner.ModelBuilderFactory.build_models')
-@patch('pinard.core.finetuner.ModelBuilderFactory.build_single_model')
-@patch('pinard.core.finetuner.ModelManagerFactory.get_model_manager')
-@patch('pinard.core.finetuner.optuna.create_study')
+@patch('nirs4all.core.model.model_builder_factory.importlib.import_module')
+@patch('nirs4all.core.finetuner.ModelBuilderFactory.build_models')
+@patch('nirs4all.core.finetuner.ModelBuilderFactory.build_single_model')
+@patch('nirs4all.core.finetuner.ModelManagerFactory.get_model_manager')
+@patch('nirs4all.core.finetuner.optuna.create_study')
 def test_optuna_finetuner_finetune(mock_create_study, mock_get_model_manager, 
                                 mock_build_single, mock_build_models, mock_import_module):
     # Configure import_module mock to avoid ModuleNotFoundError
@@ -74,7 +74,7 @@ def test_optuna_finetuner_finetune(mock_create_study, mock_get_model_manager,
     # Prepare the original model_manager
     model_manager = MagicMock()
     model_manager.model_config = {
-        'class': 'pinard.models.SomeModel',
+        'class': 'nirs4all.models.SomeModel',
         'model_params': {'param1': 'value1'}
     }
     
@@ -106,8 +106,8 @@ def test_optuna_finetuner_finetune(mock_create_study, mock_get_model_manager,
     assert result == mock_study.best_params
 
 
-@patch('pinard.core.finetuner.ModelManagerFactory')
-@patch('pinard.core.finetuner.GridSearchCV')
+@patch('nirs4all.core.finetuner.ModelManagerFactory')
+@patch('nirs4all.core.finetuner.GridSearchCV')
 def test_sklearn_finetuner_finetune(mock_grid_search_cv, mock_model_manager_factory):
     # Configure le mock pour GridSearchCV
     mock_grid_search = MagicMock()

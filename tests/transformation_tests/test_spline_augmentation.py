@@ -2,7 +2,7 @@
 
 import numpy as np
 import pytest
-from pinard.transformations._spline_augmentation import (
+from nirs4all.transformations._spline_augmentation import (
     Spline_Smoothing,
     Spline_X_Perturbations,
     Spline_Y_Perturbations,

@@ -1,5 +1,5 @@
 """
-Integration tests for TensorFlow models using Pinard API.
+Integration tests for TensorFlow models using Nirs4all API.
 """
 
 import pytest
@@ -17,10 +17,10 @@ except NameError:
 parent_dir = os.path.abspath(os.path.join(script_dir, "../.."))
 sys.path.append(parent_dir)
 
-from pinard.core.runner import ExperimentRunner
-from pinard.core.config import Config
-from pinard.core.utils import framework
-from pinard.presets.ref_models import nicon, nicon_classification
+from nirs4all.core.runner import ExperimentRunner
+from nirs4all.core.config import Config
+from nirs4all.core.utils import framework
+from nirs4all.presets.ref_models import nicon, nicon_classification
 from sklearn.model_selection import RepeatedKFold
 from sklearn.preprocessing import MinMaxScaler, RobustScaler
 

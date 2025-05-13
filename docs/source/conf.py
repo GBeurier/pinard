@@ -9,9 +9,9 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../pinard/'))
+sys.path.insert(0, os.path.abspath('../nirs4all/'))
 
-project = 'Pinard'
+project = 'Nirs4all'
 copyright = '2023, Gregory Beurier'
 author = 'Gregory Beurier'
 release = '1.0'

@@ -2,15 +2,15 @@
 
 PreProcessing Module
 ====================
-:mod:`pinard.preprocessing`
+:mod:`nirs4all.preprocessing`
 
 
-The ``preprocessing`` module in Pinard provides a comprehensive collection of preprocessing methods tailored specifically for NIRS (Near-Infrared Spectroscopy) data. These methods are designed to address various challenges in NIRS data analysis, such as baseline correction, noise reduction, normalization, and feature extraction. By utilizing the ``preprocessing`` module, users can effectively preprocess their NIRS data and enhance the quality of subsequent analysis and modeling.
+The ``preprocessing`` module in Nirs4all provides a comprehensive collection of preprocessing methods tailored specifically for NIRS (Near-Infrared Spectroscopy) data. These methods are designed to address various challenges in NIRS data analysis, such as baseline correction, noise reduction, normalization, and feature extraction. By utilizing the ``preprocessing`` module, users can effectively preprocess their NIRS data and enhance the quality of subsequent analysis and modeling.
 
 Preprocessing Methods
 ---------------------
 
-Pinard's ``preprocessing`` module offers a wide range of preprocessing methods for NIRS data. Some of the key methods available include:
+Nirs4all's ``preprocessing`` module offers a wide range of preprocessing methods for NIRS data. Some of the key methods available include:
 
 - Baseline Correction: This method corrects for the baseline offset in NIRS spectra, helping to remove systematic variations unrelated to the analyte of interest.
 
@@ -36,4 +36,4 @@ Pinard's ``preprocessing`` module offers a wide range of preprocessing methods f
 
 
 
-Pinard's ``preprocessing`` module provides a comprehensive set of preprocessing methods specifically designed for NIRS data. By utilizing these methods, researchers and practitioners can effectively preprocess their NIRS data, remove unwanted variations or noise, and enhance the quality of subsequent analysis or modeling. This module is a valuable resource for NIRS data preprocessing, enabling more accurate and reliable analysis in the field of NIRS spectroscopy.
+Nirs4all's ``preprocessing`` module provides a comprehensive set of preprocessing methods specifically designed for NIRS data. By utilizing these methods, researchers and practitioners can effectively preprocess their NIRS data, remove unwanted variations or noise, and enhance the quality of subsequent analysis or modeling. This module is a valuable resource for NIRS data preprocessing, enabling more accurate and reliable analysis in the field of NIRS spectroscopy.

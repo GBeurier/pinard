@@ -4,7 +4,7 @@ Augmentation Module
 ===================
 
 
-The :mod:`pinard.augmentation` module in Pinard provides functionalities for data augmentation techniques. Data augmentation is a crucial step in improving the generalization and robustness of machine learning models by increasing the diversity and size of the training data.
+The :mod:`nirs4all.augmentation` module in Nirs4all provides functionalities for data augmentation techniques. Data augmentation is a crucial step in improving the generalization and robustness of machine learning models by increasing the diversity and size of the training data.
 
 This module includes several augmentation functions that can be used to apply specific techniques to NIRS data:
 
@@ -15,8 +15,8 @@ This module includes several augmentation functions that can be used to apply sp
 - `Rotate_Translate`: Applies rotation and translation transformations to the spectra.
 - `Random_X_Operation`: Performs random X-operation on the spectra.
 
-In addition, the `pinard.augmentation` module provides an abstract Python class called `Augmenter`. This class serves as a base class for implementing custom data augmentation strategies. By subclassing `Augmenter` and overriding its methods, users can define their own augmentation techniques tailored to their specific requirements.
+In addition, the `nirs4all.augmentation` module provides an abstract Python class called `Augmenter`. This class serves as a base class for implementing custom data augmentation strategies. By subclassing `Augmenter` and overriding its methods, users can define their own augmentation techniques tailored to their specific requirements.
 
-The `Augmenter` class provides a consistent interface for data augmentation, allowing users to apply their custom augmentation methods to NIRS data. By inheriting from `Augmenter`, users can leverage the underlying functionality of the Pinard package while extending it with their own augmentation logic.
+The `Augmenter` class provides a consistent interface for data augmentation, allowing users to apply their custom augmentation methods to NIRS data. By inheriting from `Augmenter`, users can leverage the underlying functionality of the Nirs4all package while extending it with their own augmentation logic.
 
-For more information on the available augmentation functions and the usage of the `Augmenter` class, please refer to the API reference documentation for `pinard.augmentation`.
+For more information on the available augmentation functions and the usage of the `Augmenter` class, please refer to the API reference documentation for `nirs4all.augmentation`.

@@ -1,7 +1,7 @@
 # tests/test_init.py
 
 def test_module_imports():
-    from pinard.data_splitters import (
+    from nirs4all.data_splitters import (
         CustomSplitter,
         KBinsStratifiedSplitter,
         KMeansSplitter,

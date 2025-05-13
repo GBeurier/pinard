@@ -31,11 +31,11 @@ from tensorflow.keras.layers import (
 )
 
 from keras.models import Model, Sequential
-from pinard.core.utils import framework
-from pinard.presets.legacy.Inception_1DCNN import Inception
-from pinard.presets.legacy.ResNet_v2_1DCNN import ResNetv2
-from pinard.presets.legacy.SE_ResNet_1DCNN import SEResNet
-from pinard.presets.legacy.VGG_1DCNN import VGG
+from nirs4all.core.utils import framework
+from nirs4all.presets.legacy.Inception_1DCNN import Inception
+from nirs4all.presets.legacy.ResNet_v2_1DCNN import ResNetv2
+from nirs4all.presets.legacy.SE_ResNet_1DCNN import SEResNet
+from nirs4all.presets.legacy.VGG_1DCNN import VGG
 
 
 @framework('tensorflow')
